@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var m = require("../../src/core/hyperscript")
+import m from "../../src/core/hyperscript.js"
 
 o.spec("normalize", function() {
 	o("normalizes array into fragment", function() {

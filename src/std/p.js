@@ -1,5 +1,3 @@
-"use strict"
-
 var toString = {}.toString
 
 var serializeQueryValue = (key, value) => {
@@ -17,7 +15,7 @@ var serializeQueryValue = (key, value) => {
 var invalidTemplateChars = /:([^\/\.-]+)(\.{3})?:/
 
 // Returns `path` from `template` + `params`
-module.exports = (template, params) => {
+var p = (template, params) => {
 	if (invalidTemplateChars.test(template)) {
 		throw new SyntaxError("Template parameter names must be separated by either a '/', '-', or '.'.")
 	}
@@ -52,3 +50,5 @@ module.exports = (template, params) => {
 	if (newHashIndex >= 0) result += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)
 	return result
 }
+
+export {p as default}

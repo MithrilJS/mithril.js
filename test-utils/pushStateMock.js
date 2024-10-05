@@ -1,7 +1,5 @@
-"use strict"
-
-var parseURL = require("../test-utils/parseURL")
-var callAsync = require("../test-utils/callAsync")
+import callAsync from "../test-utils/callAsync.js"
+import parseURL from "../test-utils/parseURL.js"
 
 function debouncedAsync(f) {
 	var ref
@@ -14,7 +12,7 @@ function debouncedAsync(f) {
 	}
 }
 
-module.exports = function(options) {
+export default function pushStateMock(options) {
 	if (options == null) options = {}
 
 	var $window = options.window || {}

@@ -1,8 +1,7 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var domMock = require("../../test-utils/domMock")
-var render = require("../../src/core/render")
+import domMock from "../../test-utils/domMock.js"
+import render from "../../src/core/render.js"
 
 o.spec("createText", function() {
 	var $window, root

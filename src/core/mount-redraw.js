@@ -1,49 +1,45 @@
-"use strict"
+import render from "./render.js"
 
-var render = require("./render")
-
-module.exports = function(schedule, console) {
-	var subscriptions = []
+function makeMountRedraw(schedule, console) {
+	var subscriptions = new Map()
 	var pending = false
-	var offset = -1
 
-	function sync() {
-		for (offset = 0; offset < subscriptions.length; offset += 2) {
-			try { render(subscriptions[offset], (0, subscriptions[offset + 1])(), redraw) }
-			catch (e) { console.error(e) }
-		}
-		offset = -1
+	function redrawSync() {
+		subscriptions.forEach((view, root) => {
+			try {
+				render(root, view(), redraw)
+			} catch (e) {
+				console.error(e)
+			}
+		})
 	}
 
 	function redraw() {
 		if (!pending) {
 			pending = true
-			schedule(function() {
+			schedule(() => {
 				pending = false
-				sync()
+				redrawSync()
 			})
 		}
 	}
-
-	redraw.sync = sync
 
 	function mount(root, view) {
 		if (view != null && typeof view !== "function") {
 			throw new TypeError("m.mount expects a component, not a vnode.")
 		}
 
-		var index = subscriptions.indexOf(root)
-		if (index >= 0) {
-			subscriptions.splice(index, 2)
-			if (index <= offset) offset -= 2
+		if (subscriptions.delete(root)) {
 			render(root, [])
 		}
 
-		if (view != null) {
-			subscriptions.push(root, view)
+		if (typeof view === "function") {
+			subscriptions.set(root, view)
 			render(root, view(), redraw)
 		}
 	}
 
-	return {mount: mount, redraw: redraw}
+	return {mount, redraw, redrawSync}
 }
+
+export {makeMountRedraw as default}

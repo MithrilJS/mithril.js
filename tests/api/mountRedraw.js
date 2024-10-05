@@ -1,11 +1,9 @@
-"use strict"
+import o from "ospec"
 
-// Low-priority TODO: remove the dependency on the renderer here.
-var o = require("ospec")
-var domMock = require("../../test-utils/domMock")
-var throttleMocker = require("../../test-utils/throttleMock")
-var mountRedraw = require("../../src/core/mount-redraw")
-var h = require("../../src/core/hyperscript")
+import domMock from "../../test-utils/domMock.js"
+import h from "../../src/core/hyperscript.js"
+import mountRedraw from "../../src/core/mount-redraw.js"
+import throttleMocker from "../../test-utils/throttleMock.js"
 
 o.spec("mount/redraw", function() {
 	var error = console.error
@@ -310,13 +308,13 @@ o.spec("mount/redraw", function() {
 		o(spy2.callCount).equals(1)
 		o(spy3.callCount).equals(1)
 
-		m.redraw.sync()
+		m.redrawSync()
 
 		o(spy1.callCount).equals(2)
 		o(spy2.callCount).equals(2)
 		o(spy3.callCount).equals(2)
 
-		m.redraw.sync()
+		m.redrawSync()
 
 		o(spy1.callCount).equals(3)
 		o(spy2.callCount).equals(3)
@@ -364,7 +362,7 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 		])
 
-		m.redraw.sync()
+		m.redrawSync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", "root3",
@@ -397,7 +395,7 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 		])
 
-		m.redraw.sync()
+		m.redrawSync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", "root2", "root3",
@@ -429,7 +427,7 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 		])
 
-		m.redraw.sync()
+		m.redrawSync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", "root3",
@@ -462,7 +460,7 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 		])
 
-		m.redraw.sync()
+		m.redrawSync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", [TypeError, "Node is currently being rendered to and thus is locked."], "root2", "root3",
@@ -496,7 +494,7 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 		])
 
-		m.redraw.sync()
+		m.redrawSync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", "root3",

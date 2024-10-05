@@ -1,9 +1,8 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var domMock = require("../../test-utils/domMock")
-var render = require("../../src/core/render")
-var m = require("../../src/core/hyperscript")
+import domMock from "../../test-utils/domMock.js"
+import m from "../../src/core/hyperscript.js"
+import render from "../../src/core/render.js"
 
 o.spec("createFragment", function() {
 	var $window, root

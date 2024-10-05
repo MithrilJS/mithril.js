@@ -1,9 +1,7 @@
-"use strict"
+import callAsync from "../test-utils/callAsync.js"
+import parseURL from "../test-utils/parseURL.js"
 
-var callAsync = require("../test-utils/callAsync")
-var parseURL = require("../test-utils/parseURL")
-
-module.exports = function() {
+export default function xhrMock() {
 	var routes = {}
 	// var callback = "callback"
 	var serverErrorHandler = function(url) {

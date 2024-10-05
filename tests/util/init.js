@@ -1,9 +1,8 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var init = require("../../src/std/init")
-var domMock = require("../../test-utils/domMock")
-var render = require("../../src/core/render")
+import domMock from "../../test-utils/domMock.js"
+import init from "../../src/std/init.js"
+import render from "../../src/core/render.js"
 
 o.spec("m.init", () => {
 	o("works", () => {

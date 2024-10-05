@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var withProgress = require("../../src/std/with-progress")
+import withProgress from "../../src/std/with-progress.js"
 
 if (typeof ReadableStream === "function") {
 	o.spec("withProgress", () => {

@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var p = require("../../src/std/p")
+import p from "../../src/std/p.js"
 
 o.spec("p", () => {
 	function test(prefix) {

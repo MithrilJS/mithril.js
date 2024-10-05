@@ -1,10 +1,9 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var makeTracked = require("../../src/std/tracked")
+import makeTracked from "../../src/std/tracked.js"
 
 o.spec("tracked", () => {
-	/** @param {import("../tracked").Tracked<number, string>} t */
+	/** @param {import("../tracked.js").Tracked<number, string>} t */
 	var live = (t) => t.live().map((h) => [h.key, h.value, h.signal.aborted])
 
 	o("initializes values correctly", () => {

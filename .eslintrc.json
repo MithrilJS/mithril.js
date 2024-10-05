@@ -1,20 +1,83 @@
-"use strict"
-
-module.exports = {
+{
+	"overrides": [
+		{"files": "*.cjs", "parserOptions": {"sourceType": "script"}},
+		{
+			"files": "scripts/**",
+			"env": {
+				"node": true,
+				"es2022": true
+			},
+			"parserOptions": {
+				"ecmaVersion": 2022
+			},
+			"rules": {
+				"no-process-env": "off",
+				"no-restricted-syntax": "off"
+			}
+		},
+		{
+			"files": "tests/**",
+			"env": {
+				"node": true
+			},
+			"parserOptions": {
+				"ecmaVersion": 2020
+			},
+			"rules": {
+				"no-process-env": "off"
+			}
+		}
+	],
 	"env": {
-		"commonjs": true,
-		"es6": true,
-		"node": true
+		"es6": true
 	},
 	"globals": {
-		ReadableStream: true,
-		Response: true,
+		"ReadableStream": true,
+		"Response": true,
+		"URL": true,
+		"URLSearchParams": true,
+		"AbortController": true,
+		"setTimeout": true,
+		"clearTimeout": true,
+		"console": true
 	},
 	"parserOptions": {
-		"ecmaVersion": 2015
+		"ecmaVersion": 2018,
+		"sourceType": "module"
 	},
 	"extends": "eslint:recommended",
 	"rules": {
+		"no-restricted-syntax": ["error",
+			{"selector": "Literal[bigint]", "message": "BigInts are not supported in ES2018"},
+			{"selector": "ChainExpression", "message": "Optional chaining is not supported in ES2018"},
+			{"selector": "BinaryExpression[operator='??']", "message": "Nullish coalescing is not supported in ES2018"},
+			{"selector": "MetaProperty[meta.name='import'][property.name='meta']", "message": "`import.meta` is not supported in ES2018"},
+			{"selector": "ExportAllDeclaration[exported!=null]", "message": "`export * as foo from ...` is not supported in ES2018"},
+			{"selector": "CatchClause[param=null]", "message": "Omitted `catch` bindings are not supported in ES2018"},
+			{"selector": "ForOfStatement[await=true]", "message": "Async/await is not supported in ES2018"},
+			{"selector": "ObjectExpression > SpreadElement", "message": "Object rest/spread is not supported in ES2018"},
+			{"selector": "ObjectPattern > SpreadElement", "message": "Object rest/spread is not supported in ES2018"},
+			{"selector": "Function[async=true][generator=true]", "message": "Async generators are not supported in ES2018"},
+			{"selector": "Literal[regex.flags=/s/]", "message": "`/.../s` is not supported in ES2018"},
+			{"selector": "Literal[regex.pattern=/\\(<=|\\(<!/]", "message": "Lookbehind assertions are not supported in ES2018"},
+			{"selector": "Literal[regex.pattern=/\\(?<[\\w$]+>|\\\\k<[\\w$]+>/]", "message": "Named capture groups are not supported in ES2018"},
+			{"selector": "Literal[regex.flags=/u/][regex.pattern=/\\\\p/i]", "message": "`\\p{...}` in regexps are not supported in ES2018"},
+			{"selector": "Literal[regex.flags=/v/]", "message": "`/.../v` is not supported in ES2018"},
+			{
+				"selector": "TaggedTemplateExpression TemplateElement[value.raw=/\\\\(?![0'\"\\\\nrvtbf\\n\\r\\u2028\\u2029]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|u\\{([0-9a-fA-F]{1,5}|10[0-9a-fA-F]{0,4})\\})/]",
+				"message": "Tagged template strings in ES2018 have the same lexical grammar as non-tagged template strings"
+			},
+
+			{"selector": "MemberExpression[property.name='matchAll']", "message": "`string.matchAll` is not supported in ES2018"},
+			{"selector": "MemberExpression[property.name='trimStart']", "message": "`string.trimStart` is not supported in ES2018"},
+			{"selector": "MemberExpression[property.name='finally']", "message": "`promise.finally` is not supported in ES2018"}
+		],
+		"no-restricted-properties": ["error",
+			{"object": "Promise", "property": "allSettled", "message": "`Promise.allSettled` is not supported in ES2018"},
+			{"object": "Object", "property": "fromEntries", "message": "`Object.fromEntries` is not supported in ES2018"},
+			{"object": "Symbol", "property": "asyncIterator", "message": "Async/await is not supported in ES2018"}
+		],
+
 		"accessor-pairs": "error",
 		"array-bracket-spacing": [
 			"error",
@@ -147,7 +210,6 @@ module.exports = {
 		"no-restricted-globals": "error",
 		"no-restricted-imports": "error",
 		"no-restricted-modules": "error",
-		"no-restricted-syntax": "error",
 		"no-return-assign": "off",
 		"no-script-url": "error",
 		"no-self-compare": "error",
@@ -213,7 +275,7 @@ module.exports = {
 		"require-yield": "error",
 		"semi": "off",
 		"semi-spacing": "off",
-		"sort-imports": "error",
+		"sort-imports": ["error", {"allowSeparatedGroups": true}],
 		"sort-vars": "off",
 		"space-before-blocks": "off",
 		"space-before-function-paren": "off",
@@ -234,4 +296,4 @@ module.exports = {
 		"yoda": "off"
 	},
 	"root": true
-};
+}

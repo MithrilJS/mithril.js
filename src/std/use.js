@@ -1,6 +1,4 @@
-"use strict"
-
-var m = require("../core/hyperscript")
+import m from "../core/hyperscript.js"
 
 var Use = () => {
 	var key = 0
@@ -16,4 +14,6 @@ var Use = () => {
 	}
 }
 
-module.exports = (deps, ...children) => m(Use, {d: [...deps]}, ...children)
+var use = (deps, ...children) => m(Use, {d: [...deps]}, ...children)
+
+export {use as default}

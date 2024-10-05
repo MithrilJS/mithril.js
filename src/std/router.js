@@ -1,8 +1,8 @@
-"use strict"
+import m from "../core/hyperscript.js"
 
-var m = require("../core/hyperscript")
+import {p} from "../util.js"
 
-module.exports = function($window, redraw) {
+function makeRouter($window, redraw) {
 	var mustReplace = false
 	var routePrefix, currentUrl, currentPath, currentHref
 
@@ -32,7 +32,7 @@ module.exports = function($window, redraw) {
 		}
 		if (mustReplace) replace = true
 		mustReplace = true
-		queueMicrotask(updateRoute)
+		p.then(updateRoute)
 		redraw()
 		$window.history[replace ? "replaceState" : "pushState"](state, "", routePrefix + path)
 	}
@@ -91,3 +91,6 @@ module.exports = function($window, redraw) {
 				}),
 	}
 }
+
+
+export {makeRouter as default}

@@ -1,10 +1,9 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var domMock = require("../../test-utils/domMock")
-var hyperscript = require("../../src/core/hyperscript")
-var makeLazy = require("../../src/std/lazy")
-var render = require("../../src/core/render")
+import domMock from "../../test-utils/domMock.js"
+import hyperscript from "../../src/core/hyperscript.js"
+import makeLazy from "../../src/std/lazy.js"
+import render from "../../src/core/render.js"
 
 o.spec("lazy", () => {
 	var consoleError = console.error
@@ -12,6 +11,10 @@ o.spec("lazy", () => {
 	o.beforeEach(() => {
 		$window = domMock()
 		root = $window.document.createElement("div")
+		console.error = (...args) => {
+			consoleError.apply(console, args)
+			throw new Error("should not be called")
+		}
 	})
 	o.afterEach(() => {
 		console.error = consoleError
@@ -89,7 +92,7 @@ o.spec("lazy", () => {
 				var error = new Error("test")
 				var calls = []
 				console.error = (e) => {
-					calls.push("error", e.message)
+					calls.push("console.error", e.message)
 				}
 				var scheduled = 1
 				var send, notifyRedrawn
@@ -120,7 +123,7 @@ o.spec("lazy", () => {
 				return fetchRedrawn.then(() => {
 					o(calls).deepEquals([
 						"fetch",
-						"error", "test",
+						"console.error", "test",
 						"scheduled 1",
 					])
 
@@ -131,7 +134,7 @@ o.spec("lazy", () => {
 
 					o(calls).deepEquals([
 						"fetch",
-						"error", "test",
+						"console.error", "test",
 						"scheduled 1",
 					])
 
@@ -142,7 +145,7 @@ o.spec("lazy", () => {
 
 					o(calls).deepEquals([
 						"fetch",
-						"error", "test",
+						"console.error", "test",
 						"scheduled 1",
 					])
 				})
@@ -229,7 +232,7 @@ o.spec("lazy", () => {
 				var error = new Error("test")
 				var calls = []
 				console.error = (e) => {
-					calls.push("error", e.message)
+					calls.push("console.error", e.message)
 				}
 				var scheduled = 1
 				var send, notifyRedrawn
@@ -267,7 +270,7 @@ o.spec("lazy", () => {
 						"fetch",
 						"pending",
 						"pending",
-						"error", "test",
+						"console.error", "test",
 						"scheduled 1",
 					])
 
@@ -280,7 +283,7 @@ o.spec("lazy", () => {
 						"fetch",
 						"pending",
 						"pending",
-						"error", "test",
+						"console.error", "test",
 						"scheduled 1",
 					])
 
@@ -293,7 +296,7 @@ o.spec("lazy", () => {
 						"fetch",
 						"pending",
 						"pending",
-						"error", "test",
+						"console.error", "test",
 						"scheduled 1",
 					])
 				})
@@ -371,6 +374,9 @@ o.spec("lazy", () => {
 			o("works with fetch + error and failure", () => {
 				var error = new Error("test")
 				var calls = []
+				console.error = (e) => {
+					calls.push("console.error", e.message)
+				}
 				var scheduled = 1
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
@@ -403,6 +409,7 @@ o.spec("lazy", () => {
 				return fetchRedrawn.then(() => {
 					o(calls).deepEquals([
 						"fetch",
+						"console.error", "test",
 						"scheduled 1",
 					])
 
@@ -413,6 +420,7 @@ o.spec("lazy", () => {
 
 					o(calls).deepEquals([
 						"fetch",
+						"console.error", "test",
 						"scheduled 1",
 						"error", "test",
 						"error", "test",
@@ -425,6 +433,7 @@ o.spec("lazy", () => {
 
 					o(calls).deepEquals([
 						"fetch",
+						"console.error", "test",
 						"scheduled 1",
 						"error", "test",
 						"error", "test",
@@ -517,6 +526,9 @@ o.spec("lazy", () => {
 			o("works with all hooks and failure", () => {
 				var error = new Error("test")
 				var calls = []
+				console.error = (e) => {
+					calls.push("console.error", e.message)
+				}
 				var scheduled = 1
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
@@ -556,6 +568,7 @@ o.spec("lazy", () => {
 						"fetch",
 						"pending",
 						"pending",
+						"console.error", "test",
 						"scheduled 1",
 					])
 
@@ -568,6 +581,7 @@ o.spec("lazy", () => {
 						"fetch",
 						"pending",
 						"pending",
+						"console.error", "test",
 						"scheduled 1",
 						"error", "test",
 						"error", "test",
@@ -582,6 +596,7 @@ o.spec("lazy", () => {
 						"fetch",
 						"pending",
 						"pending",
+						"console.error", "test",
 						"scheduled 1",
 						"error", "test",
 						"error", "test",

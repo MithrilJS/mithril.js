@@ -1,7 +1,7 @@
-"use strict"
+/* global process: false */
+import o from "ospec"
 
-var o = require("ospec")
-var domMock = require("../../test-utils/domMock")
+import domMock from "../../test-utils/domMock.js"
 
 o.spec("domMock", function() {
 	var $document, $window

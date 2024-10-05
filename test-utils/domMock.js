@@ -1,5 +1,3 @@
-"use strict"
-
 /*
 Known limitations:
 - the innerHTML setter and the DOMParser only support a small subset of the true HTML/XML syntax.
@@ -14,7 +12,7 @@ options:
 - spy:(f: Function) => Function
 */
 
-module.exports = function(options) {
+export default function domMock(options) {
 	options = options || {}
 	var spy = options.spy || function(f){return f}
 	var spymap = []

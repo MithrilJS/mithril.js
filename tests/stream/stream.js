@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var Stream = require("../../stream/stream")
+import Stream from "../../src/entry/stream.esm.js"
 
 o.spec("stream", function() {
 	o.spec("stream", function() {

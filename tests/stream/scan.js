@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var stream = require("../../stream/stream")
+import stream from "../../src/entry/stream.esm.js"
 
 o.spec("scan", function() {
 	o("defaults to seed", function() {

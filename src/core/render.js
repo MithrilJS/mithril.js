@@ -1,6 +1,4 @@
-"use strict"
-
-var hyperscript = require("./hyperscript")
+import hyperscript from "./hyperscript.js"
 
 var xlinkNs = "http://www.w3.org/1999/xlink"
 var nameSpace = {
@@ -489,7 +487,7 @@ function updateEvent(vnode, key, value) {
 
 var currentlyRendering = []
 
-module.exports = function(dom, vnodes, redraw) {
+function render(dom, vnodes, redraw) {
 	if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 	if (currentlyRendering.some((d) => d === dom || d.contains(dom))) {
 		throw new TypeError("Node is currently being rendered to and thus is locked.")
@@ -534,3 +532,5 @@ module.exports = function(dom, vnodes, redraw) {
 		currentlyRendering.pop()
 	}
 }
+
+export {render as default}

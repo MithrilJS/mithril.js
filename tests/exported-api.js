@@ -1,23 +1,28 @@
-"use strict"
-/* global window: false */
+/* global window: false, global: false */
+import o from "ospec"
 
-var o = require("ospec")
-var browserMock = require("../test-utils/browserMock")
+import browserMock from "../test-utils/browserMock.js"
 
 o.spec("api", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var mock = browserMock(), root
-	mock.setTimeout = setTimeout
-	if (typeof global !== "undefined") {
-		global.window = mock
-		global.requestAnimationFrame = mock.requestAnimationFrame
-	}
+	var root
 
 	function sleep(ms) {
 		return new Promise((resolve) => setTimeout(resolve, ms))
 	}
 
-	var m = require("..") // eslint-disable-line global-require
+	var m
+
+	o.before(async () => {
+		var mock = browserMock()
+		mock.setTimeout = setTimeout
+		if (typeof global !== "undefined") {
+			global.window = mock
+			global.requestAnimationFrame = mock.requestAnimationFrame
+		}
+		const mod = await import("../src/entry/mithril.esm.js")
+		m = mod.default
+	})
 
 	o.afterEach(function() {
 		if (root) m.mount(root, null)
@@ -88,12 +93,15 @@ o.spec("api", function() {
 				o(count).equals(2)
 			})
 		})
-		o("sync", function() {
+	})
+
+	o.spec("m.redrawSync", function() {
+		o("works", function() {
 			root = window.document.createElement("div")
 			var view = o.spy()
 			m.mount(root, view)
 			o(view.callCount).equals(1)
-			m.redraw.sync()
+			m.redrawSync()
 			o(view.callCount).equals(2)
 		})
 	})

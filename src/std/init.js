@@ -1,7 +1,8 @@
-"use strict"
+import m from "../core/hyperscript.js"
 
-var m = require("../core/hyperscript")
+import {p} from "../util.js"
 
-var Init = ({f}, o) => (o ? m.retain() : m.layout((_, signal) => queueMicrotask(() => f(signal))))
+var Init = ({f}) => m.layout((_, signal, isInit) => isInit && p.then(() => f(signal)))
+var init = (f) => m(Init, {f})
 
-module.exports = (f) => m(Init, {f})
+export {init as default}

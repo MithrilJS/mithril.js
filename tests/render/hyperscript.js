@@ -1,8 +1,7 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var m = require("../../src/core/hyperscript")
-var domMock = require("../../test-utils/domMock")
+import domMock from "../../test-utils/domMock.js"
+import m from "../../src/core/hyperscript.js"
 
 o.spec("hyperscript", function() {
 	o.spec("selector", function() {

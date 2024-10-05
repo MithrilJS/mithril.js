@@ -2,28 +2,53 @@
   "name": "mithril",
   "version": "2.2.9",
   "description": "A framework for building brilliant applications",
-  "author": "Leo Horie",
+  "contributors": [
+    "Leo Horie (https://github.com/lhorie)",
+    "Claudia Meadows <contact@claudiameadows.dev> (https://github.com/dead-claudia)"
+  ],
   "license": "MIT",
-  "unpkg": "mithril.min.js",
-  "jsdelivr": "mithril.min.js",
+  "type": "module",
+  "unpkg": "dist/mithril.umd.min.js",
+  "jsdelivr": "dist/mithril.umd.min.js",
   "repository": "github:MithrilJS/mithril.js",
-  "main": "src/index.js",
+  "main": "dist/mithril.umd.js",
+  "module": "dist/mithril.esm.js",
+  "files": [
+    "LICENSE",
+    "package.json",
+    "/dist/*.js"
+  ],
+  "exports": {
+    "./stream.js": {
+      "production": {
+        "import": "./dist/stream.esm.min.js",
+        "require": "./dist/stream.umd.min.js"
+      },
+      "import": "./dist/stream.esm.js",
+      "require": "./dist/stream.umd.js"
+    },
+    ".": {
+      "production": {
+        "import": "./dist/mithril.esm.min.js",
+        "require": "./dist/mithril.umd.min.js"
+      },
+      "import": "./dist/mithril.esm.js",
+      "require": "./dist/mithril.umd.js"
+    }
+  },
   "scripts": {
-    "watch": "run-p watch:**",
-    "watch:js": "node scripts/bundler src/browser.js -output mithril.js -watch",
-    "build": "run-p build:browser build:min build:stream-min",
-    "build:browser": "node scripts/bundler src/browser.js -output mithril.js",
-    "build:min": "node scripts/bundler src/browser.js -output mithril.min.js -minify -save",
-    "build:stream-min": "node scripts/minify-stream",
+    "build": "node scripts/build.js --save",
     "cleanup:lint": "rimraf .eslintcache",
     "lint": "run-s -cn lint:**",
     "lint:js": "eslint . --cache",
     "perf": "node performance/test-perf.js",
     "pretest": "npm run lint",
-    "test": "run-s test:js",
-    "test:js": "ospec"
+    "test": "ospec"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.0",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
     "benchmark": "^2.1.4",
     "chokidar": "^4.0.1",
     "eslint": "^8.9.0",
@@ -31,6 +56,7 @@
     "npm-run-all": "^4.1.5",
     "ospec": "4.2.1",
     "rimraf": "^6.0.1",
+    "rollup": "^4.24.0",
     "terser": "^4.3.4"
   }
 }

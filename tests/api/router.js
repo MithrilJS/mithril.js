@@ -1,13 +1,11 @@
-"use strict"
+import o from "ospec"
 
-// Low-priority TODO: remove the dependency on the renderer here.
-var o = require("ospec")
-var browserMock = require("../../test-utils/browserMock")
-var throttleMocker = require("../../test-utils/throttleMock")
+import browserMock from "../../test-utils/browserMock.js"
+import throttleMocker from "../../test-utils/throttleMock.js"
 
-var m = require("../../src/core/hyperscript")
-var apiMountRedraw = require("../../src/core/mount-redraw")
-var apiRouter = require("../../src/std/router")
+import apiMountRedraw from "../../src/core/mount-redraw.js"
+import apiRouter from "../../src/std/router.js"
+import m from "../../src/core/hyperscript.js"
 
 o.spec("route", () => {
 	// Note: the `n` parameter used in calls to this are generally found by

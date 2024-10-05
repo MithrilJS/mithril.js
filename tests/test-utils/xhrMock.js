@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var xhrMock = require("../../test-utils/xhrMock")
+import xhrMock from "../../test-utils/xhrMock.js"
 
 o.spec("xhrMock", function() {
 	var $window

@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var callAsync = require("../../test-utils/callAsync")
+import callAsync from "../../test-utils/callAsync.js"
 
 o.spec("callAsync", function() {
 	o("works", function(done) {

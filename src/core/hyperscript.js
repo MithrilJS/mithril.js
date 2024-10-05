@@ -1,6 +1,4 @@
-"use strict"
-
-var hasOwn = require("../util/hasOwn")
+import {hasOwn} from "../util.js"
 
 /*
 This same structure is used for several nodes. Here's an explainer for each type.
@@ -174,4 +172,4 @@ m.normalizeChildren = (input) => {
 	return input
 }
 
-module.exports = m
+export {m as default}

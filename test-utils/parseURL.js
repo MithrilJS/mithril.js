@@ -1,6 +1,4 @@
-"use strict"
-
-module.exports = function parseURL(url, root) {
+export default function parseURL(url, root) {
 	var data = {}
 	var protocolIndex = url.indexOf("://")
 	var pathnameIndex = protocolIndex > -1 ? url.indexOf("/", protocolIndex + 3) : url.indexOf("/")

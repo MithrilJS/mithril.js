@@ -1,9 +1,3 @@
-/* eslint-disable */
-;(function() {
-"use strict"
-/* eslint-enable */
-/* global window: false */
-
 Stream.SKIP = {}
 Stream.lift = lift
 Stream.scan = scan
@@ -178,8 +172,4 @@ function open(s) {
 	return s._state === "pending" || s._state === "active" || s._state === "changing"
 }
 
-if (typeof module !== "undefined") module["exports"] = Stream
-else if (typeof window.m === "function" && !("stream" in window.m)) window.m.stream = Stream
-else window.m = {stream : Stream}
-
-}());
+export {Stream as default}

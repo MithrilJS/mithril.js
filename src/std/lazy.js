@@ -1,35 +1,29 @@
-"use strict"
+import m from "../core/hyperscript.js"
 
-var mountRedraw = require("../core/mount-redraw")
-var m = require("../core/hyperscript")
-
-module.exports = (opts, redraw = mountRedraw.redraw) => {
-	var fetched = false
+var lazy = (opts, redraw = m.redraw) => {
+	// Capture the error here so stack traces make more sense
+	var error = new ReferenceError("Component not found")
 	var Comp = () => opts.pending && opts.pending()
-	var e = new ReferenceError("Component not found")
-	var ShowError = () => opts.error && opts.error(e)
-
-	return () => {
-		if (!fetched) {
-			fetched = true
-			new Promise((resolve) => resolve(opts.fetch())).then(
-				(result) => {
-					Comp = typeof result === "function"
-						? result
-						: result && typeof result.default === "function"
-							? result.default
-							: ShowError
-					redraw()
-				},
-				(error) => {
-					Comp = ShowError
-					e = error
-					if (!opts.error) console.error(error)
-					redraw()
-				}
-			)
+	var init = async () => {
+		try {
+			Comp = await opts.fetch()
+			if (typeof Comp !== "function") {
+				Comp = Comp.default
+				if (typeof Comp !== "function") throw error
+			}
+		} catch (e) {
+			console.error(e)
+			Comp = () => opts.error && opts.error(e)
 		}
+		redraw()
+	}
 
-		return (attrs) => m(Comp, attrs)
+	return (attrs) => {
+		var f = init
+		init = undefined
+		if (typeof f === "function") f()
+		return m(Comp, attrs)
 	}
 }
+
+export {lazy as default}

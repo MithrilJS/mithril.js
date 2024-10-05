@@ -1,6 +1,4 @@
-"use strict"
-
-var mountRedraw = require("../core/mount-redraw")
+import m from "../core/hyperscript.js"
 
 /*
 Here's the intent.
@@ -78,7 +76,7 @@ why that was removed in favor of this:
  * @param {() => void} [onUpdate]
  * @returns {Tracked<K, V>}
  */
-module.exports = (initial, onUpdate = mountRedraw.redraw) => {
+var tracked = (initial, onUpdate = m.redraw) => {
 	/** @type {Map<K, TrackedHandle<K, V> & {_: AbortController}>} */ var state = new Map()
 	/** @type {Set<TrackedHandle<K, V>>} */ var live = new Set()
 
@@ -139,3 +137,5 @@ module.exports = (initial, onUpdate = mountRedraw.redraw) => {
 		},
 	}
 }
+
+export {tracked as default}

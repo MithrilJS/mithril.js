@@ -1,10 +1,9 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var use = require("../../src/std/use")
-var domMock = require("../../test-utils/domMock")
-var render = require("../../src/core/render")
-var m = require("../../src/core/hyperscript")
+import domMock from "../../test-utils/domMock.js"
+import m from "../../src/core/hyperscript.js"
+import render from "../../src/core/render.js"
+import use from "../../src/std/use.js"
 
 o.spec("m.use", () => {
 	o("works with empty arrays", () => {

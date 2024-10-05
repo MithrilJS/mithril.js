@@ -1,7 +1,6 @@
-"use strict"
+import o from "ospec"
 
-var o = require("ospec")
-var throttleMocker = require("../../test-utils/throttleMock")
+import throttleMocker from "../../test-utils/throttleMock.js"
 
 o.spec("throttleMock", function() {
 	o("schedules one callback", function() {

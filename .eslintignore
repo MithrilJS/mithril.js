@@ -7,6 +7,4 @@
 /.eslintcache
 
 # These are artifacts from various scripts
-/mithril.js
-/mithril.min.js
-/stream/stream.min.js
+/dist
