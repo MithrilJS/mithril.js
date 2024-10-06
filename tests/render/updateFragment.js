@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("updateFragment", function() {
 	var $window, root
@@ -15,8 +14,8 @@ o.spec("updateFragment", function() {
 		var vnode = [m("a")]
 		var updated = [m("b")]
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated[0].dom).equals(root.firstChild)
 		o(updated[0].dom.nodeName).equals("B")
@@ -25,8 +24,8 @@ o.spec("updateFragment", function() {
 		var vnode = []
 		var updated = [m("a"), m("b")]
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated[0].dom).equals(root.firstChild)
 		o(root.childNodes.length).equals(2)
@@ -37,8 +36,8 @@ o.spec("updateFragment", function() {
 		var vnode = [m("a"), m("b")]
 		var updated = []
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(0)
 	})
@@ -46,8 +45,8 @@ o.spec("updateFragment", function() {
 		var vnode = []
 		var updated = [m("a")]
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated[0].dom).equals(root.firstChild)
 		o(updated[0].dom.nodeName).equals("A")
@@ -56,8 +55,8 @@ o.spec("updateFragment", function() {
 		var vnode = [m("a")]
 		var updated = []
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(0)
 	})

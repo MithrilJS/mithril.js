@@ -1,4 +1,4 @@
-import m from "../core/hyperscript.js"
+import m from "../core.js"
 
 var lazy = (opts, redraw = m.redraw) => {
 	// Capture the error here so stack traces make more sense

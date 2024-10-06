@@ -1,16 +1,5 @@
-import callAsync from "../test-utils/callAsync.js"
+import {callAsync} from "../test-utils/callAsync.js"
 import parseURL from "../test-utils/parseURL.js"
-
-function debouncedAsync(f) {
-	var ref
-	return function() {
-		if (ref != null) return
-		ref = callAsync(function(){
-			ref = null
-			f()
-		})
-	}
-}
 
 export default function pushStateMock(options) {
 	if (options == null) options = {}
@@ -50,10 +39,15 @@ export default function pushStateMock(options) {
 		if (value === "") return ""
 		return (value.charAt(0) !== prefix ? prefix : "") + value
 	}
-	function _hashchange() {
-		if (typeof $window.onhashchange === "function") $window.onhashchange({type: "hashchange"})
+	var hashchangePending = false
+	function hashchange() {
+		if (hashchangePending) return
+		callAsync(() => {
+			hashchangePending = false
+			if (typeof $window.onhashchange === "function") $window.onhashchange({type: "hashchange"})
+		})
+		hashchangePending = true
 	}
-	var hashchange = debouncedAsync(_hashchange)
 	function popstate() {
 		if (typeof $window.onpopstate === "function") $window.onpopstate({type: "popstate", state: $window.history.state})
 	}

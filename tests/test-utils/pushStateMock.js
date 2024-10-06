@@ -1,6 +1,6 @@
 import o from "ospec"
 
-import callAsync from "../../test-utils/callAsync.js"
+import {callAsync, waitAsync} from "../../test-utils/callAsync.js"
 import pushStateMock from "../../test-utils/pushStateMock.js"
 
 o.spec("pushStateMock", function() {
@@ -565,18 +565,14 @@ o.spec("pushStateMock", function() {
 				})
 			})
 		})
-		o("onhashchange triggers once when the hash changes twice in a single tick", function(done) {
+		o("onhashchange triggers once when the hash changes twice in a single tick", async () => {
 			$window.location.href = "#a"
-			callAsync(function(){
-				$window.onhashchange = o.spy()
-				$window.history.back()
-				$window.history.forward()
-
-				callAsync(function(){
-					o($window.onhashchange.callCount).equals(1)
-					done()
-				})
-			})
+			await waitAsync()
+			$window.onhashchange = o.spy()
+			$window.history.back()
+			$window.history.forward()
+			await waitAsync()
+			o($window.onhashchange.callCount).equals(1)
 		})
 		o("onhashchange does not trigger on history.back() that causes page change with different hash", function(done) {
 			$window.location.href = "#a"

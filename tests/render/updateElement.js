@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("updateElement", function() {
 	var $window, root
@@ -15,8 +14,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {id: "b"})
 		var updated = m("a", {id: "c"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
@@ -26,8 +25,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {id: "b"})
 		var updated = m("a", {id: "c", title: "d"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
@@ -37,8 +36,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a")
 		var updated = m("a", {title: "d"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
@@ -48,8 +47,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {id: "b", title: "d"})
 		var updated = m("a", {id: "c"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
@@ -59,8 +58,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {id: "b", className: "d"})
 		var updated = m("a", {id: "c"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
@@ -70,8 +69,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a")
 		var updated = m("a", {style: {backgroundColor: "green"}})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
@@ -79,8 +78,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a")
 		var updated = m("a", {style: "background-color:green"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
@@ -88,8 +87,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: {backgroundColor: "red"}})
 		var updated = m("a", {style: {backgroundColor: "green"}})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
@@ -97,8 +96,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: {backgroundColor: "red"}})
 		var updated = m("a", {style: "background-color:green;"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
@@ -106,8 +105,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: "background-color:green;"})
 		var updated = m("a", {style: "background-color:green;"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
@@ -115,8 +114,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: {backgroundColor: "red"}})
 		var updated = m("a", {style: {backgroundColor: "red"}})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("red")
 	})
@@ -124,8 +123,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: "background-color:red;"})
 		var updated = m("a", {style: {backgroundColor: "green"}})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
@@ -133,8 +132,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: "background-color:red;"})
 		var updated = m("a", {style: "background-color:green;"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
@@ -142,8 +141,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: {backgroundColor: "red", border: "1px solid red"}})
 		var updated = m("a", {style: {backgroundColor: "red"}})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("red")
 		o(updated.dom.style.border).equals("")
@@ -152,8 +151,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: "background-color:red;border:1px solid red"})
 		var updated = m("a", {style: {backgroundColor: "red"}})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("red")
 		o(updated.dom.style.border).notEquals("1px solid red")
@@ -162,8 +161,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: {backgroundColor: "red", border: "1px solid red"}})
 		var updated = m("a", {style: "background-color:red"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("red")
 		o(updated.dom.style.border).equals("")
@@ -172,8 +171,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a", {style: "background-color:red;border:1px solid red"})
 		var updated = m("a", {style: "background-color:red"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.style.backgroundColor).equals("red")
 		o(updated.dom.style.border).equals("")
@@ -182,12 +181,12 @@ o.spec("updateElement", function() {
 		var style = {color: "gold"}
 		var vnode = m("a", {style: style})
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		root.firstChild.style.color = "red"
 		style = {color: "gold"}
 		var updated = m("a", {style: style})
-		render(root, updated)
+		m.render(root, updated)
 
 		o(updated.dom.style.color).equals("red")
 	})
@@ -195,12 +194,12 @@ o.spec("updateElement", function() {
 		var vnode = m("p", {style: "background-color: red"})
 		var updated = m("p", {style: null})
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o("style" in vnode.dom.attributes).equals(true)
 		o(vnode.dom.attributes.style.value).equals("background-color: red;")
 
-		render(root, updated)
+		m.render(root, updated)
 
 		//browsers disagree here
 		try {
@@ -215,12 +214,12 @@ o.spec("updateElement", function() {
 		var vnode = m("p", {style: "background-color: red"})
 		var updated = m("p", {style: undefined})
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o("style" in vnode.dom.attributes).equals(true)
 		o(vnode.dom.attributes.style.value).equals("background-color: red;")
 
-		render(root, updated)
+		m.render(root, updated)
 
 		//browsers disagree here
 		try {
@@ -237,12 +236,12 @@ o.spec("updateElement", function() {
 		var vnode = m("p", {style: "background-color: red"})
 		var updated = m("p")
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o("style" in vnode.dom.attributes).equals(true)
 		o(vnode.dom.attributes.style.value).equals("background-color: red;")
 
-		render(root, updated)
+		m.render(root, updated)
 
 		//browsers disagree here
 		try {
@@ -259,8 +258,8 @@ o.spec("updateElement", function() {
 		var vnode = m("a")
 		var updated = m("b")
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom).equals(root.firstChild)
 		o(updated.dom.nodeName).equals("B")
@@ -269,8 +268,8 @@ o.spec("updateElement", function() {
 		var vnode = m("svg", {className: "a"})
 		var updated = m("svg", {className: "b"})
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.attributes["class"].value).equals("b")
 	})
@@ -278,8 +277,8 @@ o.spec("updateElement", function() {
 		var vnode = m("svg", m("circle"))
 		var updated = m("svg", m("line"))
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})

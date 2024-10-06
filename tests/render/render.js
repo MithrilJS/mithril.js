@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("render", function() {
 	var $window, root
@@ -12,27 +11,27 @@ o.spec("render", function() {
 	})
 
 	o("renders plain text", function() {
-		render(root, "a")
+		m.render(root, "a")
 		o(root.childNodes.length).equals(1)
 		o(root.childNodes[0].nodeValue).equals("a")
 	})
 
 	o("updates plain text", function() {
-		render(root, "a")
-		render(root, "b")
+		m.render(root, "a")
+		m.render(root, "b")
 		o(root.childNodes.length).equals(1)
 		o(root.childNodes[0].nodeValue).equals("b")
 	})
 
 	o("renders a number", function() {
-		render(root, 1)
+		m.render(root, 1)
 		o(root.childNodes.length).equals(1)
 		o(root.childNodes[0].nodeValue).equals("1")
 	})
 
 	o("updates a number", function() {
-		render(root, 1)
-		render(root, 2)
+		m.render(root, 1)
+		m.render(root, 2)
 		o(root.childNodes.length).equals(1)
 		o(root.childNodes[0].nodeValue).equals("2")
 	})
@@ -42,7 +41,7 @@ o.spec("render", function() {
 
 		root.appendChild($window.document.createElement("div"));
 
-		render(root, vnodes)
+		m.render(root, vnodes)
 
 		o(root.childNodes.length).equals(0)
 	})
@@ -50,7 +49,7 @@ o.spec("render", function() {
 	o("throws on invalid root node", function() {
 		var threw = false
 		try {
-			render(null, [])
+			m.render(null, [])
 		} catch (e) {
 			threw = true
 		}
@@ -61,12 +60,12 @@ o.spec("render", function() {
 		var A = o.spy(() => { throw new Error("error") })
 		var throwCount = 0
 
-		try {render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(A.callCount).equals(1)
 
-		try {render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(2)
 		o(A.callCount).equals(2)
@@ -75,13 +74,13 @@ o.spec("render", function() {
 		var A = o.spy(() => view)
 		var view = o.spy(() => { throw new Error("error") })
 		var throwCount = 0
-		try {render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(A.callCount).equals(1)
 		o(view.callCount).equals(1)
 
-		try {render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(2)
 		o(A.callCount).equals(2)
@@ -104,11 +103,11 @@ o.spec("render", function() {
 				m.key(22, m("div"))
 			))
 		}
-		render(root, a())
+		m.render(root, a())
 		var first = root.firstChild.firstChild
-		render(root, b())
+		m.render(root, b())
 		var second = root.firstChild.firstChild
-		render(root, a())
+		m.render(root, a())
 		var third = root.firstChild.firstChild
 
 		o(layoutA.callCount).equals(2)
@@ -142,11 +141,11 @@ o.spec("render", function() {
 				m("div", m.layout(layoutB))
 			))
 		}
-		render(root, a())
+		m.render(root, a())
 		var first = root.firstChild.firstChild
-		render(root, b())
+		m.render(root, b())
 		var second = root.firstChild.firstChild
-		render(root, a())
+		m.render(root, a())
 		var third = root.firstChild.firstChild
 
 		o(layoutA.callCount).equals(2)
@@ -181,8 +180,8 @@ o.spec("render", function() {
 				m("div", m.layout(layoutB))
 			))
 		}
-		render(root, a())
-		render(root, a())
+		m.render(root, a())
+		m.render(root, a())
 		var first = root.firstChild.firstChild
 		o(layoutA.callCount).equals(2)
 		o(layoutA.calls[0].args[0]).equals(first)
@@ -193,7 +192,7 @@ o.spec("render", function() {
 		o(layoutA.calls[1].args[2]).equals(false)
 		o(onabortA.callCount).equals(0)
 
-		render(root, b())
+		m.render(root, b())
 		var second = root.firstChild.firstChild
 		o(layoutA.callCount).equals(2)
 		o(layoutA.calls[0].args[1].aborted).equals(true)
@@ -205,8 +204,8 @@ o.spec("render", function() {
 		o(layoutB.calls[0].args[2]).equals(true)
 		o(onabortB.callCount).equals(0)
 
-		render(root, a())
-		render(root, a())
+		m.render(root, a())
+		m.render(root, a())
 		var third = root.firstChild.firstChild
 		o(layoutB.callCount).equals(1)
 		o(layoutB.calls[0].args[1].aborted).equals(true)
@@ -225,7 +224,7 @@ o.spec("render", function() {
 			m.key(0, m("g")),
 			m.key(1, m("g"))
 		)
-		render(root, svg)
+		m.render(root, svg)
 
 		o(svg.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
@@ -235,38 +234,38 @@ o.spec("render", function() {
 			m.key(1, m("g", {x: 1})),
 			m.key(2, m("g", {x: 2}))
 		)
-		render(root, svg)
+		m.render(root, svg)
 
 		o(svg.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
 	o("the namespace of the root is passed to children", function() {
-		render(root, m("svg"))
+		m.render(root, m("svg"))
 		o(root.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
-		render(root.childNodes[0], m("g"))
+		m.render(root.childNodes[0], m("g"))
 		o(root.childNodes[0].childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
 	o("does not allow reentrant invocations", function() {
 		var thrown = []
 		function A() {
-			try {render(root, m(A))} catch (e) {thrown.push("construct")}
+			try {m.render(root, m(A))} catch (e) {thrown.push("construct")}
 			return () => {
-				try {render(root, m(A))} catch (e) {thrown.push("view")}
+				try {m.render(root, m(A))} catch (e) {thrown.push("view")}
 			}
 		}
-		render(root, m(A))
+		m.render(root, m(A))
 		o(thrown).deepEquals([
 			"construct",
 			"view",
 		])
-		render(root, m(A))
+		m.render(root, m(A))
 		o(thrown).deepEquals([
 			"construct",
 			"view",
 			"view",
 		])
-		render(root, [])
+		m.render(root, [])
 		o(thrown).deepEquals([
 			"construct",
 			"view",

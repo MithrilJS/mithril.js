@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("createNodes", function() {
 	var $window, root
@@ -17,7 +16,7 @@ o.spec("createNodes", function() {
 			"b",
 			["c"],
 		]
-		render(root, vnodes)
+		m.render(root, vnodes)
 
 		o(root.childNodes.length).equals(3)
 		o(root.childNodes[0].nodeName).equals("A")
@@ -31,7 +30,7 @@ o.spec("createNodes", function() {
 			null,
 			["c"],
 		]
-		render(root, vnodes)
+		m.render(root, vnodes)
 
 		o(root.childNodes.length).equals(3)
 		o(root.childNodes[0].nodeName).equals("A")
@@ -45,7 +44,7 @@ o.spec("createNodes", function() {
 			undefined,
 			["c"],
 		]
-		render(root, vnodes)
+		m.render(root, vnodes)
 
 		o(root.childNodes.length).equals(3)
 		o(root.childNodes[0].nodeName).equals("A")

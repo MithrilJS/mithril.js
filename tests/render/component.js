@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("component", function() {
 	var $window, root
@@ -16,7 +15,7 @@ o.spec("component", function() {
 			var component = () => m("div", {id: "a"}, "b")
 			var node = m(component)
 
-			render(root, node)
+			m.render(root, node)
 
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].value).equals("a")
@@ -26,7 +25,7 @@ o.spec("component", function() {
 			var component = (attrs) => m("div", attrs)
 			var node = m(component, {id: "a"}, "b")
 
-			render(root, node)
+			m.render(root, node)
 
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].value).equals("a")
@@ -34,8 +33,8 @@ o.spec("component", function() {
 		})
 		o("updates", function() {
 			var component = (attrs) => m("div", attrs)
-			render(root, [m(component, {id: "a"}, "b")])
-			render(root, [m(component, {id: "c"}, "d")])
+			m.render(root, [m(component, {id: "a"}, "b")])
+			m.render(root, [m(component, {id: "c"}, "d")])
 
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].value).equals("c")
@@ -44,65 +43,65 @@ o.spec("component", function() {
 		o("updates root from null", function() {
 			var visible = false
 			var component = () => (visible ? m("div") : null)
-			render(root, m(component))
+			m.render(root, m(component))
 			visible = true
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.firstChild.nodeName).equals("DIV")
 		})
 		o("updates root from primitive", function() {
 			var visible = false
 			var component = () => (visible ? m("div") : false)
-			render(root, m(component))
+			m.render(root, m(component))
 			visible = true
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.firstChild.nodeName).equals("DIV")
 		})
 		o("updates root to null", function() {
 			var visible = true
 			var component = () => (visible ? m("div") : null)
-			render(root, m(component))
+			m.render(root, m(component))
 			visible = false
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
 		o("updates root to primitive", function() {
 			var visible = true
 			var component = () => (visible ? m("div") : false)
-			render(root, m(component))
+			m.render(root, m(component))
 			visible = false
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
 		o("updates root from null to null", function() {
 			var component = () => null
-			render(root, m(component))
-			render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
 		o("removes", function() {
 			var component = () => m("div")
-			render(root, [m.key(1, m(component)), m.key(2, m("div"))])
+			m.render(root, [m.key(1, m(component)), m.key(2, m("div"))])
 			var div = m("div")
-			render(root, [m.key(2, div)])
+			m.render(root, [m.key(2, div)])
 
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(div.dom)
 		})
 		o("svg works when creating across component boundary", function() {
 			var component = () => m("g")
-			render(root, m("svg", m(component)))
+			m.render(root, m("svg", m(component)))
 
 			o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 		})
 		o("svg works when updating across component boundary", function() {
 			var component = () => m("g")
-			render(root, m("svg", m(component)))
-			render(root, m("svg", m(component)))
+			m.render(root, m("svg", m(component)))
+			m.render(root, m("svg", m(component)))
 
 			o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 		})
@@ -113,7 +112,7 @@ o.spec("component", function() {
 				m("label"),
 				m("input"),
 			]
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(2)
 			o(root.childNodes[0].nodeName).equals("LABEL")
@@ -121,53 +120,53 @@ o.spec("component", function() {
 		})
 		o("can return string", function() {
 			var component = () => "a"
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("a")
 		})
 		o("can return falsy string", function() {
 			var component = () => ""
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("")
 		})
 		o("can return number", function() {
 			var component = () => 1
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("1")
 		})
 		o("can return falsy number", function() {
 			var component = () => 0
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("0")
 		})
 		o("can return `true`", function() {
 			var component = () => true
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
 		o("can return `false`", function() {
 			var component = () => false
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
 		o("can return null", function() {
 			var component = () => null
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
 		o("can return undefined", function() {
 			var component = () => undefined
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
@@ -177,7 +176,7 @@ o.spec("component", function() {
 			var component = () => vnode
 			var vnode = m(component)
 			try {
-				render(root, vnode)
+				m.render(root, vnode)
 			}
 			catch (e) {
 				threw = true
@@ -191,13 +190,13 @@ o.spec("component", function() {
 			// A view that returns its vnode would otherwise trigger an infinite loop
 			var threw = false
 			var component = () => vnode
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 
 			var vnode = m(component)
 			try {
-				render(root, m(component))
+				m.render(root, m(component))
 			}
 			catch (e) {
 				threw = true
@@ -212,8 +211,8 @@ o.spec("component", function() {
 				m("label"),
 				m("input"),
 			]
-			render(root, m(component))
-			render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(2)
 			o(root.childNodes[0].nodeName).equals("LABEL")
@@ -221,16 +220,16 @@ o.spec("component", function() {
 		})
 		o("can update when returning primitive", function() {
 			var component = () => "a"
-			render(root, m(component))
-			render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("a")
 		})
 		o("can update when returning null", function() {
 			var component = () => null
-			render(root, m(component))
-			render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, m(component))
 
 			o(root.childNodes.length).equals(0)
 		})
@@ -240,9 +239,9 @@ o.spec("component", function() {
 				m("input"),
 			]
 			var div = m("div")
-			render(root, [m.key(1, m(component)), m.key(2, div)])
+			m.render(root, [m.key(1, m(component)), m.key(2, div)])
 
-			render(root, [m.key(2, m("div"))])
+			m.render(root, [m.key(2, m("div"))])
 
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(div.dom)
@@ -250,9 +249,9 @@ o.spec("component", function() {
 		o("can remove when returning primitive", function() {
 			var component = () => "a"
 			var div = m("div")
-			render(root, [m.key(1, m(component)), m.key(2, div)])
+			m.render(root, [m.key(1, m(component)), m.key(2, div)])
 
-			render(root, [m.key(2, m("div"))])
+			m.render(root, [m.key(2, m("div"))])
 
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(div.dom)
@@ -269,7 +268,7 @@ o.spec("component", function() {
 				return () => m("div", {id: "a"}, "b")
 			}
 
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
@@ -286,7 +285,7 @@ o.spec("component", function() {
 				return () => [m("div", {id: "a"}, "b")]
 			}
 
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
@@ -303,7 +302,7 @@ o.spec("component", function() {
 				}
 			}
 
-			render(root, m(component))
+			m.render(root, m(component))
 		})
 		o("does not initialize on redraw", function() {
 			var component = o.spy(() => () => m("div", {id: "a"}, "b"))
@@ -312,8 +311,8 @@ o.spec("component", function() {
 				return m(component)
 			}
 
-			render(root, view())
-			render(root, view())
+			m.render(root, view())
+			m.render(root, view())
 
 			o(component.callCount).equals(1)
 		})
@@ -325,7 +324,7 @@ o.spec("component", function() {
 				m("div", {id: "a"}, "b"),
 			]
 
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(layoutSpy.callCount).equals(1)
 			o(layoutSpy.args[0]).equals(root)
@@ -344,8 +343,8 @@ o.spec("component", function() {
 				m("div", {id: "a"}, "b"),
 			]
 
-			render(root, m(component))
-			render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, m(component))
 
 			o(layoutSpy.callCount).equals(2)
 			o(layoutSpy.args[0]).equals(root)
@@ -364,8 +363,8 @@ o.spec("component", function() {
 				m("div", {id: "a"}, "b"),
 			]
 
-			render(root, m(component))
-			render(root, null)
+			m.render(root, m(component))
+			m.render(root, null)
 
 			o(layoutSpy.callCount).equals(1)
 			o(layoutSpy.args[1].aborted).equals(true)
@@ -380,9 +379,9 @@ o.spec("component", function() {
 				m("div", {id: "a"}, "b"),
 			]
 
-			render(root, m(component))
-			render(root, m(component))
-			render(root, null)
+			m.render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, null)
 
 			o(layoutSpy.callCount).equals(2)
 			o(layoutSpy.args[1].aborted).equals(true)
@@ -393,7 +392,7 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m("div", {id: "a"}, m.layout(layoutSpy), "b")
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(layoutSpy.callCount).equals(1)
 			o(layoutSpy.args[0]).equals(root.firstChild)
@@ -408,8 +407,8 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m("div", {id: "a"}, m.layout(layoutSpy), "b")
-			render(root, m(component))
-			render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, m(component))
 
 			o(layoutSpy.callCount).equals(2)
 			o(layoutSpy.args[0]).equals(root.firstChild)
@@ -424,8 +423,8 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m("div", {id: "a"}, m.layout(layoutSpy), "b")
-			render(root, m(component))
-			render(root, null)
+			m.render(root, m(component))
+			m.render(root, null)
 
 			o(layoutSpy.callCount).equals(1)
 			o(layoutSpy.args[1].aborted).equals(true)
@@ -436,9 +435,9 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m("div", {id: "a"}, m.layout(layoutSpy), "b")
-			render(root, m(component))
-			render(root, m(component))
-			render(root, null)
+			m.render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, null)
 
 			o(layoutSpy.callCount).equals(2)
 			o(layoutSpy.args[1].aborted).equals(true)
@@ -449,7 +448,7 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m.layout(layoutSpy)
-			render(root, m(component))
+			m.render(root, m(component))
 
 			o(layoutSpy.callCount).equals(1)
 			o(layoutSpy.args[0]).equals(root)
@@ -462,8 +461,8 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m.layout(layoutSpy)
-			render(root, m(component))
-			render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, m(component))
 
 			o(layoutSpy.callCount).equals(2)
 			o(layoutSpy.args[0]).equals(root)
@@ -476,8 +475,8 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m.layout(layoutSpy)
-			render(root, m(component))
-			render(root, null)
+			m.render(root, m(component))
+			m.render(root, null)
 
 			o(layoutSpy.callCount).equals(1)
 			o(layoutSpy.args[1].aborted).equals(true)
@@ -488,9 +487,9 @@ o.spec("component", function() {
 			var onabort = o.spy()
 			var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 			var component = () => m.layout(layoutSpy)
-			render(root, m(component))
-			render(root, m(component))
-			render(root, null)
+			m.render(root, m(component))
+			m.render(root, m(component))
+			m.render(root, null)
 
 			o(layoutSpy.callCount).equals(2)
 			o(layoutSpy.args[1].aborted).equals(true)
@@ -501,10 +500,10 @@ o.spec("component", function() {
 			var layout = o.spy()
 			var component = o.spy(() => m("div", m.layout(layout)))
 
-			render(root, [m("div", m.key(1, m(component)))])
+			m.render(root, [m("div", m.key(1, m(component)))])
 			var child = root.firstChild.firstChild
-			render(root, [])
-			render(root, [m("div", m.key(1, m(component)))])
+			m.render(root, [])
+			m.render(root, [m("div", m.key(1, m(component)))])
 
 			o(child).notEquals(root.firstChild.firstChild) // this used to be a recycling pool test
 			o(component.callCount).equals(2)

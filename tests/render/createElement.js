@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("createElement", function() {
 	var $window, root
@@ -13,13 +12,13 @@ o.spec("createElement", function() {
 
 	o("creates element", function() {
 		var vnode = m("div")
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 	})
 	o("creates attr", function() {
 		var vnode = m("div", {id: "a", title: "b"})
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.attributes["id"].value).equals("a")
@@ -27,33 +26,33 @@ o.spec("createElement", function() {
 	})
 	o("creates style", function() {
 		var vnode = m("div", {style: {backgroundColor: "red"}})
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.style.backgroundColor).equals("red")
 	})
 	o("allows css vars in style", function() {
 		var vnode = m("div", {style: {"--css-var": "red"}})
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.style["--css-var"]).equals("red")
 	})
 	o("allows css vars in style with uppercase letters", function() {
 		var vnode = m("div", {style: {"--cssVar": "red"}})
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.style["--cssVar"]).equals("red")
 	})
 	o("censors cssFloat to float", function() {
 		var vnode = m("a", {style: {cssFloat: "left"}})
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.style.float).equals("left")
 	})
 	o("creates children", function() {
 		var vnode = m("div", m("a"), m("b"))
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.childNodes.length).equals(2)
@@ -62,7 +61,7 @@ o.spec("createElement", function() {
 	})
 	o("creates attrs and children", function() {
 		var vnode = m("div", {id: "a", title: "b"}, m("a"), m("b"))
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.attributes["id"].value).equals("a")
@@ -77,7 +76,7 @@ o.spec("createElement", function() {
 			m("a", {"xlink:href": "javascript:;"}),
 			m("foreignObject", m("body", {xmlns: "http://www.w3.org/1999/xhtml"}))
 		)
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("svg")
 		o(vnode.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
@@ -92,13 +91,13 @@ o.spec("createElement", function() {
 	/* eslint-enable no-script-url */
 	o("sets attributes correctly for svg", function() {
 		var vnode = m("svg", {viewBox: "0 0 100 100"})
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.attributes["viewBox"].value).equals("0 0 100 100")
 	})
 	o("creates mathml", function() {
 		var vnode = m("math", m("mrow"))
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("math")
 		o(vnode.dom.namespaceURI).equals("http://www.w3.org/1998/Math/MathML")

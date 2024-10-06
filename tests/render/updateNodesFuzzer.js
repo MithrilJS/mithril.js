@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("updateNodes keyed list Fuzzer", () => {
 	const maxLength = 12
@@ -45,8 +44,8 @@ o.spec("updateNodes keyed list Fuzzer", () => {
 					var $window = domMock()
 					var root = $window.document.body
 
-					render(root, from.map((x) => m.key(x, view(x))))
-					render(root, to.map((x) => m.key(x, view(x))))
+					m.render(root, from.map((x) => m.key(x, view(x))))
+					m.render(root, to.map((x) => m.key(x, view(x))))
 					assert(root, to)
 				})
 			}

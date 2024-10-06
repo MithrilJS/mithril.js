@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("textContent", function() {
 	var $window, root
@@ -14,7 +13,7 @@ o.spec("textContent", function() {
 	o("ignores null", function() {
 		var vnode = m("a", null)
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(0)
@@ -23,7 +22,7 @@ o.spec("textContent", function() {
 	o("ignores undefined", function() {
 		var vnode = m("a", undefined)
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(0)
@@ -32,7 +31,7 @@ o.spec("textContent", function() {
 	o("creates string", function() {
 		var vnode = m("a", "a")
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -42,7 +41,7 @@ o.spec("textContent", function() {
 	o("creates falsy string", function() {
 		var vnode = m("a", "")
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -52,7 +51,7 @@ o.spec("textContent", function() {
 	o("creates number", function() {
 		var vnode = m("a", 1)
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -62,7 +61,7 @@ o.spec("textContent", function() {
 	o("creates falsy number", function() {
 		var vnode = m("a", 0)
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -72,7 +71,7 @@ o.spec("textContent", function() {
 	o("creates boolean", function() {
 		var vnode = m("a", true)
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(0)
@@ -81,7 +80,7 @@ o.spec("textContent", function() {
 	o("creates falsy boolean", function() {
 		var vnode = m("a", false)
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(0)
@@ -91,8 +90,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "a")
 		var updated = m("a", "b")
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -103,8 +102,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "a")
 		var updated = m("a", "")
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -115,8 +114,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "a")
 		var updated = m("a", 1)
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -127,8 +126,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "a")
 		var updated = m("a", 0)
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -139,8 +138,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "a")
 		var updated = m("a", true)
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(0)
@@ -150,8 +149,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "a")
 		var updated = m("a", false)
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(0)
@@ -161,8 +160,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "1")
 		var updated = m("a", 1)
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -173,8 +172,8 @@ o.spec("textContent", function() {
 		var vnode = m("a")
 		var updated = m("a", "b")
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(1)
@@ -185,8 +184,8 @@ o.spec("textContent", function() {
 		var vnode = m("a", "a")
 		var updated = m("a")
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(1)
 		o(vnode.dom.childNodes.length).equals(0)

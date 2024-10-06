@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import reallyRender from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("event", function() {
 	var $window, root, redraw, render
@@ -11,7 +10,7 @@ o.spec("event", function() {
 		root = $window.document.body
 		redraw = o.spy()
 		render = function(dom, vnode) {
-			return reallyRender(dom, vnode, redraw)
+			return m.render(dom, vnode, redraw)
 		}
 	})
 
@@ -289,7 +288,7 @@ o.spec("event", function() {
 	o("handles changed spy", function() {
 		var div1 = m("div", {ontransitionend: function() {}})
 
-		reallyRender(root, [div1], redraw)
+		m.render(root, [div1], redraw)
 		var e = $window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 		div1.dom.dispatchEvent(e)
@@ -301,7 +300,7 @@ o.spec("event", function() {
 		var replacementRedraw = o.spy()
 		var div2 = m("div", {ontransitionend: function() {}})
 
-		reallyRender(root, [div2], replacementRedraw)
+		m.render(root, [div2], replacementRedraw)
 		var e = $window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 		div2.dom.dispatchEvent(e)

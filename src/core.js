@@ -1,4 +1,209 @@
-import hyperscript from "./hyperscript.js"
+import {hasOwn} from "./util.js"
+
+export {m as default}
+
+/*
+This same structure is used for several nodes. Here's an explainer for each type.
+
+Components:
+- `tag`: component reference
+- `state`: view function, may `=== tag`
+- `attrs`: most recently received attributes
+- `children`: instance vnode
+- `dom`: unused
+
+DOM elements:
+- `tag`: tag name string
+- `state`: event listener dictionary, if any events were ever registered
+- `attrs`: most recently received attributes
+- `children`: virtual DOM children
+- `dom`: element reference
+
+Retain:
+- `tag`: `RETAIN`
+- All other properties are unused
+- On ingest, the vnode itself is converted into the type of the element it's retaining. This
+  includes changing its type.
+
+Fragments:
+- `tag`: `FRAGMENT`
+- `state`: unused
+- `attrs`: unused
+- `children`: virtual DOM children
+- `dom`: unused
+
+Keys:
+- `tag`: `KEY`
+- `state`: identity key (may be any arbitrary object)
+- `attrs`: unused
+- `children`: virtual DOM children
+- `dom`: unused
+
+Layout:
+- `tag`: `LAYOUT`
+- `state`: callback to schedule
+- `attrs`: unused
+- `children`: unused
+- `dom`: abort controller reference
+
+Text:
+- `tag`: `TEXT`
+- `state`: text string
+- `attrs`: unused
+- `children`: unused
+- `dom`: abort controller reference
+*/
+
+var RETAIN = Symbol.for("m.retain")
+var FRAGMENT = Symbol.for("m.Fragment")
+var KEY = Symbol.for("m.key")
+var LAYOUT = Symbol.for("m.layout")
+var TEXT = Symbol.for("m.text")
+
+function Vnode(tag, state, attrs, children) {
+	return {tag, state, attrs, children, dom: undefined}
+}
+
+var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
+var selectorUnescape = /\\(["'\\])/g
+var selectorCache = /*@__PURE__*/ new Map()
+
+function compileSelector(selector) {
+	var match, tag = "div", classes = [], attrs = {}, hasAttrs = false
+
+	while (match = selectorParser.exec(selector)) {
+		var type = match[1], value = match[2]
+		if (type === "" && value !== "") {
+			tag = value
+		} else {
+			hasAttrs = true
+			if (type === "#") {
+				attrs.id = value
+			} else if (type === ".") {
+				classes.push(value)
+			} else if (match[3][0] === "[") {
+				var attrValue = match[6]
+				if (attrValue) attrValue = attrValue.replace(selectorUnescape, "$1")
+				if (match[4] === "class" || match[4] === "className") classes.push(attrValue)
+				else attrs[match[4]] = attrValue == null || attrValue
+			}
+		}
+	}
+
+	if (classes.length > 0) {
+		attrs.class = classes.join(" ")
+	}
+
+	var state = {tag, attrs: hasAttrs ? attrs : null}
+	selectorCache.set(selector, state)
+	return state
+}
+
+function execSelector(selector, attrs, children) {
+	attrs = attrs || {}
+	var hasClassName = hasOwn.call(attrs, "className")
+	var dynamicClass = hasClassName ? attrs.className : attrs.class
+	var state = selectorCache.get(selector)
+	var original = attrs
+	var selectorClass
+
+	if (state == null) {
+		state = compileSelector(selector)
+	}
+
+	if (state.attrs != null) {
+		selectorClass = state.attrs.class
+		attrs = Object.assign({}, state.attrs, attrs)
+	}
+
+	if (dynamicClass != null || selectorClass != null) {
+		if (attrs !== original) attrs = Object.assign({}, attrs)
+		attrs.class = dynamicClass != null
+			? selectorClass != null ? `${selectorClass} ${dynamicClass}` : dynamicClass
+			: selectorClass
+		if (hasClassName) attrs.className = null
+	}
+
+	return Vnode(state.tag, undefined, attrs, normalizeChildren(children))
+}
+
+// Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
+// allocations in the fast path, especially with fragments.
+function m(selector, attrs, ...children) {
+	if (typeof selector !== "string" && typeof selector !== "function") {
+		throw new Error("The selector must be either a string or a component.");
+	}
+
+	if (attrs == null || typeof attrs === "object" && attrs.tag == null && !Array.isArray(attrs)) {
+		children = children.length === 0 && attrs && hasOwn.call(attrs, "children") && Array.isArray(attrs.children)
+			? attrs.children.slice()
+			: children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
+	} else {
+		children = children.length === 0 && Array.isArray(attrs) ? attrs.slice() : [attrs, ...children]
+		attrs = undefined
+	}
+
+	if (typeof selector === "string") {
+		return execSelector(selector, attrs, children)
+	} else if (selector === m.Fragment) {
+		return Vnode(FRAGMENT, undefined, undefined, normalizeChildren(children))
+	} else {
+		return Vnode(selector, undefined, Object.assign({children}, attrs), undefined)
+	}
+}
+
+// Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
+// redrawing.
+m.capture = (ev) => {
+	ev.preventDefault()
+	ev.stopPropagation()
+	return false
+}
+
+m.retain = () => Vnode(RETAIN, undefined, undefined, undefined)
+
+m.layout = (f) => Vnode(LAYOUT, f, undefined, undefined)
+
+m.Fragment = (attrs) => attrs.children
+m.key = (key, ...children) =>
+	Vnode(KEY, key, undefined, normalizeChildren(
+		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
+	))
+
+m.normalize = (node) => {
+	if (node == null || typeof node === "boolean") return null
+	if (typeof node !== "object") return Vnode(TEXT, String(node), undefined, undefined)
+	if (Array.isArray(node)) return Vnode(FRAGMENT, undefined, undefined, normalizeChildren(node.slice()))
+	return node
+}
+
+function normalizeChildren(input) {
+	if (input.length) {
+		input[0] = m.normalize(input[0])
+		var isKeyed = input[0] != null && input[0].tag === KEY
+		var keys = new Set()
+		// Note: this is a *very* perf-sensitive check.
+		// Fun fact: merging the loop like this is somehow faster than splitting
+		// it, noticeably so.
+		for (var i = 1; i < input.length; i++) {
+			input[i] = m.normalize(input[i])
+			if ((input[i] != null && input[i].tag === KEY) !== isKeyed) {
+				throw new TypeError(
+					isKeyed
+						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit empty key vnode, `m.key()`, instead of a hole."
+						: "In fragments, vnodes must either all have keys or none have keys."
+				)
+			}
+			if (isKeyed) {
+				if (keys.has(input[i].state)) {
+					throw new TypeError(`Duplicate key detected: ${input[i].state}`)
+				}
+				keys.add(input[i].state)
+			}
+		}
+	}
+	return input
+}
 
 var xlinkNs = "http://www.w3.org/1999/xlink"
 var nameSpace = {
@@ -27,19 +232,20 @@ function createNodes(vnodes, start) {
 	for (var i = start; i < vnodes.length; i++) createNode(vnodes[i])
 }
 function createNode(vnode) {
-	if (vnode == null) return
-	assertVnodeIsNew(vnode)
-	var tag = vnode.tag
-	if (typeof tag === "string") {
-		switch (tag) {
-			case "!": throw new Error("No node present to retain with `m.retain()`")
-			case ">": createLayout(vnode); break
-			case "#": createText(vnode); break
-			case "=":
-			case "[": createNodes(vnode.children, 0); break
-			default: createElement(vnode)
-		}
+	if (vnode != null) {
+		assertVnodeIsNew(vnode)
+		innerCreateNode(vnode)
 	}
+}
+function innerCreateNode(vnode) {
+	switch (vnode.tag) {
+		case RETAIN: throw new Error("No node present to retain with `m.retain()`")
+		case LAYOUT: return createLayout(vnode)
+		case TEXT: return createText(vnode)
+		case KEY:
+		case FRAGMENT: return createNodes(vnode.children, 0)
+	}
+	if (typeof vnode.tag === "string") createElement(vnode)
 	else createComponent(vnode)
 }
 function createLayout(vnode) {
@@ -47,7 +253,7 @@ function createLayout(vnode) {
 	currentHooks.push({v: vnode, p: currentParent, i: true})
 }
 function createText(vnode) {
-	insertAfterCurrentRefNode(vnode.dom = currentParent.ownerDocument.createTextNode(vnode.children))
+	insertAfterCurrentRefNode(vnode.dom = currentParent.ownerDocument.createTextNode(vnode.state))
 }
 function createElement(vnode) {
 	var tag = vnode.tag
@@ -89,7 +295,7 @@ function createComponent(vnode) {
 	var tree = (vnode.state = vnode.tag)(vnode.attrs)
 	if (typeof tree === "function") tree = (vnode.state = tree)(vnode.attrs)
 	if (tree === vnode) throw new Error("A view cannot return the vnode it received as argument")
-	createNode(vnode.instance = hyperscript.normalize(tree))
+	createNode(vnode.children = m.normalize(tree))
 }
 
 //update
@@ -98,8 +304,8 @@ function updateNodes(old, vnodes) {
 	else if (old == null || old.length === 0) createNodes(vnodes, 0)
 	else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0)
 	else {
-		var isOldKeyed = old[0] != null && old[0].tag === "="
-		var isKeyed = vnodes[0] != null && vnodes[0].tag === "="
+		var isOldKeyed = old[0] != null && old[0].tag === KEY
+		var isKeyed = vnodes[0] != null && vnodes[0].tag === KEY
 		if (isOldKeyed !== isKeyed) {
 			// Key state changed. Replace the subtree
 			removeNodes(old, 0)
@@ -153,34 +359,32 @@ function updateNode(old, vnode) {
 		createNode(vnode)
 	} else if (vnode == null) {
 		removeNode(old)
-	} else if (vnode.tag === "!") {
+	} else {
 		assertVnodeIsNew(vnode)
-		// If it's a retain node, transmute it into the node it's retaining. Makes it much easier
-		// to implement and work with.
-		//
-		// Note: this key list *must* be complete.
-		vnode.tag = old.tag
-		vnode.state = old.state
-		vnode.attrs = old.attrs
-		vnode.children = old.children
-		vnode.dom = old.dom
-		vnode.instance = old.instance
-	} else if (vnode.tag === old.tag && (vnode.tag !== "=" || vnode.state === old.state)) {
-		assertVnodeIsNew(vnode)
-		if (typeof vnode.tag === "string") {
+		if (vnode.tag === RETAIN) {
+			// If it's a retain node, transmute it into the node it's retaining. Makes it much easier
+			// to implement and work with.
+			//
+			// Note: this key list *must* be complete.
+			vnode.tag = old.tag
+			vnode.state = old.state
+			vnode.attrs = old.attrs
+			vnode.children = old.children
+			vnode.dom = old.dom
+		} else if (vnode.tag === old.tag && (vnode.tag !== KEY || vnode.state === old.state)) {
 			switch (vnode.tag) {
-				case ">": updateLayout(old, vnode); break
-				case "#": updateText(old, vnode); break
-				case "=":
-				case "[": updateNodes(old.children, vnode.children); break
-				default: updateElement(old, vnode)
+				case LAYOUT: return updateLayout(old, vnode)
+				case TEXT: return updateText(old, vnode)
+				case KEY:
+				case FRAGMENT: return updateNodes(old.children, vnode.children)
 			}
+			if (typeof vnode.tag === "string") updateElement(old, vnode)
+			else updateComponent(old, vnode)
 		}
-		else updateComponent(old, vnode)
-	}
-	else {
-		removeNode(old)
-		createNode(vnode)
+		else {
+			removeNode(old)
+			innerCreateNode(vnode)
+		}
 	}
 }
 function updateLayout(old, vnode) {
@@ -188,7 +392,7 @@ function updateLayout(old, vnode) {
 	currentHooks.push({v: vnode, p: currentParent, i: false})
 }
 function updateText(old, vnode) {
-	if (`${old.children}` !== `${vnode.children}`) old.dom.nodeValue = vnode.children
+	if (`${old.state}` !== `${vnode.state}`) old.dom.nodeValue = vnode.state
 	vnode.dom = currentRefNode = old.dom
 }
 function updateElement(old, vnode) {
@@ -211,9 +415,9 @@ function updateElement(old, vnode) {
 	}
 }
 function updateComponent(old, vnode) {
-	vnode.instance = hyperscript.normalize((vnode.state = old.state)(vnode.attrs, old.attrs))
-	if (vnode.instance === vnode) throw new Error("A view cannot return the vnode it received as argument")
-	updateNode(old.instance, vnode.instance)
+	vnode.children = m.normalize((vnode.state = old.state)(vnode.attrs, old.attrs))
+	if (vnode.children === vnode) throw new Error("A view cannot return the vnode it received as argument")
+	updateNode(old.children, vnode.children)
 }
 
 function insertAfterCurrentRefNode(child) {
@@ -226,10 +430,10 @@ function insertAfterCurrentRefNode(child) {
 
 function moveToPosition(vnode) {
 	while (typeof vnode.tag === "function") {
-		vnode = vnode.instance
+		vnode = vnode.children
 		if (!vnode) return
 	}
-	if (vnode.tag === "[" || vnode.tag === "=") {
+	if (vnode.tag === FRAGMENT || vnode.tag === KEY) {
 		vnode.children.forEach(moveToPosition)
 	} else {
 		insertAfterCurrentRefNode(vnode.dom)
@@ -253,21 +457,19 @@ function removeNodes(vnodes, start) {
 function removeNode(vnode) {
 	if (vnode != null) {
 		if (typeof vnode.tag === "function") {
-			if (vnode.instance != null) removeNode(vnode.instance)
-		} else if (vnode.tag === ">") {
+			removeNode(vnode.children)
+		} else if (vnode.tag === LAYOUT) {
 			try {
 				vnode.dom.abort()
 			} catch (e) {
 				console.error(e)
 			}
 		} else {
-			var isNode = vnode.tag !== "[" && vnode.tag !== "="
-
-			if (vnode.tag !== "#") {
+			if (vnode.children != null) {
 				removeNodes(vnode.children, 0)
 			}
 
-			if (isNode) vnode.dom.remove()
+			if (vnode.dom != null) vnode.dom.remove()
 		}
 	}
 }
@@ -471,14 +673,14 @@ function updateEvent(vnode, key, value) {
 		vnode.state._ = currentRedraw
 		var prev = vnode.state.get(key)
 		if (prev === value) return
-		if (value != null && (typeof value === "function" || typeof value === "object")) {
+		if (typeof value === "function") {
 			if (prev == null) vnode.dom.addEventListener(key.slice(2), vnode.state, false)
 			vnode.state.set(key, value)
 		} else {
 			if (prev != null) vnode.dom.removeEventListener(key.slice(2), vnode.state, false)
 			vnode.state.delete(key)
 		}
-	} else if (value != null && (typeof value === "function" || typeof value === "object")) {
+	} else if (typeof value === "function") {
 		vnode.state = new EventDict()
 		vnode.dom.addEventListener(key.slice(2), vnode.state, false)
 		vnode.state.set(key, value)
@@ -487,7 +689,7 @@ function updateEvent(vnode, key, value) {
 
 var currentlyRendering = []
 
-function render(dom, vnodes, redraw) {
+m.render = (dom, vnodes, redraw) => {
 	if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 	if (currentlyRendering.some((d) => d === dom || d.contains(dom))) {
 		throw new TypeError("Node is currently being rendered to and thus is locked.")
@@ -511,7 +713,7 @@ function render(dom, vnodes, redraw) {
 
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
-		vnodes = hyperscript.normalizeChildren(Array.isArray(vnodes) ? vnodes.slice() : [vnodes])
+		vnodes = normalizeChildren(Array.isArray(vnodes) ? vnodes.slice() : [vnodes])
 		updateNodes(dom.vnodes, vnodes)
 		dom.vnodes = vnodes
 		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
@@ -533,4 +735,47 @@ function render(dom, vnodes, redraw) {
 	}
 }
 
-export {render as default}
+var subscriptions = new Map()
+var id = 0
+
+function unscheduleFrame() {
+	if (id) {
+		// eslint-disable-next-line no-undef
+		cancelAnimationFrame(id)
+		id = 0
+	}
+}
+
+m.redraw = () => {
+	// eslint-disable-next-line no-undef
+	if (!id) id = requestAnimationFrame(m.redrawSync)
+}
+
+m.redrawSync = () => {
+	unscheduleFrame()
+	subscriptions.forEach((view, root) => {
+		try {
+			m.render(root, view(), m.redraw)
+		} catch (e) {
+			console.error(e)
+		}
+	})
+}
+
+m.mount = (root, view) => {
+	if (!root) throw new TypeError("Root must be an element")
+
+	if (view != null && typeof view !== "function") {
+		throw new TypeError("View must be a component")
+	}
+
+	if (subscriptions.delete(root)) {
+		if (!subscriptions.size) unscheduleFrame()
+		m.render(root, null)
+	}
+
+	if (typeof view === "function") {
+		subscriptions.set(root, view)
+		m.render(root, view(), m.redraw)
+	}
+}

@@ -1,7 +1,7 @@
 import o from "ospec"
 
 import browserMock from "../../test-utils/browserMock.js"
-import callAsync from "../../test-utils/callAsync.js"
+import {callAsync} from "../../test-utils/callAsync.js"
 
 o.spec("browserMock", function() {
 	var $window

@@ -14,9 +14,7 @@
   "main": "dist/mithril.umd.js",
   "module": "dist/mithril.esm.js",
   "files": [
-    "LICENSE",
-    "package.json",
-    "/dist/*.js"
+    "/dist/**"
   ],
   "exports": {
     "./stream.js": {

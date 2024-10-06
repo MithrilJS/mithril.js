@@ -29,6 +29,10 @@ SOFTWARE.
 // Mithril.js and Benchmark.js are loaded globally via bundle in the browser, so
 // this doesn't require a CommonJS sham polyfill.
 
+// So it can tell from Node that it's not actually in a real browser. This gets mucked with by the
+// global injection
+import "./is-browser.js"
+
 // set up browser env on before running tests
 import "./inject-mock-globals.js"
 

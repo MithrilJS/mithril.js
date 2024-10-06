@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("form inputs", function() {
 	var $window, root
@@ -20,9 +19,9 @@ o.spec("form inputs", function() {
 		o("maintains focus after move", function() {
 			var input
 
-			render(root, [m.key(1, input = m("input")), m.key(2, m("a")), m.key(3, m("b"))])
+			m.render(root, [m.key(1, input = m("input")), m.key(2, m("a")), m.key(3, m("b"))])
 			input.dom.focus()
-			render(root, [m.key(2, m("a")), m.key(1, input = m("input")), m.key(3, m("b"))])
+			m.render(root, [m.key(2, m("a")), m.key(1, input = m("input")), m.key(3, m("b"))])
 
 			o($window.document.activeElement).equals(input.dom)
 		})
@@ -32,7 +31,7 @@ o.spec("form inputs", function() {
 				dom.focus()
 			}));
 
-			render(root, input)
+			m.render(root, input)
 
 			o($window.document.activeElement).equals(input.dom)
 		})
@@ -42,7 +41,7 @@ o.spec("form inputs", function() {
 			var updated = m("input", {value: "aaa", oninput: function() {}})
 			var redraw = o.spy()
 
-			render(root, input, redraw)
+			m.render(root, input, redraw)
 
 			//simulate user typing
 			var e = $window.document.createEvent("KeyboardEvent")
@@ -53,7 +52,7 @@ o.spec("form inputs", function() {
 			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			render(root, updated, redraw)
+			m.render(root, updated, redraw)
 
 			o(updated.dom.value).equals("aaa")
 			o(redraw.callCount).equals(1)
@@ -63,8 +62,8 @@ o.spec("form inputs", function() {
 			var input = m("input", {value: "aaa", oninput: function() {}})
 			var updated = m("input", {value: undefined, oninput: function() {}})
 
-			render(root, input)
-			render(root, updated)
+			m.render(root, input)
+			m.render(root, updated)
 
 			o(updated.dom.value).equals("")
 		})
@@ -74,7 +73,7 @@ o.spec("form inputs", function() {
 			var updated = m("input", {type: "checkbox", checked: true, onclick: function() {}})
 			var redraw = o.spy()
 
-			render(root, input, redraw)
+			m.render(root, input, redraw)
 
 			//simulate user clicking checkbox
 			var e = $window.document.createEvent("MouseEvents")
@@ -84,7 +83,7 @@ o.spec("form inputs", function() {
 			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			render(root, updated, redraw)
+			m.render(root, updated, redraw)
 
 			o(updated.dom.checked).equals(true)
 			o(redraw.callCount).equals(1)
@@ -96,13 +95,13 @@ o.spec("form inputs", function() {
 			var spy = o.spy()
 			var error = console.error
 
-			render(root, input)
+			m.render(root, input)
 
 			input.dom.value = "test.png"
 
 			try {
 				console.error = spy
-				render(root, updated)
+				m.render(root, updated)
 			} finally {
 				console.error = error
 			}
@@ -117,13 +116,13 @@ o.spec("form inputs", function() {
 			var spy = o.spy()
 			var error = console.error
 
-			render(root, input)
+			m.render(root, input)
 
 			input.dom.value = "test.png"
 
 			try {
 				console.error = spy
-				render(root, updated)
+				m.render(root, updated)
 			} finally {
 				console.error = error
 			}
@@ -142,7 +141,7 @@ o.spec("form inputs", function() {
 			var spy = o.spy()
 			var error = console.error
 
-			render(root, input)
+			m.render(root, input)
 
 			// Verify our assumptions about the outer element state
 			o($window.__getSpies(input.dom).valueSetter.callCount).equals(0)
@@ -151,7 +150,7 @@ o.spec("form inputs", function() {
 
 			try {
 				console.error = spy
-				render(root, updated1)
+				m.render(root, updated1)
 			} finally {
 				console.error = error
 			}
@@ -162,7 +161,7 @@ o.spec("form inputs", function() {
 
 			try {
 				console.error = spy
-				render(root, updated2)
+				m.render(root, updated2)
 			} finally {
 				console.error = error
 			}
@@ -179,7 +178,7 @@ o.spec("form inputs", function() {
 				m("option", {value: "a"}, "aaa")
 			)
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.value).equals("a")
 			o(select.dom.selectedIndex).equals(0)
@@ -190,7 +189,7 @@ o.spec("form inputs", function() {
 				m("option", {value: ""}, "aaa")
 			)
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.firstChild.value).equals("")
 		})
@@ -200,7 +199,7 @@ o.spec("form inputs", function() {
 				m("option", "aaa")
 			)
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.firstChild.value).equals("aaa")
 			o(select.dom.value).equals("aaa")
@@ -210,7 +209,7 @@ o.spec("form inputs", function() {
 				m("option", "bbb")
 			)
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.firstChild.value).equals("bbb")
 			o(select.dom.value).equals("bbb")
@@ -220,7 +219,7 @@ o.spec("form inputs", function() {
 				m("option", {value: ""}, "aaa")
 			)
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.firstChild.value).equals("")
 			o(select.dom.value).equals("")
@@ -230,7 +229,7 @@ o.spec("form inputs", function() {
 				m("option", "aaa")
 			)
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.firstChild.value).equals("aaa")
 			o(select.dom.value).equals("aaa")
@@ -239,7 +238,7 @@ o.spec("form inputs", function() {
 		o("select yields invalid value without children", function() {
 			var select = m("select", {value: "a"})
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.value).equals("")
 			o(select.dom.selectedIndex).equals(-1)
@@ -252,7 +251,7 @@ o.spec("form inputs", function() {
 				m("option", {value: "c"}, "ccc")
 			)
 
-			render(root, select)
+			m.render(root, select)
 
 			o(select.dom.value).equals("b")
 			o(select.dom.selectedIndex).equals(1)
@@ -267,14 +266,14 @@ o.spec("form inputs", function() {
 				)
 			}
 
-			render(root, makeSelect())
+			m.render(root, makeSelect())
 
 			//simulate user selecting option
 			root.firstChild.value = "c"
 			root.firstChild.focus()
 
 			//re-render may use same vdom value as previous render call
-			render(root, makeSelect())
+			m.render(root, makeSelect())
 
 			o(root.firstChild.value).equals("b")
 			o(root.firstChild.selectedIndex).equals(1)

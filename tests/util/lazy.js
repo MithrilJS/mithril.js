@@ -1,9 +1,8 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import hyperscript from "../../src/core/hyperscript.js"
+import m from "../../src/entry/mithril.esm.js"
 import makeLazy from "../../src/std/lazy.js"
-import render from "../../src/core/render.js"
 
 o.spec("lazy", () => {
 	var consoleError = console.error
@@ -22,12 +21,12 @@ o.spec("lazy", () => {
 
 	void [{name: "direct", wrap: (v) => v}, {name: "in module with default", wrap: (v) => ({default:v})}].forEach(({name, wrap}) => {
 		o.spec(name, () => {
-			o("works with only fetch and success", () => {
+			o("works with only fetch and success", async () => {
 				var calls = []
 				var scheduled = 1
 				var component = wrap(({name}) => {
 					calls.push(`view ${name}`)
-					return hyperscript("div", {id: "a"}, "b")
+					return m("div", {id: "a"}, "b")
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
@@ -43,9 +42,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -54,41 +53,41 @@ o.spec("lazy", () => {
 
 				send(component)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"scheduled 1",
-						"view one",
-						"view two",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"scheduled 1",
+					"view one",
+					"view two",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"scheduled 1",
-						"view one",
-						"view two",
-						"view one",
-						"view two",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"scheduled 1",
+					"view one",
+					"view two",
+					"view one",
+					"view two",
+				])
 			})
 
-			o("works with only fetch and failure", () => {
+			o("works with only fetch and failure", async () => {
 				var error = new Error("test")
 				var calls = []
 				console.error = (e) => {
@@ -109,9 +108,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -120,43 +119,43 @@ o.spec("lazy", () => {
 
 				send(error)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"console.error", "test",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"console.error", "test",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"console.error", "test",
-						"scheduled 1",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"console.error", "test",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"console.error", "test",
-						"scheduled 1",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"console.error", "test",
+					"scheduled 1",
+				])
 			})
 
-			o("works with fetch + pending and success", () => {
+			o("works with fetch + pending and success", async () => {
 				var calls = []
 				var scheduled = 1
 				var component = wrap(({name}) => {
 					calls.push(`view ${name}`)
-					return hyperscript("div", {id: "a"}, "b")
+					return m("div", {id: "a"}, "b")
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
@@ -175,9 +174,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -188,47 +187,47 @@ o.spec("lazy", () => {
 
 				send(component)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"scheduled 1",
-						"view one",
-						"view two",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"scheduled 1",
+					"view one",
+					"view two",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"scheduled 1",
-						"view one",
-						"view two",
-						"view one",
-						"view two",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"scheduled 1",
+					"view one",
+					"view two",
+					"view one",
+					"view two",
+				])
 			})
 
-			o("works with fetch + pending and failure", () => {
+			o("works with fetch + pending and failure", async () => {
 				var error = new Error("test")
 				var calls = []
 				console.error = (e) => {
@@ -252,9 +251,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -265,49 +264,49 @@ o.spec("lazy", () => {
 
 				send(error)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"console.error", "test",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"console.error", "test",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"console.error", "test",
-						"scheduled 1",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"console.error", "test",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"console.error", "test",
-						"scheduled 1",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"console.error", "test",
+					"scheduled 1",
+				])
 			})
 
-			o("works with fetch + error and success", () => {
+			o("works with fetch + error and success", async () => {
 				var calls = []
 				var scheduled = 1
 				var component = wrap(({name}) => {
 					calls.push(`view ${name}`)
-					return hyperscript("div", {id: "a"}, "b")
+					return m("div", {id: "a"}, "b")
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
@@ -326,9 +325,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -337,41 +336,41 @@ o.spec("lazy", () => {
 
 				send(component)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"scheduled 1",
-						"view one",
-						"view two",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"scheduled 1",
+					"view one",
+					"view two",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"scheduled 1",
-						"view one",
-						"view two",
-						"view one",
-						"view two",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"scheduled 1",
+					"view one",
+					"view two",
+					"view one",
+					"view two",
+				])
 			})
 
-			o("works with fetch + error and failure", () => {
+			o("works with fetch + error and failure", async () => {
 				var error = new Error("test")
 				var calls = []
 				console.error = (e) => {
@@ -395,9 +394,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -406,49 +405,49 @@ o.spec("lazy", () => {
 
 				send(error)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"console.error", "test",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"console.error", "test",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"console.error", "test",
-						"scheduled 1",
-						"error", "test",
-						"error", "test",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"console.error", "test",
+					"scheduled 1",
+					"error", "test",
+					"error", "test",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"console.error", "test",
-						"scheduled 1",
-						"error", "test",
-						"error", "test",
-						"error", "test",
-						"error", "test",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"console.error", "test",
+					"scheduled 1",
+					"error", "test",
+					"error", "test",
+					"error", "test",
+					"error", "test",
+				])
 			})
 
-			o("works with all hooks and success", () => {
+			o("works with all hooks and success", async() => {
 				var calls = []
 				var scheduled = 1
 				var component = wrap(({name}) => {
 					calls.push(`view ${name}`)
-					return hyperscript("div", {id: "a"}, "b")
+					return m("div", {id: "a"}, "b")
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
@@ -470,9 +469,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -483,47 +482,47 @@ o.spec("lazy", () => {
 
 				send(component)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"scheduled 1",
-						"view one",
-						"view two",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"scheduled 1",
+					"view one",
+					"view two",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"scheduled 1",
-						"view one",
-						"view two",
-						"view one",
-						"view two",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"scheduled 1",
+					"view one",
+					"view two",
+					"view one",
+					"view two",
+				])
 			})
 
-			o("works with all hooks and failure", () => {
+			o("works with all hooks and failure", async () => {
 				var error = new Error("test")
 				var calls = []
 				console.error = (e) => {
@@ -550,9 +549,9 @@ o.spec("lazy", () => {
 
 				o(calls).deepEquals([])
 
-				render(root, [
-					hyperscript(C, {name: "one"}),
-					hyperscript(C, {name: "two"}),
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
 				])
 
 				o(calls).deepEquals([
@@ -563,47 +562,47 @@ o.spec("lazy", () => {
 
 				send(error)
 
-				return fetchRedrawn.then(() => {
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"console.error", "test",
-						"scheduled 1",
-					])
+				await fetchRedrawn
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"console.error", "test",
+					"scheduled 1",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"console.error", "test",
-						"scheduled 1",
-						"error", "test",
-						"error", "test",
-					])
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
 
-					render(root, [
-						hyperscript(C, {name: "one"}),
-						hyperscript(C, {name: "two"}),
-					])
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"console.error", "test",
+					"scheduled 1",
+					"error", "test",
+					"error", "test",
+				])
 
-					o(calls).deepEquals([
-						"fetch",
-						"pending",
-						"pending",
-						"console.error", "test",
-						"scheduled 1",
-						"error", "test",
-						"error", "test",
-						"error", "test",
-						"error", "test",
-					])
-				})
+				m.render(root, [
+					m(C, {name: "one"}),
+					m(C, {name: "two"}),
+				])
+
+				o(calls).deepEquals([
+					"fetch",
+					"pending",
+					"pending",
+					"console.error", "test",
+					"scheduled 1",
+					"error", "test",
+					"error", "test",
+					"error", "test",
+					"error", "test",
+				])
 			})
 		})
 	})

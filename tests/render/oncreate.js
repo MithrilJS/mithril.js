@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("layout create", function() {
 	var $window, root
@@ -15,7 +14,7 @@ o.spec("layout create", function() {
 		var callback = o.spy()
 		var vnode = m.layout(callback)
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(callback.callCount).equals(1)
 		o(callback.args[0]).equals(root)
@@ -26,7 +25,7 @@ o.spec("layout create", function() {
 		var callback = o.spy()
 		var vnode = m("div", m.layout(callback))
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(callback.callCount).equals(1)
 		o(callback.args[1].aborted).equals(false)
@@ -36,7 +35,7 @@ o.spec("layout create", function() {
 		var callback = o.spy()
 		var vnode = [m.layout(callback)]
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(callback.callCount).equals(1)
 		o(callback.args[1].aborted).equals(false)
@@ -48,8 +47,8 @@ o.spec("layout create", function() {
 		var vnode = m("div", m.layout(createDiv))
 		var updated = m("a", m.layout(createA))
 
-		render(root, m.key(1, vnode))
-		render(root, m.key(1, updated))
+		m.render(root, m.key(1, vnode))
+		m.render(root, m.key(1, updated))
 
 		o(createDiv.callCount).equals(1)
 		o(createDiv.args[1].aborted).equals(true)
@@ -62,7 +61,7 @@ o.spec("layout create", function() {
 		var create = o.spy()
 		var vnode = m("div", m.layout(create), m("a"))
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(create.callCount).equals(1)
 		o(create.args[0]).equals(root.firstChild)
@@ -74,7 +73,7 @@ o.spec("layout create", function() {
 		var vnode = m("div", m.layout(create))
 		var otherVnode = m("a")
 
-		render(root, [m.key(1, vnode), m.key(2, otherVnode)])
+		m.render(root, [m.key(1, vnode), m.key(2, otherVnode)])
 
 		o(create.callCount).equals(1)
 		o(create.args[0]).equals(root.firstChild)
@@ -85,12 +84,12 @@ o.spec("layout create", function() {
 		var create = o.spy()
 		var vnode = m("div", m.layout(create))
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(create.callCount).equals(1)
 		o(create.args[1].aborted).equals(false)
 
-		render(root, [])
+		m.render(root, [])
 
 		o(create.callCount).equals(1)
 		o(create.args[1].aborted).equals(true)
@@ -102,8 +101,8 @@ o.spec("layout create", function() {
 		var vnode = m("div", m.layout(create))
 		var updated = m("div", m.layout(update), m("a", m.layout(callback)))
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(create.callCount).equals(1)
 		o(create.args[0]).equals(root.firstChild)
@@ -122,8 +121,8 @@ o.spec("layout create", function() {
 	})
 	o("works on unkeyed that falls into reverse list diff code path", function() {
 		var create = o.spy()
-		render(root, [m.key(1, m("p")), m.key(2, m("div"))])
-		render(root, [m.key(2, m("div", m.layout(create))), m.key(1, m("p"))])
+		m.render(root, [m.key(1, m("p")), m.key(2, m("div"))])
+		m.render(root, [m.key(2, m("div", m.layout(create))), m.key(1, m("p"))])
 
 		o(create.callCount).equals(1)
 		o(create.args[0]).equals(root.firstChild)
@@ -132,8 +131,8 @@ o.spec("layout create", function() {
 	})
 	o("works on unkeyed that falls into forward list diff code path", function() {
 		var create = o.spy()
-		render(root, [m("div"), m("p")])
-		render(root, [m("div"), m("div", m.layout(create))])
+		m.render(root, [m("div"), m("p")])
+		m.render(root, [m("div"), m("div", m.layout(create))])
 
 		o(create.callCount).equals(1)
 		o(create.args[0]).equals(root.childNodes[1])
@@ -144,7 +143,7 @@ o.spec("layout create", function() {
 		var created = false
 		var vnode = m("div", m("a", m.layout(create), m("b")))
 
-		render(root, vnode)
+		m.render(root, vnode)
 
 		function create(dom, _, isInit) {
 			if (!isInit) return

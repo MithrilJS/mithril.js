@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("layout remove", function() {
 	var $window, root
@@ -19,8 +18,8 @@ o.spec("layout remove", function() {
 		var vnode = m("div", layoutRemove(create))
 		var updated = m("div", layoutRemove(update))
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(create.callCount).equals(0)
 	})
@@ -30,8 +29,8 @@ o.spec("layout remove", function() {
 		var vnode = m("div", layoutRemove(create))
 		var updated = m("div", layoutRemove(update))
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(0)
@@ -40,8 +39,8 @@ o.spec("layout remove", function() {
 		var remove = o.spy()
 		var vnode = m("div", layoutRemove(remove))
 
-		render(root, vnode)
-		render(root, [])
+		m.render(root, vnode)
+		m.render(root, [])
 
 		o(remove.callCount).equals(1)
 	})
@@ -49,8 +48,8 @@ o.spec("layout remove", function() {
 		var remove = o.spy()
 		var vnode = [layoutRemove(remove)]
 
-		render(root, vnode)
-		render(root, [])
+		m.render(root, vnode)
+		m.render(root, [])
 
 		o(remove.callCount).equals(1)
 	})
@@ -60,9 +59,9 @@ o.spec("layout remove", function() {
 		var temp = m("div", layoutRemove(remove))
 		var updated = m("div")
 
-		render(root, m.key(1, vnode))
-		render(root, m.key(2, temp))
-		render(root, m.key(1, updated))
+		m.render(root, m.key(1, vnode))
+		m.render(root, m.key(2, temp))
+		m.render(root, m.key(1, updated))
 
 		o(vnode.dom).notEquals(updated.dom) // this used to be a recycling pool test
 		o(remove.callCount).equals(1)
@@ -72,8 +71,8 @@ o.spec("layout remove", function() {
 		var comp = () => m(outer)
 		var outer = () => m(inner)
 		var inner = () => m.layout(spy)
-		render(root, m(comp))
-		render(root, null)
+		m.render(root, m(comp))
+		m.render(root, null)
 
 		o(spy.callCount).equals(1)
 	})
@@ -82,8 +81,8 @@ o.spec("layout remove", function() {
 		var comp = () => m(outer)
 		var outer = () => m(inner, m("a", layoutRemove(spy)))
 		var inner = (attrs) => m("div", attrs.children)
-		render(root, m(comp))
-		render(root, null)
+		m.render(root, m(comp))
+		m.render(root, null)
 
 		o(spy.callCount).equals(1)
 	})

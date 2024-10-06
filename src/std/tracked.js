@@ -1,4 +1,4 @@
-import m from "../core/hyperscript.js"
+import m from "../core.js"
 
 /*
 Here's the intent.

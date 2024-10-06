@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("createFragment", function() {
 	var $window, root
@@ -13,26 +12,26 @@ o.spec("createFragment", function() {
 
 	o("creates fragment", function() {
 		var vnode = m.normalize([m("a")])
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(root.childNodes[0].nodeName).equals("A")
 	})
 	o("handles empty fragment", function() {
 		var vnode = m.normalize([])
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(0)
 	})
 	o("handles childless fragment", function() {
 		var vnode = m.normalize([])
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(0)
 	})
 	o("handles multiple children", function() {
 		var vnode = m.normalize([m("a"), m("b")])
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(2)
 		o(root.childNodes[0].nodeName).equals("A")
@@ -41,7 +40,7 @@ o.spec("createFragment", function() {
 	})
 	o("handles td", function() {
 		var vnode = m.normalize([m("td")])
-		render(root, vnode)
+		m.render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
 		o(root.childNodes[0].nodeName).equals("TD")

@@ -287,6 +287,7 @@ export default function domMock(options) {
 				last = Date.now()
 			}, delay - elapsed)
 		},
+		cancelAnimationFrame: clearTimeout,
 		document: {
 			createElement: function(tag) {
 				var cssText = ""

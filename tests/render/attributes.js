@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("attributes", function() {
 	var $window, root
@@ -17,15 +16,15 @@ o.spec("attributes", function() {
 			var b = m("div", {id: "test"})
 			var c = m("div")
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.hasAttribute("id")).equals(false)
 
-			render(root, b);
+			m.render(root, b);
 
 			o(b.dom.getAttribute("id")).equals("test")
 
-			render(root, c);
+			m.render(root, c);
 
 			o(c.dom.hasAttribute("id")).equals(false)
 		})
@@ -34,17 +33,17 @@ o.spec("attributes", function() {
 			var b = m("div", {id: "test"})
 			var c = m("div", {id: undefined})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.hasAttribute("id")).equals(false)
 
-			render(root, b);
+			m.render(root, b);
 
 			o(b.dom.hasAttribute("id")).equals(true)
 			o(b.dom.getAttribute("id")).equals("test")
 
 			// #1804
-			render(root, c);
+			m.render(root, c);
 
 			o(c.dom.hasAttribute("id")).equals(false)
 		})
@@ -64,7 +63,7 @@ o.spec("attributes", function() {
 				return el
 			}
 
-			render(root, [
+			m.render(root, [
 				m("input", {value: "hello"}),
 				m("input", {value: "hello"}),
 				m("input", {value: "hello"}),
@@ -108,7 +107,7 @@ o.spec("attributes", function() {
 				return el
 			}
 
-			render(root, [
+			m.render(root, [
 				m("input", {value: "hello"}),
 				m("input", {value: "hello"}),
 				m("input", {value: "hello"}),
@@ -136,14 +135,14 @@ o.spec("attributes", function() {
 		o("when input readonly is true, attribute is present", function() {
 			var a = m("input", {readonly: true})
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.attributes["readonly"].value).equals("")
 		})
 		o("when input readonly is false, attribute is not present", function() {
 			var a = m("input", {readonly: false})
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.attributes["readonly"]).equals(undefined)
 		})
@@ -152,7 +151,7 @@ o.spec("attributes", function() {
 		o("when input checked is true, attribute is not present", function() {
 			var a = m("input", {checked: true})
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.checked).equals(true)
 			o(a.dom.attributes["checked"]).equals(undefined)
@@ -160,7 +159,7 @@ o.spec("attributes", function() {
 		o("when input checked is false, attribute is not present", function() {
 			var a = m("input", {checked: false})
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.checked).equals(false)
 			o(a.dom.attributes["checked"]).equals(undefined)
@@ -169,12 +168,12 @@ o.spec("attributes", function() {
 			var a = m("input", {checked: false})
 			var b = m("input", {checked: true})
 
-			render(root, a)
+			m.render(root, a)
 
 			a.dom.checked = true //setting the javascript property makes the value no longer track the state of the attribute
 			a.dom.checked = false
 
-			render(root, b)
+			m.render(root, b)
 
 			o(a.dom.checked).equals(true)
 			o(a.dom.attributes["checked"]).equals(undefined)
@@ -184,7 +183,7 @@ o.spec("attributes", function() {
 		o("can be set as text", function() {
 			var a = m("input", {value: "test"})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("test")
 		})
@@ -193,23 +192,23 @@ o.spec("attributes", function() {
 			var b = m("input", {value: "test"})
 			var c = m("input")
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.value).equals("")
 
-			render(root, b)
+			m.render(root, b)
 
 			o(a.dom.value).equals("test")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			render(root, c)
+			m.render(root, c)
 
 			o(a.dom.value).equals("")
 		})
 		o("can be set as number", function() {
 			var a = m("input", {value: 1})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("1")
 		})
@@ -218,17 +217,17 @@ o.spec("attributes", function() {
 			var b = m("input", {value: "test"})
 			var c = m("input", {value: null})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("")
 			o(a.dom.getAttribute("value")).equals(null)
 
-			render(root, b);
+			m.render(root, b);
 
 			o(b.dom.value).equals("test")
 			o(b.dom.getAttribute("value")).equals(null)
 
-			render(root, c);
+			m.render(root, c);
 
 			o(c.dom.value).equals("")
 			o(c.dom.getAttribute("value")).equals(null)
@@ -238,16 +237,16 @@ o.spec("attributes", function() {
 			var b = m("input", {value: ""})
 			var c = m("input", {value: 0})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("0")
 
-			render(root, b);
+			m.render(root, b);
 
 			o(b.dom.value).equals("")
 
 			// #1595 redux
-			render(root, c);
+			m.render(root, c);
 
 			o(c.dom.value).equals("0")
 		})
@@ -261,28 +260,28 @@ o.spec("attributes", function() {
 			var d = m("input", {value: 1})
 			var e = m("input", {value: 2})
 
-			render(root, a)
+			m.render(root, a)
 			var spies = $window.__getSpies(a.dom)
 			a.dom.focus()
 
 			o(spies.valueSetter.callCount).equals(0)
 
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, c)
+			m.render(root, c)
 
 			o(c.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, d)
+			m.render(root, d)
 
 			o(d.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, e)
+			m.render(root, e)
 
 			o(d.dom.value).equals("2")
 			o(spies.valueSetter.callCount).equals(2)
@@ -297,15 +296,15 @@ o.spec("attributes", function() {
 			var b = m("input", {type: "text"})
 			var c = m("input")
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.getAttribute("type")).equals("radio")
 
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.getAttribute("type")).equals("text")
 
-			render(root, c)
+			m.render(root, c)
 
 			o(c.dom.hasAttribute("type")).equals(false)
 		})
@@ -315,12 +314,12 @@ o.spec("attributes", function() {
 			var a = m("textarea", {value:"x"})
 			var b = m("textarea")
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.value).equals("x")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("")
 		})
@@ -334,28 +333,28 @@ o.spec("attributes", function() {
 			var d = m("textarea", {value: 1})
 			var e = m("textarea", {value: 2})
 
-			render(root, a)
+			m.render(root, a)
 			var spies = $window.__getSpies(a.dom)
 			a.dom.focus()
 
 			o(spies.valueSetter.callCount).equals(0)
 
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, c)
+			m.render(root, c)
 
 			o(c.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, d)
+			m.render(root, d)
 
 			o(d.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, e)
+			m.render(root, e)
 
 			o(d.dom.value).equals("2")
 			o(spies.valueSetter.callCount).equals(2)
@@ -365,14 +364,14 @@ o.spec("attributes", function() {
 		o("when link href is true, attribute is present", function() {
 			var a = m("a", {href: true})
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.attributes["href"]).notEquals(undefined)
 		})
 		o("when link href is false, attribute is not present", function() {
 			var a = m("a", {href: false})
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.attributes["href"]).equals(undefined)
 		})
@@ -381,7 +380,7 @@ o.spec("attributes", function() {
 		o("uses attribute API", function() {
 			var canvas = m("canvas", {width: "100%"})
 
-			render(root, canvas)
+			m.render(root, canvas)
 
 			o(canvas.dom.attributes["width"].value).equals("100%")
 			o(canvas.dom.width).equals(100)
@@ -391,7 +390,7 @@ o.spec("attributes", function() {
 		o("when className is specified then it should be added as a class", function() {
 			var a = m("svg", {className: "test"})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.attributes["class"].value).equals("test")
 		})
@@ -400,7 +399,7 @@ o.spec("attributes", function() {
 			var vnode = m("svg", {ns: "http://www.w3.org/2000/svg"},
 				m("a", {ns: "http://www.w3.org/2000/svg", "xlink:href": "javascript:;"})
 			)
-			render(root, vnode)
+			m.render(root, vnode)
 
 			o(vnode.dom.nodeName).equals("svg")
 			o(vnode.dom.firstChild.attributes["href"].value).equals("javascript:;")
@@ -409,7 +408,7 @@ o.spec("attributes", function() {
 			vnode = m("svg", {ns: "http://www.w3.org/2000/svg"},
 				m("a", {ns: "http://www.w3.org/2000/svg"})
 			)
-			render(root, vnode)
+			m.render(root, vnode)
 
 			o(vnode.dom.nodeName).equals("svg")
 			o("href" in vnode.dom.firstChild.attributes).equals(false)
@@ -420,14 +419,14 @@ o.spec("attributes", function() {
 		o("can be set as text", function() {
 			var a = m("option", {value: "test"})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("test")
 		})
 		o("can be set as number", function() {
 			var a = m("option", {value: 1})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("1")
 		})
@@ -436,17 +435,17 @@ o.spec("attributes", function() {
 			var b = m("option", {value: "test"})
 			var c = m("option", {value: null})
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("")
 			o(a.dom.hasAttribute("value")).equals(false)
 
-			render(root, b);
+			m.render(root, b);
 
 			o(b.dom.value).equals("test")
 			o(b.dom.getAttribute("value")).equals("test")
 
-			render(root, c);
+			m.render(root, c);
 
 			o(c.dom.value).equals("")
 			o(c.dom.hasAttribute("value")).equals(false)
@@ -456,16 +455,16 @@ o.spec("attributes", function() {
 			var b = m("option", {value: ""}, "")
 			var c = m("option", {value: 0}, "")
 
-			render(root, a);
+			m.render(root, a);
 
 			o(a.dom.value).equals("0")
 
-			render(root, b);
+			m.render(root, b);
 
 			o(a.dom.value).equals("")
 
 			// #1595 redux
-			render(root, c);
+			m.render(root, c);
 
 			o(c.dom.value).equals("0")
 		})
@@ -479,27 +478,27 @@ o.spec("attributes", function() {
 			var d = m("option", {value: 1})
 			var e = m("option", {value: 2})
 
-			render(root, a)
+			m.render(root, a)
 			var spies = $window.__getSpies(a.dom)
 
 			o(spies.valueSetter.callCount).equals(0)
 
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, c)
+			m.render(root, c)
 
 			o(c.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, d)
+			m.render(root, d)
 
 			o(d.dom.value).equals("1")
 			o(spies.valueSetter.callCount).equals(1)
 
-			render(root, e)
+			m.render(root, e)
 
 			o(d.dom.value).equals("2")
 			o(spies.valueSetter.callCount).equals(2)
@@ -526,7 +525,7 @@ o.spec("attributes", function() {
 			var select = m("select", {selectedIndex: 0},
 				m("option", {value: "1", selected: ""})
 			)
-			render(root, select)
+			m.render(root, select)
 		})
 		*/
 		o("can be set as text", function() {
@@ -534,17 +533,17 @@ o.spec("attributes", function() {
 			var b = makeSelect("2")
 			var c = makeSelect("a")
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.value).equals("1")
 			o(a.dom.selectedIndex).equals(0)
 
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("2")
 			o(b.dom.selectedIndex).equals(1)
 
-			render(root, c)
+			m.render(root, c)
 
 			o(c.dom.value).equals("a")
 			o(c.dom.selectedIndex).equals(2)
@@ -552,7 +551,7 @@ o.spec("attributes", function() {
 		o("setting null unsets the value", function() {
 			var a = makeSelect(null)
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.value).equals("")
 			o(a.dom.selectedIndex).equals(-1)
@@ -561,12 +560,12 @@ o.spec("attributes", function() {
 			var a = makeSelect(1)
 			var b = makeSelect(2)
 
-			render(root, a)
+			m.render(root, a)
 
 			o(a.dom.value).equals("1")
 			o(a.dom.selectedIndex).equals(0)
 
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("2")
 			o(b.dom.selectedIndex).equals(1)
@@ -575,13 +574,13 @@ o.spec("attributes", function() {
 			var a = makeSelect("")
 			var b = makeSelect(0)
 
-			render(root, a)
+			m.render(root, a)
 			a.dom.focus()
 
 			o(a.dom.value).equals("")
 
 			// #1595 redux
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("0")
 		})
@@ -590,18 +589,18 @@ o.spec("attributes", function() {
 			var b = makeSelect(null)
 			var c = makeSelect("")
 
-			render(root, a)
+			m.render(root, a)
 			a.dom.focus()
 
 			o(a.dom.value).equals("")
 			o(a.dom.selectedIndex).equals(4)
 
-			render(root, b)
+			m.render(root, b)
 
 			o(b.dom.value).equals("")
 			o(b.dom.selectedIndex).equals(-1)
 
-			render(root, c)
+			m.render(root, c)
 
 			o(c.dom.value).equals("")
 			o(c.dom.selectedIndex).equals(4)
@@ -615,24 +614,24 @@ o.spec("attributes", function() {
 			var c = makeSelect(1)
 			var d = makeSelect("2")
 
-			render(root, a)
+			m.render(root, a)
 			var spies = $window.__getSpies(a.dom)
 			a.dom.focus()
 
 			o(spies.valueSetter.callCount).equals(0)
 			o(a.dom.value).equals("1")
 
-			render(root, b)
+			m.render(root, b)
 
 			o(spies.valueSetter.callCount).equals(0)
 			o(b.dom.value).equals("1")
 
-			render(root, c)
+			m.render(root, c)
 
 			o(spies.valueSetter.callCount).equals(0)
 			o(c.dom.value).equals("1")
 
-			render(root, d)
+			m.render(root, d)
 
 			o(spies.valueSetter.callCount).equals(1)
 			o(d.dom.value).equals("2")
@@ -644,7 +643,7 @@ o.spec("attributes", function() {
 			var succeeded = false
 
 			try {
-				render(root, div)
+				m.render(root, div)
 
 				succeeded = true
 			}
@@ -657,7 +656,7 @@ o.spec("attributes", function() {
 			var succeeded = false
 
 			try {
-				render(root, div)
+				m.render(root, div)
 
 				succeeded = true
 			}
@@ -669,10 +668,10 @@ o.spec("attributes", function() {
 	o.spec("mutate attr object", function() {
 		o("throw when reusing attrs object", function() {
 			const attrs = {className: "on"}
-			render(root, {tag: "input", attrs})
+			m.render(root, {tag: "input", attrs})
 
 			attrs.className = "off"
-			o(() => render(root, {tag: "input", attrs})).throws(Error)
+			o(() => m.render(root, {tag: "input", attrs})).throws(Error)
 		})
 	})
 })

@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 import use from "../../src/std/use.js"
 
 o.spec("m.use", () => {
@@ -11,15 +10,15 @@ o.spec("m.use", () => {
 		var initializer = o.spy((_, signal) => { signal.onabort = onabort })
 		var $window = domMock()
 
-		render($window.document.body, use([], m.layout(initializer)))
+		m.render($window.document.body, use([], m.layout(initializer)))
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 
-		render($window.document.body, use([], m.layout(initializer)))
+		m.render($window.document.body, use([], m.layout(initializer)))
 		o(initializer.callCount).equals(2)
 		o(onabort.callCount).equals(0)
 
-		render($window.document.body, null)
+		m.render($window.document.body, null)
 		o(initializer.callCount).equals(2)
 		o(onabort.callCount).equals(1)
 	})
@@ -29,15 +28,15 @@ o.spec("m.use", () => {
 		var initializer = o.spy((_, signal) => { signal.onabort = onabort })
 		var $window = domMock()
 
-		render($window.document.body, use([1], m.layout(initializer)))
+		m.render($window.document.body, use([1], m.layout(initializer)))
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 
-		render($window.document.body, use([1], m.layout(initializer)))
+		m.render($window.document.body, use([1], m.layout(initializer)))
 		o(initializer.callCount).equals(2)
 		o(onabort.callCount).equals(0)
 
-		render($window.document.body, null)
+		m.render($window.document.body, null)
 		o(initializer.callCount).equals(2)
 		o(onabort.callCount).equals(1)
 	})
@@ -47,15 +46,15 @@ o.spec("m.use", () => {
 		var initializer = o.spy((_, signal) => { signal.onabort = onabort })
 		var $window = domMock()
 
-		render($window.document.body, use([1], m.layout(initializer)))
+		m.render($window.document.body, use([1], m.layout(initializer)))
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 
-		render($window.document.body, use([2], m.layout(initializer)))
+		m.render($window.document.body, use([2], m.layout(initializer)))
 		o(initializer.callCount).equals(2)
 		o(onabort.callCount).equals(1)
 
-		render($window.document.body, null)
+		m.render($window.document.body, null)
 		o(initializer.callCount).equals(2)
 		o(onabort.callCount).equals(2)
 	})

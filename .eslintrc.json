@@ -2,7 +2,7 @@
 	"overrides": [
 		{"files": "*.cjs", "parserOptions": {"sourceType": "script"}},
 		{
-			"files": "scripts/**",
+			"files": ["scripts/**", "performance/**"],
 			"env": {
 				"node": true,
 				"es2022": true

@@ -1,8 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("layout update", function() {
 	var $window, root
@@ -15,8 +14,8 @@ o.spec("layout update", function() {
 		var layout = o.spy()
 		var vnode = m("div", m.layout(layout))
 
-		render(root, vnode)
-		render(root, [])
+		m.render(root, vnode)
+		m.render(root, [])
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 	})
@@ -25,8 +24,8 @@ o.spec("layout update", function() {
 		var update = o.spy()
 		var vnode = m.key(1, m("div", m.layout(layout)))
 		var updated = m.key(1, m("a", m.layout(update)))
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 		o(update.calls.map((c) => c.args[2])).deepEquals([true])
@@ -34,9 +33,9 @@ o.spec("layout update", function() {
 	o("does not call old callback when removing layout vnode from new vnode", function() {
 		var layout = o.spy()
 
-		render(root, m("a", m.layout(layout)))
-		render(root, m("a", m.layout(layout)))
-		render(root, m("a"))
+		m.render(root, m("a", m.layout(layout)))
+		m.render(root, m("a", m.layout(layout)))
+		m.render(root, m("a"))
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false])
 	})
@@ -46,8 +45,8 @@ o.spec("layout update", function() {
 		var vnode = m("div", m.layout(layout))
 		var updated = m("div", m.layout(update))
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 		o(update.calls.map((c) => c.args[2])).deepEquals([false])
@@ -58,8 +57,8 @@ o.spec("layout update", function() {
 		var vnode = m("div", m.layout(layout))
 		var updated = m("div", {id: "a"}, m.layout(update))
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 		o(update.calls.map((c) => c.args[2])).deepEquals([false])
@@ -70,8 +69,8 @@ o.spec("layout update", function() {
 		var vnode = m("div", m.layout(layout), m("a"))
 		var updated = m("div", m.layout(update), m("b"))
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 		o(update.calls.map((c) => c.args[2])).deepEquals([false])
@@ -82,8 +81,8 @@ o.spec("layout update", function() {
 		var vnode = [m.layout(layout)]
 		var updated = [m.layout(update)]
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 		o(update.calls.map((c) => c.args[2])).deepEquals([false])
@@ -101,8 +100,8 @@ o.spec("layout update", function() {
 			)
 		)
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		function update(dom, _, isInit) {
 			if (isInit) return

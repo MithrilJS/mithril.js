@@ -1,32 +1,20 @@
-/* global window: false, global: false */
 import o from "ospec"
 
+import {injectGlobals, register, restoreGlobalState} from "../test-utils/redraw-registry.js"
+
+import m from "../src/entry/mithril.esm.js"
+
 import browserMock from "../test-utils/browserMock.js"
+import throttleMocker from "../test-utils/throttleMock.js"
 
 o.spec("api", function() {
-	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var root
+	var $window, throttleMock, root
 
-	function sleep(ms) {
-		return new Promise((resolve) => setTimeout(resolve, ms))
-	}
-
-	var m
-
-	o.before(async () => {
-		var mock = browserMock()
-		mock.setTimeout = setTimeout
-		if (typeof global !== "undefined") {
-			global.window = mock
-			global.requestAnimationFrame = mock.requestAnimationFrame
-		}
-		const mod = await import("../src/entry/mithril.esm.js")
-		m = mod.default
+	o.beforeEach(() => {
+		injectGlobals($window = browserMock(), throttleMock = throttleMocker())
 	})
 
-	o.afterEach(function() {
-		if (root) m.mount(root, null)
-	})
+	o.afterEach(restoreGlobalState)
 
 	o.spec("m", function() {
 		o("works", function() {
@@ -39,7 +27,7 @@ o.spec("api", function() {
 		o("works", function() {
 			var vnode = m.normalize([m("div")])
 
-			o(vnode.tag).equals("[")
+			o(vnode.tag).equals(Symbol.for("m.Fragment"))
 			o(vnode.children.length).equals(1)
 			o(vnode.children[0].tag).equals("div")
 		})
@@ -48,7 +36,7 @@ o.spec("api", function() {
 		o("works", function() {
 			var vnode = m.key(123, [m("div")])
 
-			o(vnode.tag).equals("=")
+			o(vnode.tag).equals(Symbol.for("m.key"))
 			o(vnode.state).equals(123)
 			o(vnode.children.length).equals(1)
 			o(vnode.children[0].tag).equals("div")
@@ -63,7 +51,7 @@ o.spec("api", function() {
 	})
 	o.spec("m.render", function() {
 		o("works", function() {
-			root = window.document.createElement("div")
+			root = register($window.document.createElement("div"))
 			m.render(root, m("div"))
 
 			o(root.childNodes.length).equals(1)
@@ -73,7 +61,7 @@ o.spec("api", function() {
 
 	o.spec("m.mount", function() {
 		o("works", function() {
-			root = window.document.createElement("div")
+			root = register($window.document.createElement("div"))
 			m.mount(root, () => m("div"))
 
 			o(root.childNodes.length).equals(1)
@@ -84,20 +72,19 @@ o.spec("api", function() {
 	o.spec("m.redraw", function() {
 		o("works", function() {
 			var count = 0
-			root = window.document.createElement("div")
+			root = register($window.document.createElement("div"))
 			m.mount(root, () => {count++})
 			o(count).equals(1)
 			m.redraw()
 			o(count).equals(1)
-			return sleep(FRAME_BUDGET + 10).then(() => {
-				o(count).equals(2)
-			})
+			throttleMock.fire()
+			o(count).equals(2)
 		})
 	})
 
 	o.spec("m.redrawSync", function() {
 		o("works", function() {
-			root = window.document.createElement("div")
+			root = register($window.document.createElement("div"))
 			var view = o.spy()
 			m.mount(root, view)
 			o(view.callCount).equals(1)
@@ -107,8 +94,8 @@ o.spec("api", function() {
 	})
 
 	o.spec("m.route", function() {
-		o("works", function() {
-			root = window.document.createElement("div")
+		o("works", async() => {
+			root = register($window.document.createElement("div"))
 			m.route.init("#")
 			m.mount(root, () => {
 				if (m.route.path === "/a") {
@@ -120,15 +107,21 @@ o.spec("api", function() {
 				}
 			})
 
-			return sleep(FRAME_BUDGET + 10)
-				.then(() => {
-					o(root.childNodes.length).equals(1)
-					o(root.firstChild.nodeName).equals("DIV")
-					o(m.route.get()).equals("/a")
-				})
-				.then(() => { m.route.set("/b") })
-				.then(() => sleep(FRAME_BUDGET + 10))
-				.then(() => { o(m.route.get()).equals("/b") })
+			await Promise.resolve()
+			throttleMock.fire()
+			o(throttleMock.queueLength()).equals(0)
+
+			o(root.childNodes.length).equals(1)
+			o(root.firstChild.nodeName).equals("DIV")
+			o(m.route.get()).equals("/a")
+
+			m.route.set("/b")
+
+			await Promise.resolve()
+			throttleMock.fire()
+			o(throttleMock.queueLength()).equals(0)
+
+			o(m.route.get()).equals("/b")
 		})
 	})
 })

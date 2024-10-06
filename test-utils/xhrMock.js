@@ -1,4 +1,4 @@
-import callAsync from "../test-utils/callAsync.js"
+import {callAsync} from "../test-utils/callAsync.js"
 import parseURL from "../test-utils/parseURL.js"
 
 export default function xhrMock() {

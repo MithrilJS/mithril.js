@@ -1,7 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import render from "../../src/core/render.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("updateText", function() {
 	var $window, root
@@ -14,8 +14,8 @@ o.spec("updateText", function() {
 		var vnode = "a"
 		var updated = "b"
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("b")
 	})
@@ -23,8 +23,8 @@ o.spec("updateText", function() {
 		var vnode = "a"
 		var updated = ""
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("")
 	})
@@ -32,8 +32,8 @@ o.spec("updateText", function() {
 		var vnode = ""
 		var updated = "b"
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("b")
 	})
@@ -41,8 +41,8 @@ o.spec("updateText", function() {
 		var vnode = "a"
 		var updated = 1
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("1")
 	})
@@ -50,8 +50,8 @@ o.spec("updateText", function() {
 		var vnode = "a"
 		var updated = 0
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("0")
 	})
@@ -59,8 +59,8 @@ o.spec("updateText", function() {
 		var vnode = 0
 		var updated = "b"
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("b")
 	})
@@ -68,8 +68,8 @@ o.spec("updateText", function() {
 		var vnode = "a"
 		var updated = true
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(0)
 	})
@@ -77,8 +77,8 @@ o.spec("updateText", function() {
 		var vnode = "a"
 		var updated = false
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.childNodes.length).equals(0)
 	})
@@ -86,8 +86,8 @@ o.spec("updateText", function() {
 		var vnode = false
 		var updated = "b"
 
-		render(root, vnode)
-		render(root, updated)
+		m.render(root, vnode)
+		m.render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("b")
 	})

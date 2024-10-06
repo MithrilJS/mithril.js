@@ -1,7 +1,7 @@
 import o from "ospec"
 
 import domMock from "../../test-utils/domMock.js"
-import m from "../../src/core/hyperscript.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("hyperscript", function() {
 	o.spec("selector", function() {
@@ -370,22 +370,22 @@ o.spec("hyperscript", function() {
 		o("handles string single child", function() {
 			var vnode = m("div", {}, ["a"])
 
-			o(vnode.children[0].children).equals("a")
+			o(vnode.children[0].state).equals("a")
 		})
 		o("handles falsy string single child", function() {
 			var vnode = m("div", {}, [""])
 
-			o(vnode.children[0].children).equals("")
+			o(vnode.children[0].state).equals("")
 		})
 		o("handles number single child", function() {
 			var vnode = m("div", {}, [1])
 
-			o(vnode.children[0].children).equals("1")
+			o(vnode.children[0].state).equals("1")
 		})
 		o("handles falsy number single child", function() {
 			var vnode = m("div", {}, [0])
 
-			o(vnode.children[0].children).equals("0")
+			o(vnode.children[0].state).equals("0")
 		})
 		o("handles boolean single child", function() {
 			var vnode = m("div", {}, [true])
@@ -410,18 +410,18 @@ o.spec("hyperscript", function() {
 		o("handles multiple string children", function() {
 			var vnode = m("div", {}, ["", "a"])
 
-			o(vnode.children[0].tag).equals("#")
-			o(vnode.children[0].children).equals("")
-			o(vnode.children[1].tag).equals("#")
-			o(vnode.children[1].children).equals("a")
+			o(vnode.children[0].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[0].state).equals("")
+			o(vnode.children[1].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[1].state).equals("a")
 		})
 		o("handles multiple number children", function() {
 			var vnode = m("div", {}, [0, 1])
 
-			o(vnode.children[0].tag).equals("#")
-			o(vnode.children[0].children).equals("0")
-			o(vnode.children[1].tag).equals("#")
-			o(vnode.children[1].children).equals("1")
+			o(vnode.children[0].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[0].state).equals("0")
+			o(vnode.children[1].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[1].state).equals("1")
 		})
 		o("handles multiple boolean children", function() {
 			var vnode = m("div", {}, [false, true])
@@ -436,15 +436,15 @@ o.spec("hyperscript", function() {
 		o("handles falsy number single child without attrs", function() {
 			var vnode = m("div", 0)
 
-			o(vnode.children[0].children).equals("0")
+			o(vnode.children[0].state).equals("0")
 		})
 		o("handles children in attributes", function() {
 			var vnode = m("div", {children: ["", "a"]})
 
-			o(vnode.children[0].tag).equals("#")
-			o(vnode.children[0].children).equals("")
-			o(vnode.children[1].tag).equals("#")
-			o(vnode.children[1].children).equals("a")
+			o(vnode.children[0].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[0].state).equals("")
+			o(vnode.children[1].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[1].state).equals("a")
 		})
 	})
 	o.spec("permutations", function() {
@@ -492,34 +492,34 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, ["c", "d"])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].tag).equals("#")
-			o(vnode.children[0].children).equals("c")
-			o(vnode.children[1].tag).equals("#")
-			o(vnode.children[1].children).equals("d")
+			o(vnode.children[0].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[0].state).equals("c")
+			o(vnode.children[1].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[1].state).equals("d")
 		})
 		o("handles attr and single string text child", function() {
 			var vnode = m("div", {a: "b"}, ["c"])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].children).equals("c")
+			o(vnode.children[0].state).equals("c")
 		})
 		o("handles attr and single falsy string text child", function() {
 			var vnode = m("div", {a: "b"}, [""])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].children).equals("")
+			o(vnode.children[0].state).equals("")
 		})
 		o("handles attr and single number text child", function() {
 			var vnode = m("div", {a: "b"}, [1])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].children).equals("1")
+			o(vnode.children[0].state).equals("1")
 		})
 		o("handles attr and single falsy number text child", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].children).equals("0")
+			o(vnode.children[0].state).equals("0")
 		})
 		o("handles attr and single boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [true])
@@ -531,7 +531,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].children).equals("0")
+			o(vnode.children[0].state).equals("0")
 		})
 		o("handles attr and single false boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [false])
@@ -543,16 +543,16 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, "c")
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].children).equals("c")
+			o(vnode.children[0].state).equals("c")
 		})
 		o("handles attr and text children unwrapped", function() {
 			var vnode = m("div", {a: "b"}, "c", "d")
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.children[0].tag).equals("#")
-			o(vnode.children[0].children).equals("c")
-			o(vnode.children[1].tag).equals("#")
-			o(vnode.children[1].children).equals("d")
+			o(vnode.children[0].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[0].state).equals("c")
+			o(vnode.children[1].tag).equals(Symbol.for("m.text"))
+			o(vnode.children[1].state).equals("d")
 		})
 		o("handles children without attr", function() {
 			var vnode = m("div", [m("i"), m("s")])
@@ -612,23 +612,23 @@ o.spec("hyperscript", function() {
 		o("handles fragment children without attr unwrapped", function() {
 			var vnode = m("div", [m("i")], [m("s")])
 
-			o(vnode.children[0].tag).equals("[")
+			o(vnode.children[0].tag).equals(Symbol.for("m.Fragment"))
 			o(vnode.children[0].children[0].tag).equals("i")
-			o(vnode.children[1].tag).equals("[")
+			o(vnode.children[1].tag).equals(Symbol.for("m.Fragment"))
 			o(vnode.children[1].children[0].tag).equals("s")
 		})
 		o("handles children with nested array", function() {
 			var vnode = m("div", [[m("i"), m("s")]])
 
-			o(vnode.children[0].tag).equals("[")
+			o(vnode.children[0].tag).equals(Symbol.for("m.Fragment"))
 			o(vnode.children[0].children[0].tag).equals("i")
 			o(vnode.children[0].children[1].tag).equals("s")
 		})
 		o("handles children with deeply nested array", function() {
 			var vnode = m("div", [[[m("i"), m("s")]]])
 
-			o(vnode.children[0].tag).equals("[")
-			o(vnode.children[0].children[0].tag).equals("[")
+			o(vnode.children[0].tag).equals(Symbol.for("m.Fragment"))
+			o(vnode.children[0].children[0].tag).equals(Symbol.for("m.Fragment"))
 			o(vnode.children[0].children[0].children[0].tag).equals("i")
 			o(vnode.children[0].children[0].children[1].tag).equals("s")
 		})
