@@ -38,7 +38,7 @@ import {nestedTree} from "./components/nested-tree.js"
 import {simpleTree} from "./components/simple-tree.js"
 
 // eslint-disable-next-line no-undef
-var globalObject = typeof globalThis !== "undefined" ? globalThis : isDOM ? window : global
+var globalObject = typeof globalThis !== "undefined" ? globalThis : isBrowser ? window : global
 
 globalObject.rootElem = null
 
@@ -83,23 +83,6 @@ var xsuite = {add: function(name) { console.log("skipping " + name) }}
 globalObject.simpleTree = simpleTree
 globalObject.nestedTree = nestedTree
 
-var mountVersion = 0
-var messageSet = new Set()
-
-function doFetch(deferred, path) {
-	import(`${path}?v=${mountVersion++}`).then(
-		() => deferred.resolve(),
-		(e) => {
-			const key = `${path}:${e.message}`
-			if (!messageSet.has(key)) {
-				messageSet.add(key)
-				console.error(e)
-			}
-			deferred.resolve()
-		}
-	)
-}
-
 suite.add("construct simple tree", {
 	fn: function () {
 		simpleTree()
@@ -107,9 +90,8 @@ suite.add("construct simple tree", {
 })
 
 suite.add("mount simple tree", {
-	defer: true,
-	fn: function (deferred) {
-		doFetch(deferred, "./components/mount-simple-tree.js")
+	fn: function () {
+		m.mount(rootElem, simpleTree)
 	}
 })
 
@@ -123,9 +105,8 @@ suite.add("redraw simple tree", {
 })
 
 suite.add("mount large nested tree", {
-	defer: true,
-	fn: function (deferred) {
-		doFetch(deferred, "./components/mount-nested-tree.js")
+	fn: function () {
+		m.mount(rootElem, nestedTree)
 	}
 })
 

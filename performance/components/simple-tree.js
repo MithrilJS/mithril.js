@@ -1,6 +1,10 @@
 import m from "../../src/entry/mithril.esm.js"
 
-import {fields} from "./common.js"
+const fields = []
+
+for (let i=100; i--;) {
+	fields.push((i * 999).toString(36))
+}
 
 export const simpleTree = () => m(".foo.bar[data-foo=bar]", {p: 2},
 	m("header",

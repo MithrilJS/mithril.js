@@ -1,6 +1,10 @@
 import m from "../../src/entry/mithril.esm.js"
 
-import {fields} from "./common.js"
+const fields = []
+
+for (let i=100; i--;) {
+	fields.push((i * 999).toString(36))
+}
 
 var NestedHeader = () => m("header",
 	m("h1.asdf", "a ", "b", " c ", 0, " d"),

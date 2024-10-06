@@ -300,8 +300,7 @@ function createComponent(vnode) {
 
 //update
 function updateNodes(old, vnodes) {
-	if (old === vnodes || old == null && vnodes == null) return
-	else if (old == null || old.length === 0) createNodes(vnodes, 0)
+	if (old == null || old.length === 0) createNodes(vnodes, 0)
 	else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0)
 	else {
 		var isOldKeyed = old[0] != null && old[0].tag === KEY
@@ -753,13 +752,13 @@ m.redraw = () => {
 
 m.redrawSync = () => {
 	unscheduleFrame()
-	subscriptions.forEach((view, root) => {
+	for (const [root, view] of subscriptions) {
 		try {
 			m.render(root, view(), m.redraw)
 		} catch (e) {
 			console.error(e)
 		}
-	})
+	}
 }
 
 m.mount = (root, view) => {
