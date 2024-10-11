@@ -1,25 +1,22 @@
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
+
 import m from "../../src/entry/mithril.esm.js"
 
 o.spec("retain", function() {
-	var $window, root
-	o.beforeEach(function() {
-		$window = domMock()
-		root = $window.document.createElement("div")
-	})
+	var G = setupGlobals()
 
 	o("prevents update in element", function() {
 		var vnode = m("div", {id: "a"}, "b")
 		var updated = m.retain()
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(root.firstChild.attributes["id"].value).equals("a")
-		o(root.firstChild.childNodes.length).equals(1)
-		o(root.firstChild.childNodes[0].nodeValue).equals("b")
+		o(G.root.firstChild.attributes["id"].value).equals("a")
+		o(G.root.firstChild.childNodes.length).equals(1)
+		o(G.root.firstChild.childNodes[0].nodeValue).equals("b")
 		o(updated).deepEquals(vnode)
 	})
 
@@ -27,27 +24,27 @@ o.spec("retain", function() {
 		var vnode = m.normalize(["a"])
 		var updated = m.retain()
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(root.firstChild.nodeValue).equals("a")
+		o(G.root.firstChild.nodeValue).equals("a")
 		o(updated).deepEquals(vnode)
 	})
 
 	o("throws on creation", function() {
-		o(() => m.render(root, m.retain())).throws(Error)
+		o(() => m.render(G.root, m.retain())).throws(Error)
 	})
 
 	o("prevents update in component", function() {
-		var component = (vnode, old) => (old ? m.retain() : m("div", vnode.children))
+		var component = (attrs, old) => (old ? m.retain() : m("div", attrs.children))
 		var vnode = m(component, "a")
 		var updated = m(component, "b")
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(root.firstChild.firstChild.nodeValue).equals("a")
-		o(updated.children).deepEquals(vnode.children)
+		o(G.root.firstChild.firstChild.nodeValue).equals("a")
+		o(updated.c).deepEquals(vnode.c)
 	})
 
 	o("prevents update in component and for component", function() {
@@ -55,10 +52,10 @@ o.spec("retain", function() {
 		var vnode = m(component, {id: "a"})
 		var updated = m.retain()
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(root.firstChild.attributes["id"].value).equals("a")
+		o(G.root.firstChild.attributes["id"].value).equals("a")
 		o(updated).deepEquals(vnode)
 	})
 
@@ -67,16 +64,16 @@ o.spec("retain", function() {
 		var vnode = m(component, {id: "a"})
 		var updated = m.retain()
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(root.firstChild.attributes["id"].value).equals("a")
+		o(G.root.firstChild.attributes["id"].value).equals("a")
 		o(updated).deepEquals(vnode)
 	})
 
 	o("throws if used on component creation", function() {
 		var component = () => m.retain()
 
-		o(() => m.render(root, m(component))).throws(Error)
+		o(() => m.render(G.root, m(component))).throws(Error)
 	})
 })

@@ -1,17 +1,11 @@
 import domMock from "./domMock.js"
 import pushStateMock from "./pushStateMock.js"
-import xhrMock from "./xhrMock.js"
 
 export default function browserMock(env = {}) {
-	env = env || {}
-	var $window = env.window = {}
-	$window.window = $window
+	var $window = {}
 
-	var dom = domMock()
-	var xhr = xhrMock()
-	for (var key in dom) if (!$window[key]) $window[key] = dom[key]
-	for (var key in xhr) if (!$window[key]) $window[key] = xhr[key]
-	pushStateMock(env)
+	domMock($window, env)
+	pushStateMock($window, env)
 
 	return $window
 }

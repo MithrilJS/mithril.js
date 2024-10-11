@@ -1,10 +1,9 @@
 import {callAsync} from "../test-utils/callAsync.js"
 import parseURL from "../test-utils/parseURL.js"
 
-export default function pushStateMock(options) {
+export default function pushStateMock($window, options) {
 	if (options == null) options = {}
 
-	var $window = options.window || {}
 	var protocol = options.protocol || "http:"
 	var hostname = options.hostname || "localhost"
 	var port = ""
@@ -175,8 +174,8 @@ export default function pushStateMock(options) {
 			return past.length === 0 ? null : past[past.length - 1].state
 		},
 	}
-	$window.onpopstate = null,
-	$window.onhashchange = null,
+	$window.onpopstate = null
+	$window.onhashchange = null
 	$window.onunload = null
 
 	$window.addEventListener = function (name, handler) {
@@ -186,6 +185,4 @@ export default function pushStateMock(options) {
 	$window.removeEventListener = function (name, handler) {
 		$window["on" + name] = handler
 	}
-
-	return $window
 }

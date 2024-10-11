@@ -1,4 +1,4 @@
-/* global setImmediate, clearImmediate */
+/* global setTimeout, clearTimeout, setImmediate, clearImmediate */
 const callAsyncRaw = typeof setImmediate === "function" ? setImmediate : setTimeout
 const cancelAsyncRaw = typeof clearImmediate === "function" ? clearImmediate : clearTimeout
 

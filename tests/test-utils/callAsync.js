@@ -1,3 +1,5 @@
+/* global setTimeout, clearTimeout */
+
 import o from "ospec"
 
 import {callAsync, clearPending, waitAsync} from "../../test-utils/callAsync.js"

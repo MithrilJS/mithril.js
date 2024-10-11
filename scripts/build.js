@@ -12,6 +12,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 /** @type {{[key: import("rollup").ModuleFormat]: import("rollup").Plugin}} */
 const terserPlugin = terser({
 	compress: {passes: 3},
+	sourceMap: true,
 })
 
 function format(n) {
@@ -24,8 +25,8 @@ async function build(name, format) {
 
 	try {
 		await Promise.all([
-			bundle.write({file: path.resolve(dirname, `../dist/${name}.js`), format}),
-			bundle.write({file: path.resolve(dirname, `../dist/${name}.min.js`), format, plugins: [terserPlugin]}),
+			bundle.write({file: path.resolve(dirname, `../dist/${name}.js`), format, sourcemap: true}),
+			bundle.write({file: path.resolve(dirname, `../dist/${name}.min.js`), format, plugins: [terserPlugin], sourcemap: true}),
 		])
 	} finally {
 		await bundle.close()
@@ -62,6 +63,8 @@ async function saveToReadme(size) {
 }
 
 async function main() {
+	await fs.rm(path.resolve(dirname, "../dist"), {recursive: true})
+
 	await Promise.all([
 		build("mithril.umd", "iife"),
 		build("mithril.esm", "esm"),

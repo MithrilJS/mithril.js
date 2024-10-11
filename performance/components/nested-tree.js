@@ -1,4 +1,4 @@
-import m from "../../src/entry/mithril.esm.js"
+import m from "../../dist/mithril.esm.min.js"
 
 const fields = []
 

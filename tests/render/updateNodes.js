@@ -1,6 +1,7 @@
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
+
 import m from "../../src/entry/mithril.esm.js"
 
 function vnodify(str) {
@@ -8,498 +9,512 @@ function vnodify(str) {
 }
 
 o.spec("updateNodes", function() {
-	var $window, root
-	o.beforeEach(function() {
-		$window = domMock()
-		root = $window.document.createElement("div")
-	})
+	var G = setupGlobals()
 
 	o("handles el noop", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("handles el noop without key", function() {
 		var vnodes = [m("a"), m("b")]
 		var updated = [m("a"), m("b")]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
-		o(updated[0].dom).equals(root.childNodes[0])
-		o(updated[1].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
+		o(updated[0].d).equals(G.root.childNodes[0])
+		o(updated[1].d).equals(G.root.childNodes[1])
 	})
 	o("handles text noop", function() {
 		var vnodes = "a"
 		var updated = "a"
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeValue)).deepEquals(["a"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeValue)).deepEquals(["a"])
 	})
 	o("handles text noop w/ type casting", function() {
 		var vnodes = 1
 		var updated = "1"
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeValue)).deepEquals(["1"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeValue)).deepEquals(["1"])
 	})
 	o("handles falsy text noop w/ type casting", function() {
 		var vnodes = 0
 		var updated = "0"
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeValue)).deepEquals(["0"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeValue)).deepEquals(["0"])
 	})
 	o("handles fragment noop", function() {
 		var vnodes = [m("a")]
 		var updated = [m("a")]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
+		o(updated[0].d).equals(G.root.childNodes[0])
 	})
 	o("handles fragment noop w/ text child", function() {
 		var vnodes = [m.normalize("a")]
 		var updated = [m.normalize("a")]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeValue)).deepEquals(["a"])
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(Array.from(G.root.childNodes, (n) => n.nodeValue)).deepEquals(["a"])
+		o(updated[0].d).equals(G.root.childNodes[0])
 	})
 	o("handles undefined to null noop", function() {
 		var vnodes = [null, m("div")]
 		var updated = [undefined, m("div")]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(root.childNodes.length).equals(1)
+		o(G.root.childNodes.length).equals(1)
 	})
 	o("reverses els w/ even count", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 		var updated = [m.key(4, m("s")), m.key(3, m("i")), m.key(2, m("b")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["S", "I", "B", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
-		o(updated[3].children[0].dom).equals(root.childNodes[3])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["S", "I", "B", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
+		o(updated[3].c[0].d).equals(G.root.childNodes[3])
 	})
 	o("reverses els w/ odd count", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 		var updated = [m.key(3, m("i")), m.key(2, m("b")), m.key(1, m("a"))]
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["I", "B", "A"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["I", "B", "A"])
 	})
 	o("creates el at start", function() {
 		var vnodes = [m.key(1, m("a"))]
 		var updated = [m.key(2, m("b")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("creates el at end", function() {
 		var vnodes = [m.key(1, m("a"))]
 		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("creates el in middle", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var updated = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "I", "B"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "I", "B"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("creates el while reversing", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var updated = [m.key(2, m("b")), m.key(3, m("i")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "I", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "I", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("deletes el at start", function() {
 		var vnodes = [m.key(2, m("b")), m.key(1, m("a"))]
 		var updated = [m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
 	})
 	o("deletes el at end", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var updated = [m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
 	})
 	o("deletes el at middle", function() {
 		var vnodes = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
 		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("deletes el while reversing", function() {
 		var vnodes = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
 		var updated = [m.key(2, m("b")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("creates, deletes, reverses els at same time", function() {
 		var vnodes = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
 		var updated = [m.key(2, m("b")), m.key(1, m("a")), m.key(4, m("s"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A", "S"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A", "S"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("creates, deletes, reverses els at same time with '__proto__' key", function() {
 		var vnodes = [m.key("__proto__", m("a")), m.key(3, m("i")), m.key(2, m("b"))]
 		var updated = [m.key(2, m("b")), m.key("__proto__", m("a")), m.key(4, m("s"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A", "S"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A", "S"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("adds to empty fragment followed by el", function() {
 		var vnodes = [m.key(1), m.key(2, m("b"))]
 		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("reverses followed by el", function() {
 		var vnodes = [m.key(1, m.key(2, m("a")), m.key(3, m("b"))), m.key(4, m("i"))]
 		var updated = [m.key(1, m.key(3, m("b")), m.key(2, m("a"))), m.key(4, m("i"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A", "I"])
-		o(updated[0].children[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[0].children[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[1].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "A", "I"])
+		o(updated[0].c[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[0].c[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[1].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("populates fragment followed by el keyed", function() {
 		var vnodes = [m.key(1), m.key(2, m("i"))]
 		var updated = [m.key(1, m("a"), m("b")), m.key(2, m("i"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[0].children[1].dom).equals(root.childNodes[1])
-		o(updated[1].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[0].c[1].d).equals(G.root.childNodes[1])
+		o(updated[1].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("throws if fragment followed by null then el on first render keyed", function() {
 		var vnodes = [m.key(1), null, m.key(2, m("i"))]
 
-		o(() => m.render(root, vnodes)).throws(TypeError)
+		o(() => m.render(G.root, vnodes)).throws(TypeError)
 	})
 	o("throws if fragment followed by null then el on next render keyed", function() {
 		var vnodes = [m.key(1), m.key(2, m("i"))]
 		var updated = [m.key(1, m("a"), m("b")), null, m.key(2, m("i"))]
 
-		m.render(root, vnodes)
-		o(() => m.render(root, updated)).throws(TypeError)
+		m.render(G.root, vnodes)
+		o(() => m.render(G.root, updated)).throws(TypeError)
 	})
 	o("populates childless fragment replaced followed by el keyed", function() {
 		var vnodes = [m.key(1), m.key(2, m("i"))]
 		var updated = [m.key(1, m("a"), m("b")), m.key(2, m("i"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[0].children[1].dom).equals(root.childNodes[1])
-		o(updated[1].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[0].c[1].d).equals(G.root.childNodes[1])
+		o(updated[1].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("throws if childless fragment replaced followed by null then el keyed", function() {
 		var vnodes = [m.key(1), m.key(2, m("i"))]
 		var updated = [m.key(1, m("a"), m("b")), null, m.key(2, m("i"))]
 
-		m.render(root, vnodes)
-		o(() => m.render(root, updated)).throws(TypeError)
+		m.render(G.root, vnodes)
+		o(() => m.render(G.root, updated)).throws(TypeError)
 	})
 	o("moves from end to start", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 		var updated = [m.key(4, m("s")), m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["S", "A", "B", "I"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
-		o(updated[3].children[0].dom).equals(root.childNodes[3])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["S", "A", "B", "I"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
+		o(updated[3].c[0].d).equals(G.root.childNodes[3])
 	})
 	o("moves from start to end", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 		var updated = [m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "I", "S", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
-		o(updated[3].children[0].dom).equals(root.childNodes[3])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "I", "S", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
+		o(updated[3].c[0].d).equals(G.root.childNodes[3])
 	})
 	o("removes then recreate", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 		var temp = []
 		var updated = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I", "S"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
-		o(updated[3].children[0].dom).equals(root.childNodes[3])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I", "S"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
+		o(updated[3].c[0].d).equals(G.root.childNodes[3])
 	})
 	o("removes then recreate reversed", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 		var temp = []
 		var updated = [m.key(4, m("s")), m.key(3, m("i")), m.key(2, m("b")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["S", "I", "B", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
-		o(updated[3].children[0].dom).equals(root.childNodes[3])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["S", "I", "B", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
+		o(updated[3].c[0].d).equals(G.root.childNodes[3])
 	})
 	o("removes then recreate smaller", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
 	})
 	o("removes then recreate bigger", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B", "I"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("removes then create different", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(3, m("i")), m.key(4, m("s"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["I", "S"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["I", "S"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("removes then create different smaller", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(3, m("i"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["I"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["I"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
 	})
 	o("removes then create different bigger", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(3, m("i")), m.key(4, m("s")), m.key(5, m("div"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["I", "S", "DIV"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["I", "S", "DIV"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("removes then create mixed", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(1, m("a")), m.key(4, m("s"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "S"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "S"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("removes then create mixed reversed", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(4, m("s")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["S", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["S", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("removes then create mixed smaller", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 		var temp = []
 		var updated = [m.key(1, m("a")), m.key(4, m("s"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "S"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "S"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("removes then create mixed smaller reversed", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 		var temp = []
 		var updated = [m.key(4, m("s")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["S", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["S", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
 	})
 	o("removes then create mixed bigger", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(1, m("a")), m.key(3, m("i")), m.key(4, m("s"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "I", "S"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "I", "S"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
 	})
 	o("removes then create mixed bigger reversed", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
 		var updated = [m.key(4, m("s")), m.key(3, m("i")), m.key(1, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["S", "I", "A"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[2].children[0].dom).equals(root.childNodes[2])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["S", "I", "A"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[2].c[0].d).equals(G.root.childNodes[2])
+	})
+	o("in fragment, nest text inside fragment and add hole", function() {
+		var vnodes = ["a"]
+		var updated = [["b"], undefined]
+
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
+
+		o(G.root.childNodes.length).equals(1)
+	})
+	o("in element, nest text inside fragment and add hole", function() {
+		var vnodes = m("div", "a")
+		var updated = m("div", ["b"], undefined)
+
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
+
+		o(G.root.firstChild.childNodes.length).equals(1)
 	})
 	o("change type, position and length", function() {
-		var vnodes = m("div", undefined, "a")
-		var updated = m("div", ["b"], undefined, undefined)
+		var vnodes = m("div", {}, undefined, "a")
+		var updated = m("div", {}, ["b"], undefined, undefined)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		o(root.firstChild.childNodes.length).equals(1)
+		o(G.root.firstChild.childNodes.length).equals(1)
 	})
 	o("removes then recreates then reverses children", function() {
 		var vnodes = [m.key(1, m("a", m.key(3, m("i")), m.key(4, m("s")))), m.key(2, m("b"))]
@@ -507,280 +522,306 @@ o.spec("updateNodes", function() {
 		var temp2 = [m.key(1, m("a", m.key(3, m("i")), m.key(4, m("s")))), m.key(2, m("b"))]
 		var updated = [m.key(1, m("a", m.key(4, m("s")), m.key(3, m("i")))), m.key(2, m("b"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp1)
-		m.render(root, temp2)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp1)
+		m.render(G.root, temp2)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
-		o(Array.from(root.childNodes[0].childNodes, (n) => n.nodeName)).deepEquals(["S", "I"])
-		o(updated[0].children[0].dom).equals(root.childNodes[0])
-		o(updated[1].children[0].dom).equals(root.childNodes[1])
-		o(updated[0].children[0].children[0].children[0].dom).equals(root.childNodes[0].childNodes[0])
-		o(updated[0].children[0].children[1].children[0].dom).equals(root.childNodes[0].childNodes[1])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
+		o(Array.from(G.root.childNodes[0].childNodes, (n) => n.nodeName)).deepEquals(["S", "I"])
+		o(updated[0].c[0].d).equals(G.root.childNodes[0])
+		o(updated[1].c[0].d).equals(G.root.childNodes[1])
+		o(updated[0].c[0].c[0].c[0].d).equals(G.root.childNodes[0].childNodes[0])
+		o(updated[0].c[0].c[1].c[0].d).equals(G.root.childNodes[0].childNodes[1])
 	})
 	o("removes then recreates nested", function() {
 		var vnodes = [m.key(1, m("a", m.key(3, m("a", m.key(5, m("a")))), m.key(4, m("a", m.key(5, m("a")))))), m.key(2, m("a"))]
 		var temp = []
 		var updated = [m.key(1, m("a", m.key(3, m("a", m.key(5, m("a")))), m.key(4, m("a", m.key(5, m("a")))))), m.key(2, m("a"))]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "A"])
-		o(Array.from(root.childNodes[0].childNodes, (n) => n.nodeName)).deepEquals(["A", "A"])
-		o(Array.from(root.childNodes[0].childNodes[0].childNodes, (n) => n.nodeName)).deepEquals(["A"])
-		o(Array.from(root.childNodes[1].childNodes, (n) => n.nodeName)).deepEquals([])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "A"])
+		o(Array.from(G.root.childNodes[0].childNodes, (n) => n.nodeName)).deepEquals(["A", "A"])
+		o(Array.from(G.root.childNodes[0].childNodes[0].childNodes, (n) => n.nodeName)).deepEquals(["A"])
+		o(Array.from(G.root.childNodes[1].childNodes, (n) => n.nodeName)).deepEquals([])
 	})
 	o("reused top-level element children are rejected against the same root", function () {
 		var cached = m("a")
 
-		m.render(root, cached)
-		o(() => m.render(root, cached)).throws(Error)
+		m.render(G.root, cached)
+		o(() => m.render(G.root, cached)).throws(Error)
 	})
 	o("reused top-level element children are rejected against a different root", function () {
 		var cached = m("a")
-		var otherRoot = $window.document.createElement("div")
+		var otherRoot = G.window.document.createElement("div")
 
-		m.render(root, cached)
+		m.render(G.root, cached)
 		o(() => m.render(otherRoot, cached)).throws(Error)
 	})
 	o("reused inner fragment element children are rejected against the same root", function () {
 		var cached = m("a")
 
-		m.render(root, [cached])
-		o(() => m.render(root, [cached])).throws(Error)
+		m.render(G.root, [cached])
+		o(() => m.render(G.root, [cached])).throws(Error)
 	})
 	o("reused inner fragment element children are rejected against a different root", function () {
 		var cached = m("a")
-		var otherRoot = $window.document.createElement("div")
+		var otherRoot = G.window.document.createElement("div")
 
-		m.render(root, [cached])
+		m.render(G.root, [cached])
 		o(() => m.render(otherRoot, [cached])).throws(Error)
 	})
 	o("reused inner element element children are rejected against the same root", function () {
 		var cached = m("a")
 
-		m.render(root, m("div", cached))
-		o(() => m.render(root, m("div", cached))).throws(Error)
+		m.render(G.root, m("div", cached))
+		o(() => m.render(G.root, m("div", cached))).throws(Error)
 	})
 	o("reused inner element element children are rejected against a different root", function () {
 		var cached = m("a")
-		var otherRoot = $window.document.createElement("div")
+		var otherRoot = G.window.document.createElement("div")
 
-		m.render(root, m("div", cached))
+		m.render(G.root, m("div", cached))
 		o(() => m.render(otherRoot, m("div", cached))).throws(Error)
 	})
 	o("reused top-level retain children are rejected against the same root", function () {
 		var cached = m.retain()
 
-		m.render(root, m("a"))
-		m.render(root, cached)
-		o(() => m.render(root, cached)).throws(Error)
+		m.render(G.root, m("a"))
+		m.render(G.root, cached)
+		o(() => m.render(G.root, cached)).throws(Error)
 	})
 	o("reused top-level retain children are rejected against a different root", function () {
 		var cached = m.retain()
-		var otherRoot = $window.document.createElement("div")
+		var otherRoot = G.window.document.createElement("div")
 
-		m.render(root, m("a"))
-		m.render(root, cached)
+		m.render(G.root, m("a"))
+		m.render(G.root, cached)
 		o(() => m.render(otherRoot, cached)).throws(Error)
 	})
 	o("reused inner fragment retain children are rejected against the same root", function () {
 		var cached = m.retain()
 
-		m.render(root, [m("a")])
-		m.render(root, [cached])
-		o(() => m.render(root, [cached])).throws(Error)
+		m.render(G.root, [m("a")])
+		m.render(G.root, [cached])
+		o(() => m.render(G.root, [cached])).throws(Error)
 	})
 	o("reused inner fragment retain children are rejected against a different root", function () {
 		var cached = m.retain()
-		var otherRoot = $window.document.createElement("div")
+		var otherRoot = G.window.document.createElement("div")
 
-		m.render(root, [m("a")])
-		m.render(root, [cached])
+		m.render(G.root, [m("a")])
+		m.render(G.root, [cached])
 		o(() => m.render(otherRoot, [cached])).throws(Error)
 	})
 	o("reused inner element retain children are rejected against the same root", function () {
 		var cached = m.retain()
 
-		m.render(root, m("div", m("a")))
-		m.render(root, m("div", cached))
-		o(() => m.render(root, m("div", cached))).throws(Error)
+		m.render(G.root, m("div", m("a")))
+		m.render(G.root, m("div", cached))
+		o(() => m.render(G.root, m("div", cached))).throws(Error)
 	})
 	o("reused inner element retain children are rejected against a different root", function () {
 		var cached = m.retain()
-		var otherRoot = $window.document.createElement("div")
+		var otherRoot = G.window.document.createElement("div")
 
-		m.render(root, m("div", m("a")))
-		m.render(root, m("div", cached))
+		m.render(G.root, m("div", m("a")))
+		m.render(G.root, m("div", cached))
 		o(() => m.render(otherRoot, m("div", cached))).throws(Error)
 	})
 	o("cross-removal reused top-level element children are rejected against the same root", function () {
 		var cached = m("a")
 
-		m.render(root, cached)
-		m.render(root, null)
-		o(() => m.render(root, cached)).throws(Error)
+		m.render(G.root, cached)
+		m.render(G.root, null)
+		o(() => m.render(G.root, cached)).throws(Error)
 	})
 	o("cross-removal reused inner fragment element children are rejected against the same root", function () {
 		var cached = m("a")
 
-		m.render(root, [cached])
-		m.render(root, null)
-		o(() => m.render(root, [cached])).throws(Error)
+		m.render(G.root, [cached])
+		m.render(G.root, null)
+		o(() => m.render(G.root, [cached])).throws(Error)
 	})
 	o("cross-removal reused inner element element children are rejected against the same root", function () {
 		var cached = m("a")
 
-		m.render(root, m("div", cached))
-		m.render(root, null)
-		o(() => m.render(root, m("div", cached))).throws(Error)
+		m.render(G.root, m("div", cached))
+		m.render(G.root, null)
+		o(() => m.render(G.root, m("div", cached))).throws(Error)
 	})
 	o("cross-removal reused top-level retain children are rejected against the same root", function () {
 		var cached = m.retain()
 
-		m.render(root, m("a"))
-		m.render(root, cached)
-		m.render(root, null)
-		m.render(root, m("a"))
-		o(() => m.render(root, cached)).throws(Error)
+		m.render(G.root, m("a"))
+		m.render(G.root, cached)
+		m.render(G.root, null)
+		m.render(G.root, m("a"))
+		o(() => m.render(G.root, cached)).throws(Error)
 	})
 	o("cross-removal reused inner fragment retain children are rejected against the same root", function () {
 		var cached = m.retain()
 
-		m.render(root, [m("a")])
-		m.render(root, [cached])
-		m.render(root, null)
-		m.render(root, [m("a")])
-		o(() => m.render(root, [cached])).throws(Error)
+		m.render(G.root, [m("a")])
+		m.render(G.root, [cached])
+		m.render(G.root, null)
+		m.render(G.root, [m("a")])
+		o(() => m.render(G.root, [cached])).throws(Error)
 	})
 	o("cross-removal reused inner element retain children are rejected against the same root", function () {
 		var cached = m.retain()
 
-		m.render(root, m("div", m("a")))
-		m.render(root, m("div", cached))
-		m.render(root, null)
-		m.render(root, m("div", m("a")))
-		o(() => m.render(root, m("div", cached))).throws(Error)
+		m.render(G.root, m("div", m("a")))
+		m.render(G.root, m("div", cached))
+		m.render(G.root, null)
+		m.render(G.root, m("div", m("a")))
+		o(() => m.render(G.root, m("div", cached))).throws(Error)
 	})
 
 	o("null stays in place", function() {
 		var onabort = o.spy()
-		var layout = o.spy((_, signal) => { signal.onabort = onabort })
-		var vnodes = [m("div"), m("a", m.layout(layout))]
-		var temp = [null, m("a", m.layout(layout))]
-		var updated = [m("div"), m("a", m.layout(layout))]
+		var create = o.spy((_, signal) => { signal.onabort = onabort })
+		var update = o.spy((_, signal) => { signal.onabort = onabort })
+		var vnodes = [m("div"), m("a", m.layout(create, update))]
+		var temp = [null, m("a", m.layout(create, update))]
+		var updated = [m("div"), m("a", m.layout(create, update))]
 
-		m.render(root, vnodes)
-		var before = vnodes[1].dom
-		m.render(root, temp)
-		m.render(root, updated)
-		var after = updated[1].dom
+		m.render(G.root, vnodes)
+		var before = vnodes[1].d
 
-		o(before).equals(after)
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false, false])
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(0)
 		o(onabort.callCount).equals(0)
+
+		m.render(G.root, temp)
+
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(1)
+		o(onabort.callCount).equals(0)
+
+		m.render(G.root, updated)
+		var after = updated[1].d
+
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(2)
+		o(onabort.callCount).equals(0)
+		o(before).equals(after)
 	})
 	o("null stays in place if not first", function() {
 		var onabort = o.spy()
-		var layout = o.spy((_, signal) => { signal.onabort = onabort })
-		var vnodes = [m("b"), m("div"), m("a", m.layout(layout))]
-		var temp = [m("b"), null, m("a", m.layout(layout))]
-		var updated = [m("b"), m("div"), m("a", m.layout(layout))]
+		var create = o.spy((_, signal) => { signal.onabort = onabort })
+		var update = o.spy((_, signal) => { signal.onabort = onabort })
+		var vnodes = [m("b"), m("div"), m("a", m.layout(create, update))]
+		var temp = [m("b"), null, m("a", m.layout(create, update))]
+		var updated = [m("b"), m("div"), m("a", m.layout(create, update))]
 
-		m.render(root, vnodes)
-		var before = vnodes[2].dom
-		m.render(root, temp)
-		m.render(root, updated)
-		var after = updated[2].dom
+		m.render(G.root, vnodes)
+		var before = vnodes[2].d
 
-		o(before).equals(after)
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false, false])
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(0)
 		o(onabort.callCount).equals(0)
+
+		m.render(G.root, temp)
+
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(1)
+		o(onabort.callCount).equals(0)
+
+		m.render(G.root, updated)
+		var after = updated[2].d
+
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(2)
+		o(onabort.callCount).equals(0)
+		o(before).equals(after)
 	})
 	o("node is recreated if unwrapped from a key", function () {
 		var vnode = m.key(1, m("b"))
 		var updated = m("b")
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(vnode.children[0].dom).notEquals(updated.dom)
+		o(vnode.c[0].d).notEquals(updated.d)
 	})
 	o("don't add back elements from fragments that are restored from the pool #1991", function() {
-		m.render(root, [
+		m.render(G.root, [
 			[],
 			[]
 		])
-		m.render(root, [
+		m.render(G.root, [
 			[],
 			[m("div")]
 		])
-		m.render(root, [
+		m.render(G.root, [
 			[null]
 		])
-		m.render(root, [
+		m.render(G.root, [
 			[],
 			[]
 		])
 
-		o(root.childNodes.length).equals(0)
+		o(G.root.childNodes.length).equals(0)
 	})
 	o("don't add back elements from fragments that are being removed #1991", function() {
-		m.render(root, [
+		m.render(G.root, [
 			[],
 			m("p"),
 		])
-		m.render(root, [
+		m.render(G.root, [
 			[m("div", 5)]
 		])
-		m.render(root, [
+		m.render(G.root, [
 			[],
 			[]
 		])
 
-		o(root.childNodes.length).equals(0)
+		o(G.root.childNodes.length).equals(0)
 	})
 	o("handles null values in unkeyed lists of different length (#2003)", function() {
 		var onabort = o.spy()
-		var layout = o.spy((_, signal) => { signal.onabort = onabort })
+		var create = o.spy((_, signal) => { signal.onabort = onabort })
+		var update = o.spy((_, signal) => { signal.onabort = onabort })
 
-		m.render(root, [m("div", m.layout(layout)), null])
-		m.render(root, [null, m("div", m.layout(layout)), null])
+		m.render(G.root, [m("div", m.layout(create, update)), null])
+		m.render(G.root, [null, m("div", m.layout(create, update)), null])
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true, true])
+		o(create.callCount).equals(2)
+		o(update.callCount).equals(0)
 		o(onabort.callCount).equals(1)
 	})
 	o("supports changing the element of a keyed element in a list when traversed bottom-up", function() {
-		m.render(root, [m.key(2, m("a"))])
-		m.render(root, [m.key(1, m("b")), m.key(2, m("b"))])
+		m.render(G.root, [m.key(2, m("a"))])
+		m.render(G.root, [m.key(1, m("b")), m.key(2, m("b"))])
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "B"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "B"])
 	})
 	o("supports changing the element of a keyed element in a list when looking up nodes using the map", function() {
-		m.render(root, [m.key(1, m("x")), m.key(2, m("y")), m.key(3, m("z"))])
-		m.render(root, [m.key(2, m("b")), m.key(1, m("c")), m.key(4, m("d")), m.key(3, m("e"))])
+		m.render(G.root, [m.key(1, m("x")), m.key(2, m("y")), m.key(3, m("z"))])
+		m.render(G.root, [m.key(2, m("b")), m.key(1, m("c")), m.key(4, m("d")), m.key(3, m("e"))])
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["B", "C", "D", "E"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["B", "C", "D", "E"])
 	})
 	o("don't fetch the nextSibling from the pool", function() {
-		m.render(root, [[m.key(1, m("div")), m.key(2, m("div"))], m("p")])
-		m.render(root, [[], m("p")])
-		m.render(root, [[m.key(2, m("div")), m.key(1, m("div"))], m("p")])
+		m.render(G.root, [[m.key(1, m("div")), m.key(2, m("div"))], m("p")])
+		m.render(G.root, [[], m("p")])
+		m.render(G.root, [[m.key(2, m("div")), m.key(1, m("div"))], m("p")])
 
-		o(Array.from(root.childNodes, (el) => el.nodeName)).deepEquals(["DIV", "DIV", "P"])
+		o(Array.from(G.root.childNodes, (el) => el.nodeName)).deepEquals(["DIV", "DIV", "P"])
 	})
 	o("reverses a keyed lists with an odd number of items", function() {
 		var vnodes = vnodify("a,b,c,d")
 		var updated = vnodify("d,c,b,a")
-		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
+		var expectedTagNames = updated.map((vn) => vn.c[0].t)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		var tagNames = Array.from(root.childNodes, (n) => n.nodeName.toLowerCase())
+		var tagNames = Array.from(G.root.childNodes, (n) => n.nodeName.toLowerCase())
 
 		o(tagNames).deepEquals(expectedTagNames)
 	})
@@ -789,72 +830,72 @@ o.spec("updateNodes", function() {
 		var updated = vnodify("c,b,a")
 		var vnodes = [m.key("a", m("a")), m.key("b", m("b")), m.key("c", m("c"))]
 		var updated = [m.key("c", m("c")), m.key("b", m("b")), m.key("a", m("a"))]
-		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
+		var expectedTagNames = updated.map((vn) => vn.c[0].t)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		var tagNames = Array.from(root.childNodes, (n) => n.nodeName.toLowerCase())
+		var tagNames = Array.from(G.root.childNodes, (n) => n.nodeName.toLowerCase())
 
 		o(tagNames).deepEquals(expectedTagNames)
 	})
 	o("scrambles a keyed lists with prefixes and suffixes", function() {
 		var vnodes = vnodify("i,a,b,c,d,j")
 		var updated = vnodify("i,b,a,d,c,j")
-		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
+		var expectedTagNames = updated.map((vn) => vn.c[0].t)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		var tagNames = Array.from(root.childNodes, (n) => n.nodeName.toLowerCase())
+		var tagNames = Array.from(G.root.childNodes, (n) => n.nodeName.toLowerCase())
 
 		o(tagNames).deepEquals(expectedTagNames)
 	})
 	o("reverses a keyed lists with an odd number of items with prefixes and suffixes", function() {
 		var vnodes = vnodify("i,a,b,c,d,j")
 		var updated = vnodify("i,d,c,b,a,j")
-		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
+		var expectedTagNames = updated.map((vn) => vn.c[0].t)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		var tagNames = Array.from(root.childNodes, (n) => n.nodeName.toLowerCase())
+		var tagNames = Array.from(G.root.childNodes, (n) => n.nodeName.toLowerCase())
 
 		o(tagNames).deepEquals(expectedTagNames)
 	})
 	o("reverses a keyed lists with an even number of items with prefixes and suffixes", function() {
 		var vnodes = vnodify("i,a,b,c,j")
 		var updated = vnodify("i,c,b,a,j")
-		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
+		var expectedTagNames = updated.map((vn) => vn.c[0].t)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		var tagNames = Array.from(root.childNodes, (n) => n.nodeName.toLowerCase())
+		var tagNames = Array.from(G.root.childNodes, (n) => n.nodeName.toLowerCase())
 
 		o(tagNames).deepEquals(expectedTagNames)
 	})
 	o("scrambling sample 1", function() {
 		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
 		var updated = vnodify("k4,k1,k2,k9,k0,k3,k6,k5,k8,k7")
-		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
+		var expectedTagNames = updated.map((vn) => vn.c[0].t)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		var tagNames = Array.from(root.childNodes, (n) => n.nodeName.toLowerCase())
+		var tagNames = Array.from(G.root.childNodes, (n) => n.nodeName.toLowerCase())
 
 		o(tagNames).deepEquals(expectedTagNames)
 	})
 	o("scrambling sample 2", function() {
 		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
 		var updated = vnodify("b,d,k1,k0,k2,k3,k4,a,c,k5,k6,k7,k8,k9")
-		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
+		var expectedTagNames = updated.map((vn) => vn.c[0].t)
 
-		m.render(root, vnodes)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, updated)
 
-		var tagNames = Array.from(root.childNodes, (n) => n.nodeName.toLowerCase())
+		var tagNames = Array.from(G.root.childNodes, (n) => n.nodeName.toLowerCase())
 
 		o(tagNames).deepEquals(expectedTagNames)
 	})
@@ -865,11 +906,11 @@ o.spec("updateNodes", function() {
 		var temp = [[null, m(component), m("b")]]
 		var updated = [[m("a"), m(component), m("b")]]
 
-		m.render(root, vnodes)
-		m.render(root, temp)
-		m.render(root, updated)
+		m.render(G.root, vnodes)
+		m.render(G.root, temp)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "B"])
 	})
 	o("fragment child toggles from null in component when followed by null component then tag", function() {
 		var flag = true
@@ -879,19 +920,19 @@ o.spec("updateNodes", function() {
 		var temp = [[m(a), m(b), m("s")]]
 		var updated = [[m(a), m(b), m("s")]]
 
-		m.render(root, vnodes)
+		m.render(G.root, vnodes)
 		flag = false
-		m.render(root, temp)
+		m.render(G.root, temp)
 		flag = true
-		m.render(root, updated)
+		m.render(G.root, updated)
 
-		o(Array.from(root.childNodes, (n) => n.nodeName)).deepEquals(["A", "S"])
+		o(Array.from(G.root.childNodes, (n) => n.nodeName)).deepEquals(["A", "S"])
 	})
 	o("removing a component that returns a fragment doesn't throw (regression test for incidental bug introduced while debugging some Flems)", function() {
 		var component = () => [m("a"), m("b")]
-		m.render(root, [m(component)])
-		m.render(root, [])
+		m.render(G.root, [m(component)])
+		m.render(G.root, [])
 
-		o(root.childNodes.length).equals(0)
+		o(G.root.childNodes.length).equals(0)
 	})
 })

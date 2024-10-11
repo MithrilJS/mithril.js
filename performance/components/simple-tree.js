@@ -1,4 +1,4 @@
-import m from "../../src/entry/mithril.esm.js"
+import m from "../../dist/mithril.esm.min.js"
 
 const fields = []
 
@@ -16,7 +16,7 @@ export const simpleTree = () => m(".foo.bar[data-foo=bar]", {p: 2},
 	),
 	m("main",
 		m("form",
-			{onSubmit: function () {}},
+			{onSubmit() {}},
 			m("input[type=checkbox][checked]"),
 			m("input[type=checkbox]"),
 			m("fieldset", fields.map((field) =>

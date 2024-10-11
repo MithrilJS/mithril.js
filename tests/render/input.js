@@ -1,29 +1,21 @@
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
+
 import m from "../../src/entry/mithril.esm.js"
 
 o.spec("form inputs", function() {
-	var $window, root
-	o.beforeEach(function() {
-		$window = domMock()
-		root = $window.document.createElement("div")
-		$window.document.body.appendChild(root)
-	})
-	o.afterEach(function() {
-		while (root.firstChild) root.removeChild(root.firstChild)
-		root.vnodes = null
-	})
+	var G = setupGlobals()
 
 	o.spec("input", function() {
 		o("maintains focus after move", function() {
 			var input
 
-			m.render(root, [m.key(1, input = m("input")), m.key(2, m("a")), m.key(3, m("b"))])
-			input.dom.focus()
-			m.render(root, [m.key(2, m("a")), m.key(1, input = m("input")), m.key(3, m("b"))])
+			m.render(G.root, [m.key(1, input = m("input")), m.key(2, m("a")), m.key(3, m("b"))])
+			input.d.focus()
+			m.render(G.root, [m.key(2, m("a")), m.key(1, input = m("input")), m.key(3, m("b"))])
 
-			o($window.document.activeElement).equals(input.dom)
+			o(G.window.document.activeElement).equals(input.d)
 		})
 
 		o("maintains focus when changed manually in hook", function() {
@@ -31,9 +23,9 @@ o.spec("form inputs", function() {
 				dom.focus()
 			}));
 
-			m.render(root, input)
+			m.render(G.root, input)
 
-			o($window.document.activeElement).equals(input.dom)
+			o(G.window.document.activeElement).equals(input.d)
 		})
 
 		o("syncs input value if DOM value differs from vdom value", function() {
@@ -41,20 +33,20 @@ o.spec("form inputs", function() {
 			var updated = m("input", {value: "aaa", oninput: function() {}})
 			var redraw = o.spy()
 
-			m.render(root, input, redraw)
+			m.render(G.root, input, redraw)
 
 			//simulate user typing
-			var e = $window.document.createEvent("KeyboardEvent")
+			var e = G.window.document.createEvent("KeyboardEvent")
 			e.initEvent("input", true, true)
-			input.dom.focus()
-			input.dom.value += "a"
-			input.dom.dispatchEvent(e)
+			input.d.focus()
+			input.d.value += "a"
+			input.d.dispatchEvent(e)
 			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			m.render(root, updated, redraw)
+			m.render(G.root, updated, redraw)
 
-			o(updated.dom.value).equals("aaa")
+			o(updated.d.value).equals("aaa")
 			o(redraw.callCount).equals(1)
 		})
 
@@ -62,10 +54,10 @@ o.spec("form inputs", function() {
 			var input = m("input", {value: "aaa", oninput: function() {}})
 			var updated = m("input", {value: undefined, oninput: function() {}})
 
-			m.render(root, input)
-			m.render(root, updated)
+			m.render(G.root, input)
+			m.render(G.root, updated)
 
-			o(updated.dom.value).equals("")
+			o(updated.d.value).equals("")
 		})
 
 		o("syncs input checked attribute if DOM value differs from vdom value", function() {
@@ -73,19 +65,19 @@ o.spec("form inputs", function() {
 			var updated = m("input", {type: "checkbox", checked: true, onclick: function() {}})
 			var redraw = o.spy()
 
-			m.render(root, input, redraw)
+			m.render(G.root, input, redraw)
 
 			//simulate user clicking checkbox
-			var e = $window.document.createEvent("MouseEvents")
+			var e = G.window.document.createEvent("MouseEvents")
 			e.initEvent("click", true, true)
-			input.dom.focus()
-			input.dom.dispatchEvent(e)
+			input.d.focus()
+			input.d.dispatchEvent(e)
 			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			m.render(root, updated, redraw)
+			m.render(G.root, updated, redraw)
 
-			o(updated.dom.checked).equals(true)
+			o(updated.d.checked).equals(true)
 			o(redraw.callCount).equals(1)
 		})
 
@@ -95,18 +87,18 @@ o.spec("form inputs", function() {
 			var spy = o.spy()
 			var error = console.error
 
-			m.render(root, input)
+			m.render(G.root, input)
 
-			input.dom.value = "test.png"
+			input.d.value = "test.png"
 
 			try {
 				console.error = spy
-				m.render(root, updated)
+				m.render(G.root, updated)
 			} finally {
 				console.error = error
 			}
 
-			o(updated.dom.value).equals("")
+			o(updated.d.value).equals("")
 			o(spy.callCount).equals(0)
 		})
 
@@ -116,59 +108,58 @@ o.spec("form inputs", function() {
 			var spy = o.spy()
 			var error = console.error
 
-			m.render(root, input)
+			m.render(G.root, input)
 
-			input.dom.value = "test.png"
+			input.d.value = "test.png"
 
 			try {
 				console.error = spy
-				m.render(root, updated)
+				m.render(G.root, updated)
 			} finally {
 				console.error = error
 			}
 
-			o(updated.dom.value).equals("test.png")
+			o(updated.d.value).equals("test.png")
 			o(spy.callCount).equals(1)
 		})
 
 		o("retains file input value attribute if DOM value is the same as vdom value and is non-empty", function() {
-			var $window = domMock(o)
-			var root = $window.document.createElement("div")
-			$window.document.body.appendChild(root)
+			G.initialize({spy: o.spy})
+
 			var input = m("input", {type: "file", value: "", onclick: function() {}})
 			var updated1 = m("input", {type: "file", value: "test.png", onclick: function() {}})
 			var updated2 = m("input", {type: "file", value: "test.png", onclick: function() {}})
 			var spy = o.spy()
 			var error = console.error
 
-			m.render(root, input)
+			m.render(G.root, input)
 
 			// Verify our assumptions about the outer element state
-			o($window.__getSpies(input.dom).valueSetter.callCount).equals(0)
-			input.dom.value = "test.png"
-			o($window.__getSpies(input.dom).valueSetter.callCount).equals(1)
+			o(G.window.__getSpies(input.d).valueSetter.callCount).equals(0)
+			input.d.value = "test.png"
+			o(G.window.__getSpies(input.d).valueSetter.callCount).equals(1)
 
 			try {
 				console.error = spy
-				m.render(root, updated1)
+				m.render(G.root, updated1)
 			} finally {
 				console.error = error
 			}
 
-			o(updated1.dom.value).equals("test.png")
+			o(updated1.d.value).equals("test.png")
 			o(spy.callCount).equals(0)
-			o($window.__getSpies(updated1.dom).valueSetter.callCount).equals(1)
+			o(G.window.__getSpies(updated1.d).valueSetter.callCount).equals(1)
 
 			try {
 				console.error = spy
-				m.render(root, updated2)
+				m.render(G.root, updated2)
 			} finally {
 				console.error = error
 			}
 
-			o(updated2.dom.value).equals("test.png")
+			o(updated2.d.value).equals("test.png")
 			o(spy.callCount).equals(0)
-			o($window.__getSpies(updated2.dom).valueSetter.callCount).equals(1)
+			o(G.window.__getSpies(updated2.d).valueSetter.callCount).equals(1)
 		})
 	})
 
@@ -178,10 +169,10 @@ o.spec("form inputs", function() {
 				m("option", {value: "a"}, "aaa")
 			)
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.value).equals("a")
-			o(select.dom.selectedIndex).equals(0)
+			o(select.d.value).equals("a")
+			o(select.d.selectedIndex).equals(0)
 		})
 
 		o("select option can have empty string value", function() {
@@ -189,9 +180,9 @@ o.spec("form inputs", function() {
 				m("option", {value: ""}, "aaa")
 			)
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.firstChild.value).equals("")
+			o(select.d.firstChild.value).equals("")
 		})
 
 		o("option value defaults to textContent unless explicitly set", function() {
@@ -199,49 +190,49 @@ o.spec("form inputs", function() {
 				m("option", "aaa")
 			)
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.firstChild.value).equals("aaa")
-			o(select.dom.value).equals("aaa")
+			o(select.d.firstChild.value).equals("aaa")
+			o(select.d.value).equals("aaa")
 
 			//test that value changes when content changes
 			select = m("select",
 				m("option", "bbb")
 			)
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.firstChild.value).equals("bbb")
-			o(select.dom.value).equals("bbb")
+			o(select.d.firstChild.value).equals("bbb")
+			o(select.d.value).equals("bbb")
 
 			//test that value can be set to "" in subsequent render
 			select = m("select",
 				m("option", {value: ""}, "aaa")
 			)
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.firstChild.value).equals("")
-			o(select.dom.value).equals("")
+			o(select.d.firstChild.value).equals("")
+			o(select.d.value).equals("")
 
 			//test that value reverts to textContent when value omitted
 			select = m("select",
 				m("option", "aaa")
 			)
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.firstChild.value).equals("aaa")
-			o(select.dom.value).equals("aaa")
+			o(select.d.firstChild.value).equals("aaa")
+			o(select.d.value).equals("aaa")
 		})
 
 		o("select yields invalid value without children", function() {
 			var select = m("select", {value: "a"})
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.value).equals("")
-			o(select.dom.selectedIndex).equals(-1)
+			o(select.d.value).equals("")
+			o(select.d.selectedIndex).equals(-1)
 		})
 
 		o("select value is set correctly on first render", function() {
@@ -251,10 +242,10 @@ o.spec("form inputs", function() {
 				m("option", {value: "c"}, "ccc")
 			)
 
-			m.render(root, select)
+			m.render(G.root, select)
 
-			o(select.dom.value).equals("b")
-			o(select.dom.selectedIndex).equals(1)
+			o(select.d.value).equals("b")
+			o(select.d.selectedIndex).equals(1)
 		})
 
 		o("syncs select value if DOM value differs from vdom value", function() {
@@ -266,17 +257,17 @@ o.spec("form inputs", function() {
 				)
 			}
 
-			m.render(root, makeSelect())
+			m.render(G.root, makeSelect())
 
 			//simulate user selecting option
-			root.firstChild.value = "c"
-			root.firstChild.focus()
+			G.root.firstChild.value = "c"
+			G.root.firstChild.focus()
 
 			//re-render may use same vdom value as previous render call
-			m.render(root, makeSelect())
+			m.render(G.root, makeSelect())
 
-			o(root.firstChild.value).equals("b")
-			o(root.firstChild.selectedIndex).equals(1)
+			o(G.root.firstChild.value).equals("b")
+			o(G.root.firstChild.selectedIndex).equals(1)
 		})
 	})
 })

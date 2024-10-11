@@ -1,45 +1,38 @@
+/* eslint-disable no-bitwise */
 import o from "ospec"
 
-import {injectGlobals, register, restoreGlobalState} from "../test-utils/redraw-registry.js"
+import {setupGlobals} from "../test-utils/global.js"
 
 import m from "../src/entry/mithril.esm.js"
 
-import browserMock from "../test-utils/browserMock.js"
-import throttleMocker from "../test-utils/throttleMock.js"
-
 o.spec("api", function() {
-	var $window, throttleMock, root
-
-	o.beforeEach(() => {
-		injectGlobals($window = browserMock(), throttleMock = throttleMocker())
-	})
-
-	o.afterEach(restoreGlobalState)
+	var G = setupGlobals()
 
 	o.spec("m", function() {
 		o("works", function() {
 			var vnode = m("div")
 
-			o(vnode.tag).equals("div")
+			o(vnode.m & m.TYPE_MASK).equals(m.TYPE_ELEMENT)
+			o(vnode.t).equals("div")
 		})
 	})
 	o.spec("m.normalize", function() {
 		o("works", function() {
 			var vnode = m.normalize([m("div")])
 
-			o(vnode.tag).equals(Symbol.for("m.Fragment"))
-			o(vnode.children.length).equals(1)
-			o(vnode.children[0].tag).equals("div")
+			o(vnode.m & m.TYPE_MASK).equals(m.TYPE_FRAGMENT)
+			o(vnode.c.length).equals(1)
+			o(vnode.c[0].t).equals("div")
 		})
 	})
 	o.spec("m.key", function() {
 		o("works", function() {
 			var vnode = m.key(123, [m("div")])
 
-			o(vnode.tag).equals(Symbol.for("m.key"))
-			o(vnode.state).equals(123)
-			o(vnode.children.length).equals(1)
-			o(vnode.children[0].tag).equals("div")
+			o(vnode.m & m.TYPE_MASK).equals(m.TYPE_KEY)
+			o(vnode.t).equals(123)
+			o(vnode.c.length).equals(1)
+			o(vnode.c[0].t).equals("div")
 		})
 	})
 	o.spec("m.p", function() {
@@ -51,53 +44,38 @@ o.spec("api", function() {
 	})
 	o.spec("m.render", function() {
 		o("works", function() {
-			root = register($window.document.createElement("div"))
-			m.render(root, m("div"))
+			m.render(G.root, m("div"))
 
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild.nodeName).equals("DIV")
+			o(G.root.childNodes.length).equals(1)
+			o(G.root.firstChild.nodeName).equals("DIV")
 		})
 	})
 
 	o.spec("m.mount", function() {
 		o("works", function() {
-			root = register($window.document.createElement("div"))
-			m.mount(root, () => m("div"))
-
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild.nodeName).equals("DIV")
-		})
-	})
-
-	o.spec("m.redraw", function() {
-		o("works", function() {
 			var count = 0
-			root = register($window.document.createElement("div"))
-			m.mount(root, () => {count++})
-			o(count).equals(1)
-			m.redraw()
-			o(count).equals(1)
-			throttleMock.fire()
-			o(count).equals(2)
-		})
-	})
+			var redraw = m.mount(G.root, () => {
+				count++
+				return m("div")
+			})
 
-	o.spec("m.redrawSync", function() {
-		o("works", function() {
-			root = register($window.document.createElement("div"))
-			var view = o.spy()
-			m.mount(root, view)
-			o(view.callCount).equals(1)
-			m.redrawSync()
-			o(view.callCount).equals(2)
+			o(G.root.childNodes.length).equals(1)
+			o(G.root.firstChild.nodeName).equals("DIV")
+
+			redraw()
+			o(count).equals(1)
+			G.rafMock.fire()
+			o(count).equals(2)
+
+			redraw.sync()
+			o(count).equals(3)
 		})
 	})
 
 	o.spec("m.route", function() {
 		o("works", async() => {
-			root = register($window.document.createElement("div"))
-			m.route.init("#")
-			m.mount(root, () => {
+			m.mount(G.root, (isInit, redraw) => {
+				if (isInit) m.route.init("#", redraw)
 				if (m.route.path === "/a") {
 					return m("div")
 				} else if (m.route.path === "/b") {
@@ -108,18 +86,18 @@ o.spec("api", function() {
 			})
 
 			await Promise.resolve()
-			throttleMock.fire()
-			o(throttleMock.queueLength()).equals(0)
+			G.rafMock.fire()
+			o(G.rafMock.queueLength()).equals(0)
 
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild.nodeName).equals("DIV")
+			o(G.root.childNodes.length).equals(1)
+			o(G.root.firstChild.nodeName).equals("DIV")
 			o(m.route.get()).equals("/a")
 
 			m.route.set("/b")
 
 			await Promise.resolve()
-			throttleMock.fire()
-			o(throttleMock.queueLength()).equals(0)
+			G.rafMock.fire()
+			o(G.rafMock.queueLength()).equals(0)
 
 			o(m.route.get()).equals("/b")
 		})

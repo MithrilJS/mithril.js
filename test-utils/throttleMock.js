@@ -12,7 +12,13 @@ export default function throttleMocker() {
 		fire() {
 			const tasks = queue
 			queue = new Map()
-			for (const fn of tasks.values()) fn()
+			for (const fn of tasks.values()) {
+				try {
+					fn()
+				} catch (e) {
+					console.error(e)
+				}
+			}
 		},
 		queueLength() {
 			return queue.size

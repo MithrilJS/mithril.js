@@ -1,110 +1,104 @@
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
+
 import m from "../../src/entry/mithril.esm.js"
 
 o.spec("layout update", function() {
-	var $window, root
-	o.beforeEach(function() {
-		$window = domMock()
-		root = $window.document.createElement("div")
-	})
+	var G = setupGlobals()
 
 	o("is not invoked when removing element", function() {
-		var layout = o.spy()
-		var vnode = m("div", m.layout(layout))
+		var update = o.spy()
+		var vnode = m("div", m.layout(null, update))
 
-		m.render(root, vnode)
-		m.render(root, [])
+		m.render(G.root, vnode)
+		m.render(G.root, [])
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+		o(update.callCount).equals(0)
 	})
 	o("is not updated when replacing keyed element", function() {
-		var layout = o.spy()
 		var update = o.spy()
-		var vnode = m.key(1, m("div", m.layout(layout)))
-		var updated = m.key(1, m("a", m.layout(update)))
-		m.render(root, vnode)
-		m.render(root, updated)
+		var vnode = m.key(1, m("div", m.layout(null, update)))
+		var updated = m.key(1, m("a", m.layout(null, update)))
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
-		o(update.calls.map((c) => c.args[2])).deepEquals([true])
+		o(update.callCount).equals(0)
 	})
 	o("does not call old callback when removing layout vnode from new vnode", function() {
-		var layout = o.spy()
+		var update = o.spy()
 
-		m.render(root, m("a", m.layout(layout)))
-		m.render(root, m("a", m.layout(layout)))
-		m.render(root, m("a"))
+		m.render(G.root, m("a", m.layout(null, update)))
+		m.render(G.root, m("a", m.layout(null, update)))
+		m.render(G.root, m("a"))
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false])
+		o(update.callCount).equals(1)
 	})
 	o("invoked on noop", function() {
-		var layout = o.spy()
+		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = m("div", m.layout(layout))
-		var updated = m("div", m.layout(update))
+		var vnode = m("div", m.layout(null, preUpdate))
+		var updated = m("div", m.layout(null, update))
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
-		o(update.calls.map((c) => c.args[2])).deepEquals([false])
+		o(preUpdate.callCount).equals(0)
+		o(update.callCount).equals(1)
 	})
 	o("invoked on updating attr", function() {
-		var layout = o.spy()
+		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = m("div", m.layout(layout))
-		var updated = m("div", {id: "a"}, m.layout(update))
+		var vnode = m("div", m.layout(null, preUpdate))
+		var updated = m("div", {id: "a"}, m.layout(null, update))
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
-		o(update.calls.map((c) => c.args[2])).deepEquals([false])
+		o(preUpdate.callCount).equals(0)
+		o(update.callCount).equals(1)
 	})
 	o("invoked on updating children", function() {
-		var layout = o.spy()
+		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = m("div", m.layout(layout), m("a"))
-		var updated = m("div", m.layout(update), m("b"))
+		var vnode = m("div", m.layout(null, preUpdate), m("a"))
+		var updated = m("div", m.layout(null, update), m("b"))
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
-		o(update.calls.map((c) => c.args[2])).deepEquals([false])
+		o(preUpdate.callCount).equals(0)
+		o(update.callCount).equals(1)
 	})
 	o("invoked on updating fragment", function() {
-		var layout = o.spy()
+		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = [m.layout(layout)]
-		var updated = [m.layout(update)]
+		var vnode = [m.layout(null, preUpdate)]
+		var updated = [m.layout(null, update)]
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
-		o(update.calls.map((c) => c.args[2])).deepEquals([false])
+		o(preUpdate.callCount).equals(0)
+		o(update.callCount).equals(1)
 	})
 	o("invoked on full DOM update", function() {
 		var called = false
 		var vnode = m("div", {id: "1"},
-			m("a", {id: "2"}, m.layout(() => {}),
+			m("a", {id: "2"}, m.layout(null, null),
 				m("b", {id: "3"})
 			)
 		)
 		var updated = m("div", {id: "11"},
-			m("a", {id: "22"}, m.layout(update),
+			m("a", {id: "22"}, m.layout(null, update),
 				m("b", {id: "33"})
 			)
 		)
 
-		m.render(root, vnode)
-		m.render(root, updated)
+		m.render(G.root, vnode)
+		m.render(G.root, updated)
 
-		function update(dom, _, isInit) {
-			if (isInit) return
+		function update(dom) {
 			called = true
 
 			o(dom.parentNode.attributes["id"].value).equals("11")

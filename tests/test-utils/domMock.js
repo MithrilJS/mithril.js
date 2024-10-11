@@ -1,18 +1,13 @@
-/* global process: false */
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
 
 o.spec("domMock", function() {
-	var $document, $window
-	o.beforeEach(function() {
-		$window = domMock()
-		$document = $window.document
-	})
+	var G = setupGlobals()
 
 	o.spec("createElement", function() {
 		o("works", function() {
-			var node = $document.createElement("div")
+			var node = G.window.document.createElement("div")
 
 			o(node.nodeType).equals(1)
 			o(node.nodeName).equals("DIV")
@@ -26,7 +21,7 @@ o.spec("domMock", function() {
 
 	o.spec("createElementNS", function() {
 		o("works", function() {
-			var node = $document.createElementNS("http://www.w3.org/2000/svg", "svg")
+			var node = G.window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
 
 			o(node.nodeType).equals(1)
 			o(node.nodeName).equals("svg")
@@ -40,7 +35,7 @@ o.spec("domMock", function() {
 
 	o.spec("createTextNode", function() {
 		o("works", function() {
-			var node = $document.createTextNode("abc")
+			var node = G.window.document.createTextNode("abc")
 
 			o(node.nodeType).equals(3)
 			o(node.nodeName).equals("#text")
@@ -48,32 +43,32 @@ o.spec("domMock", function() {
 			o(node.nodeValue).equals("abc")
 		})
 		o("works w/ number", function() {
-			var node = $document.createTextNode(123)
+			var node = G.window.document.createTextNode(123)
 
 			o(node.nodeValue).equals("123")
 		})
 		o("works w/ null", function() {
-			var node = $document.createTextNode(null)
+			var node = G.window.document.createTextNode(null)
 
 			o(node.nodeValue).equals("null")
 		})
 		o("works w/ undefined", function() {
-			var node = $document.createTextNode(undefined)
+			var node = G.window.document.createTextNode(undefined)
 
 			o(node.nodeValue).equals("undefined")
 		})
 		o("works w/ object", function() {
-			var node = $document.createTextNode({})
+			var node = G.window.document.createTextNode({})
 
 			o(node.nodeValue).equals("[object Object]")
 		})
 		o("does not unescape HTML", function() {
-			var node = $document.createTextNode("<a>&amp;</a>")
+			var node = G.window.document.createTextNode("<a>&amp;</a>")
 
 			o(node.nodeValue).equals("<a>&amp;</a>")
 		})
 		o("nodeValue casts to string", function() {
-			var node = $document.createTextNode("a")
+			var node = G.window.document.createTextNode("a")
 			node.nodeValue = true
 
 			o(node.nodeValue).equals("true")
@@ -82,7 +77,7 @@ o.spec("domMock", function() {
 			o("doesn't work with symbols", function(){
 				var threw = false
 				try {
-					$document.createTextNode(Symbol("nono"))
+					G.window.document.createTextNode(Symbol("nono"))
 				} catch(e) {
 					threw = true
 				}
@@ -91,7 +86,7 @@ o.spec("domMock", function() {
 			o("symbols can't be used as nodeValue", function(){
 				var threw = false
 				try {
-					var node = $document.createTextNode("a")
+					var node = G.window.document.createTextNode("a")
 					node.nodeValue = Symbol("nono")
 				} catch(e) {
 					threw = true
@@ -101,22 +96,10 @@ o.spec("domMock", function() {
 		}
 	})
 
-	o.spec("createDocumentFragment", function() {
-		o("works", function() {
-			var node = $document.createDocumentFragment()
-
-			o(node.nodeType).equals(11)
-			o(node.nodeName).equals("#document-fragment")
-			o(node.parentNode).equals(null)
-			o(node.childNodes.length).equals(0)
-			o(node.firstChild).equals(null)
-		})
-	})
-
 	o.spec("appendChild", function() {
 		o("works", function() {
-			var parent = $document.createElement("div")
-			var child = $document.createElement("a")
+			var parent = G.window.document.createElement("div")
+			var child = G.window.document.createElement("a")
 			parent.appendChild(child)
 
 			o(parent.childNodes.length).equals(1)
@@ -125,9 +108,9 @@ o.spec("domMock", function() {
 			o(child.parentNode).equals(parent)
 		})
 		o("moves existing", function() {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			parent.appendChild(a)
 			parent.appendChild(b)
 			parent.appendChild(a)
@@ -141,50 +124,30 @@ o.spec("domMock", function() {
 			o(b.parentNode).equals(parent)
 		})
 		o("removes from old parent", function() {
-			var parent = $document.createElement("div")
-			var source = $document.createElement("span")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var source = G.window.document.createElement("span")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			parent.appendChild(a)
 			source.appendChild(b)
 			parent.appendChild(b)
 
 			o(source.childNodes.length).equals(0)
 		})
-		o("transfers from fragment", function() {
-			var parent = $document.createElement("div")
-			var a = $document.createDocumentFragment("a")
-			var b = $document.createElement("b")
-			var c = $document.createElement("c")
-			a.appendChild(b)
-			a.appendChild(c)
-			parent.appendChild(a)
-
-			o(parent.childNodes.length).equals(2)
-			o(parent.childNodes[0]).equals(b)
-			o(parent.childNodes[1]).equals(c)
-			o(parent.firstChild).equals(b)
-			o(parent.firstChild.nextSibling).equals(c)
-			o(a.childNodes.length).equals(0)
-			o(a.firstChild).equals(null)
-			o(a.parentNode).equals(null)
-			o(b.parentNode).equals(parent)
-			o(c.parentNode).equals(parent)
-		})
 		o("throws if appended to self", function(done) {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			try {div.appendChild(div)}
 			catch (e) {done()}
 		})
 		o("throws if appended to child", function(done) {
-			var parent = $document.createElement("div")
-			var child = $document.createElement("a")
+			var parent = G.window.document.createElement("div")
+			var child = G.window.document.createElement("a")
 			parent.appendChild(child)
 			try {child.appendChild(parent)}
 			catch (e) {done()}
 		})
 		o("throws if child is not element", function(done) {
-			var parent = $document.createElement("div")
+			var parent = G.window.document.createElement("div")
 			var child = 1
 			try {parent.appendChild(child)}
 			catch (e) {done()}
@@ -193,8 +156,8 @@ o.spec("domMock", function() {
 
 	o.spec("removeChild", function() {
 		o("works", function() {
-			var parent = $document.createElement("div")
-			var child = $document.createElement("a")
+			var parent = G.window.document.createElement("div")
+			var child = G.window.document.createElement("a")
 			parent.appendChild(child)
 			parent.removeChild(child)
 
@@ -203,8 +166,8 @@ o.spec("domMock", function() {
 			o(child.parentNode).equals(null)
 		})
 		o("throws if not a child", function(done) {
-			var parent = $document.createElement("div")
-			var child = $document.createElement("a")
+			var parent = G.window.document.createElement("div")
+			var child = G.window.document.createElement("a")
 			try {parent.removeChild(child)}
 			catch (e) {done()}
 		})
@@ -212,9 +175,9 @@ o.spec("domMock", function() {
 
 	o.spec("insertBefore", function() {
 		o("works", function() {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			parent.appendChild(a)
 			parent.insertBefore(b, a)
 
@@ -227,9 +190,9 @@ o.spec("domMock", function() {
 			o(b.parentNode).equals(parent)
 		})
 		o("moves existing", function() {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			parent.appendChild(a)
 			parent.appendChild(b)
 			parent.insertBefore(b, a)
@@ -243,10 +206,10 @@ o.spec("domMock", function() {
 			o(b.parentNode).equals(parent)
 		})
 		o("moves existing node forward but not at the end", function() {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
-			var c = $document.createElement("c")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
+			var c = G.window.document.createElement("c")
 			parent.appendChild(a)
 			parent.appendChild(b)
 			parent.appendChild(c)
@@ -265,44 +228,20 @@ o.spec("domMock", function() {
 
 		})
 		o("removes from old parent", function() {
-			var parent = $document.createElement("div")
-			var source = $document.createElement("span")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var source = G.window.document.createElement("span")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			parent.appendChild(a)
 			source.appendChild(b)
 			parent.insertBefore(b, a)
 
 			o(source.childNodes.length).equals(0)
 		})
-		o("transfers from fragment", function() {
-			var parent = $document.createElement("div")
-			var ref = $document.createElement("span")
-			var a = $document.createDocumentFragment("a")
-			var b = $document.createElement("b")
-			var c = $document.createElement("c")
-			parent.appendChild(ref)
-			a.appendChild(b)
-			a.appendChild(c)
-			parent.insertBefore(a, ref)
-
-			o(parent.childNodes.length).equals(3)
-			o(parent.childNodes[0]).equals(b)
-			o(parent.childNodes[1]).equals(c)
-			o(parent.childNodes[2]).equals(ref)
-			o(parent.firstChild).equals(b)
-			o(parent.firstChild.nextSibling).equals(c)
-			o(parent.firstChild.nextSibling.nextSibling).equals(ref)
-			o(a.childNodes.length).equals(0)
-			o(a.firstChild).equals(null)
-			o(a.parentNode).equals(null)
-			o(b.parentNode).equals(parent)
-			o(c.parentNode).equals(parent)
-		})
 		o("appends if second arg is null", function() {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			parent.appendChild(a)
 			parent.insertBefore(b, null)
 
@@ -314,44 +253,44 @@ o.spec("domMock", function() {
 			o(a.parentNode).equals(parent)
 		})
 		o("throws if appended to self", function(done) {
-			var div = $document.createElement("div")
-			var a = $document.createElement("a")
+			var div = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
 			div.appendChild(a)
 			try {div.isnertBefore(div, a)}
 			catch (e) {done()}
 		})
 		o("throws if appended to child", function(done) {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			parent.appendChild(a)
 			a.appendChild(b)
 			try {a.insertBefore(parent, b)}
 			catch (e) {done()}
 		})
 		o("throws if child is not element", function(done) {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
 			parent.appendChild(a)
 			try {parent.insertBefore(1, a)}
 			catch (e) {done()}
 		})
 		o("throws if inserted before itself", function(done) {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
 			try {parent.insertBefore(a, a)}
 			catch (e) {done()}
 		})
 		o("throws if second arg is undefined", function(done) {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
 			try {parent.insertBefore(a)}
 			catch (e) {done()}
 		})
 		o("throws if reference is not child", function(done) {
-			var parent = $document.createElement("div")
-			var a = $document.createElement("a")
-			var b = $document.createElement("b")
+			var parent = G.window.document.createElement("div")
+			var a = G.window.document.createElement("a")
+			var b = G.window.document.createElement("b")
 			try {parent.insertBefore(a, b)}
 			catch (e) {done()}
 		})
@@ -359,13 +298,13 @@ o.spec("domMock", function() {
 
 	o.spec("getAttribute", function() {
 		o("works", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", "aaa")
 
 			o(div.getAttribute("id")).equals("aaa")
 		})
 		o("works for attributes with a namespace", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", "aaa")
 
 			o(div.getAttribute("href")).equals("aaa")
@@ -374,7 +313,7 @@ o.spec("domMock", function() {
 
 	o.spec("setAttribute", function() {
 		o("works", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", "aaa")
 
 			o(div.attributes["id"].value).equals("aaa")
@@ -382,31 +321,31 @@ o.spec("domMock", function() {
 			o(div.attributes["id"].namespaceURI).equals(null)
 		})
 		o("works w/ number", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", 123)
 
 			o(div.attributes["id"].value).equals("123")
 		})
 		o("works w/ null", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", null)
 
 			o(div.attributes["id"].value).equals("null")
 		})
 		o("works w/ undefined", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", undefined)
 
 			o(div.attributes["id"].value).equals("undefined")
 		})
 		o("works w/ object", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", {})
 
 			o(div.attributes["id"].value).equals("[object Object]")
 		})
 		o("setting via attributes map stringifies", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", "a")
 			div.attributes["id"].value = 123
 
@@ -419,7 +358,7 @@ o.spec("domMock", function() {
 	})
 	o.spec("hasAttribute", function() {
 		o("works", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 
 			o(div.hasAttribute("id")).equals(false)
 
@@ -435,7 +374,7 @@ o.spec("domMock", function() {
 
 	o.spec("setAttributeNS", function() {
 		o("works", function() {
-			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			var a = G.window.document.createElementNS("http://www.w3.org/2000/svg", "a")
 			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", "/aaa")
 
 			o(a.href).deepEquals({baseVal: "/aaa", animVal: "/aaa"})
@@ -443,7 +382,7 @@ o.spec("domMock", function() {
 			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
 		})
 		o("works w/ number", function() {
-			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			var a = G.window.document.createElementNS("http://www.w3.org/2000/svg", "a")
 			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", 123)
 
 			o(a.href).deepEquals({baseVal: "123", animVal: "123"})
@@ -451,7 +390,7 @@ o.spec("domMock", function() {
 			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
 		})
 		o("attributes with a namespace can be querried, updated and removed with non-NS functions", function() {
-			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			var a = G.window.document.createElementNS("http://www.w3.org/2000/svg", "a")
 			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", "/aaa")
 
 			o(a.hasAttribute("href")).equals(true)
@@ -474,7 +413,7 @@ o.spec("domMock", function() {
 
 	o.spec("removeAttribute", function() {
 		o("works", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.setAttribute("id", "aaa")
 			div.removeAttribute("id")
 
@@ -484,7 +423,7 @@ o.spec("domMock", function() {
 
 	o.spec("textContent", function() {
 		o("works", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.textContent = "aaa"
 
 			o(div.childNodes.length).equals(1)
@@ -492,128 +431,39 @@ o.spec("domMock", function() {
 			o(div.firstChild.nodeValue).equals("aaa")
 		})
 		o("works with empty string", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.textContent = ""
 
 			o(div.childNodes.length).equals(0)
 		})
 	})
 
-	o.spec("innerHTML", function() {
-		o("works", function() {
-			var div = $document.createElement("div")
-			div.innerHTML = "<br /><a class='aaa' id='xyz'>123<b class=\"bbb\"></b>234<br class=ccc>345</a>"
-			o(div.childNodes.length).equals(2)
-			o(div.childNodes[0].nodeType).equals(1)
-			o(div.childNodes[0].nodeName).equals("BR")
-			o(div.childNodes[1].nodeType).equals(1)
-			o(div.childNodes[1].nodeName).equals("A")
-			o(div.childNodes[1].attributes["class"].value).equals("aaa")
-			o(div.childNodes[1].attributes["id"].value).equals("xyz")
-			o(div.childNodes[1].childNodes[0].nodeType).equals(3)
-			o(div.childNodes[1].childNodes[0].nodeValue).equals("123")
-			o(div.childNodes[1].childNodes[1].nodeType).equals(1)
-			o(div.childNodes[1].childNodes[1].nodeName).equals("B")
-			o(div.childNodes[1].childNodes[1].attributes["class"].value).equals("bbb")
-			o(div.childNodes[1].childNodes[2].nodeType).equals(3)
-			o(div.childNodes[1].childNodes[2].nodeValue).equals("234")
-			o(div.childNodes[1].childNodes[3].nodeType).equals(1)
-			o(div.childNodes[1].childNodes[3].nodeName).equals("BR")
-			o(div.childNodes[1].childNodes[3].attributes["class"].value).equals("ccc")
-			o(div.childNodes[1].childNodes[4].nodeType).equals(3)
-			o(div.childNodes[1].childNodes[4].nodeValue).equals("345")
-		})
-		o("headers work", function() {
-			var div = $document.createElement("div")
-			div.innerHTML = "<h1></h1><h2></h2><h3></h3><h4></h4><h5></h5><h6></h6>"
-			o(div.childNodes.length).equals(6)
-			o(div.childNodes[0].nodeType).equals(1)
-			o(div.childNodes[0].nodeName).equals("H1")
-			o(div.childNodes[1].nodeType).equals(1)
-			o(div.childNodes[1].nodeName).equals("H2")
-			o(div.childNodes[2].nodeType).equals(1)
-			o(div.childNodes[2].nodeName).equals("H3")
-			o(div.childNodes[3].nodeType).equals(1)
-			o(div.childNodes[3].nodeName).equals("H4")
-			o(div.childNodes[4].nodeType).equals(1)
-			o(div.childNodes[4].nodeName).equals("H5")
-			o(div.childNodes[5].nodeType).equals(1)
-			o(div.childNodes[5].nodeName).equals("H6")
-		})
-		o("detaches old elements", function() {
-			var div = $document.createElement("div")
-			var a = $document.createElement("a")
-			div.appendChild(a)
-			div.innerHTML = "<b></b>"
-
-			o(a.parentNode).equals(null)
-		})
-		o("empty SVG document", function() {
-			var div = $document.createElement("div")
-			div.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>"
-
-			o(typeof div.firstChild).notEquals(undefined)
-			o(div.firstChild.nodeName).equals("svg")
-			o(div.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(div.firstChild.childNodes.length).equals(0)
-		})
-		o("text elements", function() {
-			var div = $document.createElement("div")
-			div.innerHTML =
-				"<svg xmlns=\"http://www.w3.org/2000/svg\">"
-					+ "<text>hello</text>"
-					+ "<text> </text>"
-					+ "<text>world</text>"
-				+ "</svg>"
-
-			o(div.firstChild.nodeName).equals("svg")
-			o(div.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
-
-			var nodes = div.firstChild.childNodes
-			o(nodes.length).equals(3)
-			o(nodes[0].nodeName).equals("text")
-			o(nodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(nodes[0].childNodes.length).equals(1)
-			o(nodes[0].childNodes[0].nodeName).equals("#text")
-			o(nodes[0].childNodes[0].nodeValue).equals("hello")
-			o(nodes[1].nodeName).equals("text")
-			o(nodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(nodes[1].childNodes.length).equals(1)
-			o(nodes[1].childNodes[0].nodeName).equals("#text")
-			o(nodes[1].childNodes[0].nodeValue).equals(" ")
-			o(nodes[2].nodeName).equals("text")
-			o(nodes[2].namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(nodes[2].childNodes.length).equals(1)
-			o(nodes[2].childNodes[0].nodeName).equals("#text")
-			o(nodes[2].childNodes[0].nodeValue).equals("world")
-		})
-	})
 	o.spec("focus", function() {
 		o("body is active by default", function() {
-			o($document.documentElement.nodeName).equals("HTML")
-			o($document.body.nodeName).equals("BODY")
-			o($document.documentElement.firstChild.nodeName).equals("HEAD")
-			o($document.documentElement).equals($document.body.parentNode)
-			o($document.activeElement).equals($document.body)
+			o(G.window.document.documentElement.nodeName).equals("HTML")
+			o(G.window.document.body.nodeName).equals("BODY")
+			o(G.window.document.documentElement.firstChild.nodeName).equals("HEAD")
+			o(G.window.document.documentElement).equals(G.window.document.body.parentNode)
+			o(G.window.document.activeElement).equals(null)
 		})
 		o("focus changes activeElement", function() {
-			var input = $document.createElement("input")
-			$document.body.appendChild(input)
+			var input = G.window.document.createElement("input")
+			G.window.document.body.appendChild(input)
 			input.focus()
 
-			o($document.activeElement).equals(input)
+			o(G.window.document.activeElement).equals(input)
 
-			$document.body.removeChild(input)
+			G.window.document.body.removeChild(input)
 		})
 	})
 	o.spec("style", function() {
 		o("has style property", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 
 			o(typeof div.style).equals("object")
 		})
 		o("setting style.cssText string works", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style.cssText = "background-color: red; border-bottom: 1px solid red;"
 
 			o(div.style.backgroundColor).equals("red")
@@ -621,7 +471,7 @@ o.spec("domMock", function() {
 			o(div.attributes.style.value).equals("background-color: red; border-bottom: 1px solid red;")
 		})
 		o("removing via setting style.cssText string works", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style.cssText = "background: red;"
 			div.style.cssText = ""
 
@@ -629,7 +479,7 @@ o.spec("domMock", function() {
 			o(div.attributes.style.value).equals("")
 		})
 		o("the final semicolon is optional when setting style.cssText", function() {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style.cssText = "background: red"
 
 			o(div.style.background).equals("red")
@@ -637,13 +487,13 @@ o.spec("domMock", function() {
 			o(div.attributes.style.value).equals("background: red;")
 		})
 		o("'cssText' as a property name is ignored when setting style.cssText", function(){
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style.cssText = "cssText: red;"
 
 			o(div.style.cssText).equals("")
 		})
 		o("setting style.cssText that has a semi-colon in a strings", function(){
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style.cssText = "background: url(';'); font-family: \";\""
 
 			o(div.style.background).equals("url(';')")
@@ -651,7 +501,7 @@ o.spec("domMock", function() {
 			o(div.style.cssText).equals("background: url(';'); font-family: \";\";")
 		})
 		o("comments in style.cssText are stripped", function(){
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style.cssText = "/**/background/*:*/: /*>;)*/red/**/;/**/"
 
 			o(div.style.background).equals("red")
@@ -659,14 +509,14 @@ o.spec("domMock", function() {
 
 		})
 		o("comments in strings in style.cssText are preserved", function(){
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style.cssText = "background: url('/*foo*/')"
 
 			o(div.style.background).equals("url('/*foo*/')")
 
 		})
 		o("setting style updates style.cssText", function () {
-			var div = $document.createElement("div")
+			var div = G.window.document.createElement("div")
 			div.style = "background: red;"
 
 			o(div.style.background).equals("red")
@@ -679,14 +529,14 @@ o.spec("domMock", function() {
 			var spy, div, e
 			o.beforeEach(function() {
 				spy = o.spy()
-				div = $document.createElement("div")
-				e = $document.createEvent("MouseEvents")
+				div = G.window.document.createElement("div")
+				e = G.window.document.createEvent("MouseEvents")
 				e.initEvent("click", true, true)
 
-				$document.body.appendChild(div)
+				G.window.document.body.appendChild(div)
 			})
 			o.afterEach(function() {
-				$document.body.removeChild(div)
+				G.window.document.body.removeChild(div)
 			})
 
 			o("has onclick", function() {
@@ -737,18 +587,18 @@ o.spec("domMock", function() {
 			})
 			o("removeEventListener only removes the handler related to a given phase (1/2)", function() {
 				spy = o.spy(function(e) {o(e.eventPhase).equals(3)})
-				$document.body.addEventListener("click", spy, true)
-				$document.body.addEventListener("click", spy, false)
-				$document.body.removeEventListener("click", spy, true)
+				G.window.document.body.addEventListener("click", spy, true)
+				G.window.document.body.addEventListener("click", spy, false)
+				G.window.document.body.removeEventListener("click", spy, true)
 				div.dispatchEvent(e)
 
 				o(spy.callCount).equals(1)
 			})
 			o("removeEventListener only removes the handler related to a given phase (2/2)", function() {
 				spy = o.spy(function(e) {o(e.eventPhase).equals(1)})
-				$document.body.addEventListener("click", spy, true)
-				$document.body.addEventListener("click", spy, false)
-				$document.body.removeEventListener("click", spy, false)
+				G.window.document.body.addEventListener("click", spy, true)
+				G.window.document.body.addEventListener("click", spy, false)
+				G.window.document.body.removeEventListener("click", spy, false)
 				div.dispatchEvent(e)
 
 				o(spy.callCount).equals(1)
@@ -771,14 +621,14 @@ o.spec("domMock", function() {
 			var spy, div, e
 			o.beforeEach(function() {
 				spy = o.spy()
-				div = $document.createElement("div")
-				e = $document.createEvent("HTMLEvents")
+				div = G.window.document.createElement("div")
+				e = G.window.document.createEvent("HTMLEvents")
 				e.initEvent("transitionend", true, true)
 
-				$document.body.appendChild(div)
+				G.window.document.body.appendChild(div)
 			})
 			o.afterEach(function() {
-				$document.body.removeChild(div)
+				G.window.document.body.removeChild(div)
 			})
 
 			o("ontransitionend does not fire", function(done) {
@@ -792,14 +642,14 @@ o.spec("domMock", function() {
 		o.spec("capture and bubbling phases", function() {
 			var div, e
 			o.beforeEach(function() {
-				div = $document.createElement("div")
-				e = $document.createEvent("MouseEvents")
+				div = G.window.document.createElement("div")
+				e = G.window.document.createEvent("MouseEvents")
 				e.initEvent("click", true, true)
 
-				$document.body.appendChild(div)
+				G.window.document.body.appendChild(div)
 			})
 			o.afterEach(function() {
-				$document.body.removeChild(div)
+				G.window.document.body.removeChild(div)
 			})
 			o("capture and bubbling events both fire on the target in the order they were defined, regardless of the phase", function () {
 				var sequence = []
@@ -836,7 +686,7 @@ o.spec("domMock", function() {
 					o(ev).equals(e)
 					o(ev.eventPhase).equals(1)
 					o(ev.target).equals(div)
-					o(ev.currentTarget).equals($document.body)
+					o(ev.currentTarget).equals(G.window.document.body)
 				})
 				var bubble = o.spy(function(ev){
 					sequence.push("bubble")
@@ -844,11 +694,11 @@ o.spec("domMock", function() {
 					o(ev).equals(e)
 					o(ev.eventPhase).equals(3)
 					o(ev.target).equals(div)
-					o(ev.currentTarget).equals($document.body)
+					o(ev.currentTarget).equals(G.window.document.body)
 				})
 
-				$document.body.addEventListener("click", bubble, false)
-				$document.body.addEventListener("click", capture, true)
+				G.window.document.body.addEventListener("click", bubble, false)
+				G.window.document.body.addEventListener("click", capture, true)
 				div.dispatchEvent(e)
 
 				o(capture.callCount).equals(1)
@@ -863,7 +713,7 @@ o.spec("domMock", function() {
 					o(ev).equals(e)
 					o(ev.eventPhase).equals(3)
 					o(ev.target).equals(div)
-					o(ev.currentTarget).equals($document.body)
+					o(ev.currentTarget).equals(G.window.document.body)
 				})
 				var target = o.spy(function(ev){
 					sequence.push("target")
@@ -874,7 +724,7 @@ o.spec("domMock", function() {
 					o(ev.currentTarget).equals(div)
 				})
 
-				$document.body.addEventListener("click", parent)
+				G.window.document.body.addEventListener("click", parent)
 				div.addEventListener("click", target)
 				div.dispatchEvent(e)
 
@@ -890,7 +740,7 @@ o.spec("domMock", function() {
 					o(ev).equals(e)
 					o(ev.eventPhase).equals(3)
 					o(ev.target).equals(div)
-					o(ev.currentTarget).equals($document.body)
+					o(ev.currentTarget).equals(G.window.document.body)
 				})
 				var target = o.spy(function(ev){
 					sequence.push("target")
@@ -901,8 +751,8 @@ o.spec("domMock", function() {
 					o(ev.currentTarget).equals(div)
 				})
 
-				$document.body.addEventListener("click", parent)
-				$document.body.onclick = parent
+				G.window.document.body.addEventListener("click", parent)
+				G.window.document.body.onclick = parent
 				div.addEventListener("click", target)
 				div.dispatchEvent(e)
 
@@ -914,15 +764,15 @@ o.spec("domMock", function() {
 				var target = o.spy(function(ev){
 					o(ev).equals(e)
 					o(ev.eventPhase).equals(2)
-					o(ev.target).equals($document.body)
-					o(ev.currentTarget).equals($document.body)
+					o(ev.target).equals(G.window.document.body)
+					o(ev.currentTarget).equals(G.window.document.body)
 				})
 				var child = o.spy(function(){
 				})
 
-				$document.body.addEventListener("click", target)
+				G.window.document.body.addEventListener("click", target)
 				div.addEventListener("click", child)
-				$document.body.dispatchEvent(e)
+				G.window.document.body.dispatchEvent(e)
 
 				o(target.callCount).equals(1)
 				o(child.callCount).equals(0)
@@ -935,9 +785,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -960,9 +810,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -986,9 +836,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1011,9 +861,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1036,9 +886,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy(function(e){e.stopPropagation()})
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1061,9 +911,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy(function(e){e.stopPropagation()})
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1086,9 +936,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1111,9 +961,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1137,9 +987,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1162,9 +1012,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1187,9 +1037,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy(function(e){e.stopImmediatePropagation()})
 				var legacyParent = o.spy()
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1212,9 +1062,9 @@ o.spec("domMock", function() {
 				var bubParent = o.spy()
 				var legacyParent = o.spy(function(e){e.stopImmediatePropagation()})
 
-				$document.body.addEventListener("click", capParent, true)
-				$document.body.addEventListener("click", bubParent, false)
-				$document.body.onclick = legacyParent
+				G.window.document.body.addEventListener("click", capParent, true)
+				G.window.document.body.addEventListener("click", bubParent, false)
+				G.window.document.body.onclick = legacyParent
 
 				div.addEventListener("click", capTarget, true)
 				div.addEventListener("click", bubTarget, false)
@@ -1229,13 +1079,14 @@ o.spec("domMock", function() {
 				o(bubParent.callCount).equals(1)
 				o(legacyParent.callCount).equals(1)
 			})
-			o("errors thrown in handlers don't interrupt the chain", function(done) {
-				var errMsg = "The presence of these six errors in the log is expected in non-Node.js environments"
-				var handler = o.spy(function(){throw errMsg})
+			o("errors thrown in handlers don't interrupt the chain", function() {
+				var handler = o.spy(() => {throw "fail"})
 
-				$document.body.addEventListener("click", handler, true)
-				$document.body.addEventListener("click", handler, false)
-				$document.body.onclick = handler
+				console.error = o.spy()
+
+				G.window.document.body.addEventListener("click", handler, true)
+				G.window.document.body.addEventListener("click", handler, false)
+				G.window.document.body.onclick = handler
 
 				div.addEventListener("click", handler, true)
 				div.addEventListener("click", handler, false)
@@ -1245,57 +1096,37 @@ o.spec("domMock", function() {
 
 				o(handler.callCount).equals(6)
 
-				// Swallow the async errors in NodeJS
-				if (typeof process !== "undefined" && typeof process.once === "function"){
-					process.once("uncaughtException", function(e) {
-						if (e !== errMsg) throw e
-						process.once("uncaughtException", function(e) {
-							if (e !== errMsg) throw e
-							process.once("uncaughtException", function(e) {
-								if (e !== errMsg) throw e
-								process.once("uncaughtException", function(e) {
-									if (e !== errMsg) throw e
-									process.once("uncaughtException", function(e) {
-										if (e !== errMsg) throw e
-										process.once("uncaughtException", function(e) {
-											if (e !== errMsg) throw e
-											done()
-										})
-									})
-								})
-							})
-						})
-					})
-				} else {
-					done()
-				}
+				o(console.error.calls.map((c) => c.args)).deepEquals([
+					["fail"], ["fail"], ["fail"],
+					["fail"], ["fail"], ["fail"],
+				])
 			})
 		})
 	})
 	o.spec("attributes", function() {
 		o.spec("a[href]", function() {
 			o("is empty string if no attribute", function() {
-				var a = $document.createElement("a")
+				var a = G.window.document.createElement("a")
 
 				o(a.href).equals("")
 				o(a.attributes["href"]).equals(undefined)
 			})
 			o("is path if attribute is set", function() {
-				var a = $document.createElement("a")
+				var a = G.window.document.createElement("a")
 				a.setAttribute("href", "")
 
 				o(a.href).notEquals("")
 				o(a.attributes["href"].value).equals("")
 			})
 			o("is path if property is set", function() {
-				var a = $document.createElement("a")
+				var a = G.window.document.createElement("a")
 				a.href = ""
 
 				o(a.href).notEquals("")
 				o(a.attributes["href"].value).equals("")
 			})
 			o("property is read-only for SVG elements", function() {
-				var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+				var a = G.window.document.createElementNS("http://www.w3.org/2000/svg", "a")
 				a.href = "/foo"
 
 				o(a.href).deepEquals({baseVal: "", animVal: ""})
@@ -1304,14 +1135,14 @@ o.spec("domMock", function() {
 		})
 		o.spec("input[checked]", function() {
 			o("only exists in input elements", function() {
-				var input = $document.createElement("input")
-				var a = $document.createElement("a")
+				var input = G.window.document.createElement("input")
+				var a = G.window.document.createElement("a")
 
 				o("checked" in input).equals(true)
 				o("checked" in a).equals(false)
 			})
 			o("tracks attribute value when unset", function() {
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 				input.setAttribute("type", "checkbox")
 
 				o(input.checked).equals(false)
@@ -1328,7 +1159,7 @@ o.spec("domMock", function() {
 				o(input.attributes["checked"]).equals(undefined)
 			})
 			o("does not track attribute value when set", function() {
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 				input.setAttribute("type", "checkbox")
 				input.checked = true
 
@@ -1344,23 +1175,23 @@ o.spec("domMock", function() {
 				o(input.checked).equals(true)
 			})
 			o("toggles on click", function() {
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 				input.setAttribute("type", "checkbox")
 				input.checked = false
 
-				var e = $document.createEvent("MouseEvents")
+				var e = G.window.document.createEvent("MouseEvents")
 				e.initEvent("click", true, true)
 				input.dispatchEvent(e)
 
 				o(input.checked).equals(true)
 			})
 			o("doesn't toggle on click when preventDefault() is used", function() {
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 				input.setAttribute("type", "checkbox")
 				input.checked = false
 				input.onclick = function(e) {e.preventDefault()}
 
-				var e = $document.createEvent("MouseEvents")
+				var e = G.window.document.createEvent("MouseEvents")
 				e.initEvent("click", true, true)
 				input.dispatchEvent(e)
 
@@ -1369,14 +1200,14 @@ o.spec("domMock", function() {
 		})
 		o.spec("input[value]", function() {
 			o("only exists in input elements", function() {
-				var input = $document.createElement("input")
-				var a = $document.createElement("a")
+				var input = G.window.document.createElement("input")
+				var a = G.window.document.createElement("a")
 
 				o("value" in input).equals(true)
 				o("value" in a).equals(false)
 			})
 			o("converts null to ''", function() {
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 				input.value = "x"
 
 				o(input.value).equals("x")
@@ -1386,7 +1217,7 @@ o.spec("domMock", function() {
 				o(input.value).equals("")
 			})
 			o("converts values to strings", function() {
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 				input.value = 5
 
 				o(input.value).equals("5")
@@ -1401,7 +1232,7 @@ o.spec("domMock", function() {
 			})
 			if (typeof Symbol === "function") o("throws when set to a symbol", function() {
 				var threw = false
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 				try {
 					input.value = Symbol("")
 				} catch (e) {
@@ -1415,28 +1246,28 @@ o.spec("domMock", function() {
 		})
 		o.spec("input[type]", function(){
 			o("only exists in input elements", function() {
-				var input = $document.createElement("input")
-				var a = $document.createElement("a")
+				var input = G.window.document.createElement("input")
+				var a = G.window.document.createElement("a")
 
 				o("type" in input).equals(true)
 				o("type" in a).equals(false)
 			})
 			o("is 'text' by default", function() {
-				var input = $document.createElement("input")
+				var input = G.window.document.createElement("input")
 
 				o(input.type).equals("text")
 			})
 			"radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image"
 				.split("|").forEach(function(type) {
 					o("can be set to " + type, function(){
-						var input = $document.createElement("input")
+						var input = G.window.document.createElement("input")
 						input.type = type
 
 						o(input.getAttribute("type")).equals(type)
 						o(input.type).equals(type)
 					})
 					o("bad values set the attribute, but the getter corrects to 'text', " + type, function(){
-						var input = $document.createElement("input")
+						var input = G.window.document.createElement("input")
 						input.type = "badbad" + type
 
 						o(input.getAttribute("type")).equals("badbad" + type)
@@ -1446,20 +1277,20 @@ o.spec("domMock", function() {
 		})
 		o.spec("textarea[value]", function() {
 			o("reads from child if no value was ever set", function() {
-				var textarea = $document.createElement("textarea")
-				textarea.appendChild($document.createTextNode("aaa"))
+				var textarea = G.window.document.createElement("textarea")
+				textarea.appendChild(G.window.document.createTextNode("aaa"))
 
 				o(textarea.value).equals("aaa")
 			})
 			o("ignores child if value set", function() {
-				var textarea = $document.createElement("textarea")
+				var textarea = G.window.document.createElement("textarea")
 				textarea.value = null
-				textarea.appendChild($document.createTextNode("aaa"))
+				textarea.appendChild(G.window.document.createTextNode("aaa"))
 
 				o(textarea.value).equals("")
 			})
 			o("textarea[value] doesn't reflect `attributes.value`", function() {
-				var textarea = $document.createElement("textarea")
+				var textarea = G.window.document.createElement("textarea")
 				textarea.value = "aaa"
 				textarea.setAttribute("value", "bbb")
 
@@ -1468,8 +1299,8 @@ o.spec("domMock", function() {
 		})
 		o.spec("select[value] and select[selectedIndex]", function() {
 			o("only exist in select elements", function() {
-				var select = $document.createElement("select")
-				var a = $document.createElement("a")
+				var select = G.window.document.createElement("select")
+				var a = G.window.document.createElement("a")
 
 				o("value" in select).equals(true)
 				o("value" in a).equals(false)
@@ -1478,13 +1309,13 @@ o.spec("domMock", function() {
 				o("selectedIndex" in a).equals(false)
 			})
 			o("value defaults to value at first index", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
@@ -1492,12 +1323,12 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(0)
 			})
 			o("value falls back to child nodeValue if no attribute", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
-				option1.appendChild($document.createTextNode("a"))
-				var option2 = $document.createElement("option")
-				option2.appendChild($document.createTextNode("b"))
+				var option1 = G.window.document.createElement("option")
+				option1.appendChild(G.window.document.createTextNode("a"))
+				var option2 = G.window.document.createElement("option")
+				option2.appendChild(G.window.document.createTextNode("b"))
 				select.appendChild(option1)
 				select.appendChild(option2)
 
@@ -1508,27 +1339,27 @@ o.spec("domMock", function() {
 				o(select.childNodes[1].value).equals("b")
 			})
 			o("value defaults to invalid if no options", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
 				o(select.value).equals("")
 				o(select.selectedIndex).equals(-1)
 			})
 			o("setting valid value works", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
-				var option3 = $document.createElement("option")
+				var option3 = G.window.document.createElement("option")
 				option3.setAttribute("value", "")
 				select.appendChild(option3)
 
-				var option4 = $document.createElement("option")
+				var option4 = G.window.document.createElement("option")
 				option4.setAttribute("value", "null")
 				select.appendChild(option4)
 
@@ -1553,17 +1384,17 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(-1)
 			})
 			o("setting valid value works with type conversion", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "0")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "undefined")
 				select.appendChild(option2)
 
-				var option3 = $document.createElement("option")
+				var option3 = G.window.document.createElement("option")
 				option3.setAttribute("value", "")
 				select.appendChild(option3)
 
@@ -1590,24 +1421,24 @@ o.spec("domMock", function() {
 				}
 			})
 			o("option.value = null is converted to 'null'", function() {
-				var option = $document.createElement("option")
+				var option = G.window.document.createElement("option")
 				option.value = null
 
 				o(option.value).equals("null")
 			})
 			o("setting valid value works with optgroup", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 
-				var option3 = $document.createElement("option")
+				var option3 = G.window.document.createElement("option")
 				option3.setAttribute("value", "c")
 
-				var optgroup = $document.createElement("optgroup")
+				var optgroup = G.window.document.createElement("optgroup")
 				optgroup.appendChild(option1)
 				optgroup.appendChild(option2)
 				select.appendChild(optgroup)
@@ -1619,13 +1450,13 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(1)
 			})
 			o("setting valid selectedIndex works", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
@@ -1635,13 +1466,13 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(1)
 			})
 			o("setting option[selected] works", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
@@ -1651,13 +1482,13 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(1)
 			})
 			o("unsetting option[selected] works", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
@@ -1668,13 +1499,13 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(0)
 			})
 			o("setting invalid value yields a selectedIndex of -1 and value of empty string", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
@@ -1684,13 +1515,13 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(-1)
 			})
 			o("setting invalid selectedIndex yields a selectedIndex of -1 and value of empty string", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
@@ -1700,13 +1531,13 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(-1)
 			})
 			o("setting invalid value yields a selectedIndex of -1 and value of empty string even when there's an option whose value is empty string", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "")
 				select.appendChild(option2)
 
@@ -1716,13 +1547,13 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(-1)
 			})
 			o("setting invalid selectedIndex yields a selectedIndex of -1 and value of empty string even when there's an option whose value is empty string", function() {
-				var select = $document.createElement("select")
+				var select = G.window.document.createElement("select")
 
-				var option1 = $document.createElement("option")
+				var option1 = G.window.document.createElement("option")
 				option1.setAttribute("value", "a")
 				select.appendChild(option1)
 
-				var option2 = $document.createElement("option")
+				var option2 = G.window.document.createElement("option")
 				option2.setAttribute("value", "")
 				select.appendChild(option2)
 
@@ -1734,7 +1565,7 @@ o.spec("domMock", function() {
 		})
 		o.spec("canvas width and height", function() {
 			o("setting property works", function() {
-				var canvas = $document.createElement("canvas")
+				var canvas = G.window.document.createElement("canvas")
 
 				canvas.width = 100
 				o(canvas.attributes["width"].value).equals("100")
@@ -1745,7 +1576,7 @@ o.spec("domMock", function() {
 				o(canvas.height).equals(100)
 			})
 			o("setting string casts to number", function() {
-				var canvas = $document.createElement("canvas")
+				var canvas = G.window.document.createElement("canvas")
 
 				canvas.width = "100"
 				o(canvas.attributes["width"].value).equals("100")
@@ -1756,7 +1587,7 @@ o.spec("domMock", function() {
 				o(canvas.height).equals(100)
 			})
 			o("setting float casts to int", function() {
-				var canvas = $document.createElement("canvas")
+				var canvas = G.window.document.createElement("canvas")
 
 				canvas.width = 1.2
 				o(canvas.attributes["width"].value).equals("1")
@@ -1767,7 +1598,7 @@ o.spec("domMock", function() {
 				o(canvas.height).equals(1)
 			})
 			o("setting percentage fails", function() {
-				var canvas = $document.createElement("canvas")
+				var canvas = G.window.document.createElement("canvas")
 
 				canvas.width = "100%"
 				o(canvas.attributes["width"].value).equals("0")
@@ -1778,7 +1609,7 @@ o.spec("domMock", function() {
 				o(canvas.height).equals(0)
 			})
 			o("setting attribute works", function() {
-				var canvas = $document.createElement("canvas")
+				var canvas = G.window.document.createElement("canvas")
 
 				canvas.setAttribute("width", "100%")
 				o(canvas.attributes["width"].value).equals("100%")
@@ -1792,14 +1623,14 @@ o.spec("domMock", function() {
 	})
 	o.spec("className", function() {
 		o("works", function() {
-			var el = $document.createElement("div")
+			var el = G.window.document.createElement("div")
 			el.className = "a"
 
 			o(el.className).equals("a")
 			o(el.attributes["class"].value).equals("a")
 		})
 		o("setter throws in svg", function(done) {
-			var el = $document.createElementNS("http://www.w3.org/2000/svg", "svg")
+			var el = G.window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
 			try {
 				el.className = "a"
 			}
@@ -1809,18 +1640,18 @@ o.spec("domMock", function() {
 		})
 	})
 	o.spec("spies", function() {
-		var $window
 		o.beforeEach(function() {
-			$window = domMock({spy: o.spy})
+			G.initialize({spy: o.spy})
 		})
 		o("basics", function() {
-			o(typeof $window.__getSpies).equals("function")
-			o("__getSpies" in domMock()).equals(false)
+			o(typeof G.window.__getSpies).equals("function")
+			G.initialize()
+			o("__getSpies" in G.window).equals(false)
 		})
 		o("input elements have spies on value setters", function() {
-			var input = $window.document.createElement("input")
+			var input = G.window.document.createElement("input")
 
-			var spies = $window.__getSpies(input)
+			var spies = G.window.__getSpies(input)
 
 			o(typeof spies).equals("object")
 			o(spies).notEquals(null)
@@ -1834,9 +1665,9 @@ o.spec("domMock", function() {
 			o(spies.valueSetter.args[0]).equals("aaa")
 		})
 		o("select elements have spies on value setters", function() {
-			var select = $window.document.createElement("select")
+			var select = G.window.document.createElement("select")
 
-			var spies = $window.__getSpies(select)
+			var spies = G.window.__getSpies(select)
 
 			o(typeof spies).equals("object")
 			o(spies).notEquals(null)
@@ -1850,9 +1681,9 @@ o.spec("domMock", function() {
 			o(spies.valueSetter.args[0]).equals("aaa")
 		})
 		o("option elements have spies on value setters", function() {
-			var option = $window.document.createElement("option")
+			var option = G.window.document.createElement("option")
 
-			var spies = $window.__getSpies(option)
+			var spies = G.window.__getSpies(option)
 
 			o(typeof spies).equals("object")
 			o(spies).notEquals(null)
@@ -1866,9 +1697,9 @@ o.spec("domMock", function() {
 			o(spies.valueSetter.args[0]).equals("aaa")
 		})
 		o("textarea elements have spies on value setters", function() {
-			var textarea = $window.document.createElement("textarea")
+			var textarea = G.window.document.createElement("textarea")
 
-			var spies = $window.__getSpies(textarea)
+			var spies = G.window.__getSpies(textarea)
 
 			o(typeof spies).equals("object")
 			o(spies).notEquals(null)
@@ -1880,64 +1711,6 @@ o.spec("domMock", function() {
 			o(spies.valueSetter.callCount).equals(1)
 			o(spies.valueSetter.this).equals(textarea)
 			o(spies.valueSetter.args[0]).equals("aaa")
-		})
-	})
-	o.spec("DOMParser for SVG", function(){
-		var $DOMParser
-		o.beforeEach(function() {
-			$DOMParser = $window.DOMParser
-		})
-		o("basics", function(){
-			o(typeof $DOMParser).equals("function")
-
-			var parser = new $DOMParser()
-
-			o(parser instanceof $DOMParser).equals(true)
-			o(typeof parser.parseFromString).equals("function")
-		})
-		o("empty document", function() {
-			var parser = new $DOMParser()
-			var doc = parser.parseFromString(
-				"<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
-				"image/svg+xml"
-			)
-
-			o(typeof doc.documentElement).notEquals(undefined)
-			o(doc.documentElement.nodeName).equals("svg")
-			o(doc.documentElement.namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(doc.documentElement.childNodes.length).equals(0)
-		})
-		o("text elements", function() {
-			var parser = new $DOMParser()
-			var doc = parser.parseFromString(
-				"<svg xmlns=\"http://www.w3.org/2000/svg\">"
-					+ "<text>hello</text>"
-					+ "<text> </text>"
-					+ "<text>world</text>"
-				+ "</svg>",
-				"image/svg+xml"
-			)
-
-			o(doc.documentElement.nodeName).equals("svg")
-			o(doc.documentElement.namespaceURI).equals("http://www.w3.org/2000/svg")
-
-			var nodes = doc.documentElement.childNodes
-			o(nodes.length).equals(3)
-			o(nodes[0].nodeName).equals("text")
-			o(nodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(nodes[0].childNodes.length).equals(1)
-			o(nodes[0].childNodes[0].nodeName).equals("#text")
-			o(nodes[0].childNodes[0].nodeValue).equals("hello")
-			o(nodes[1].nodeName).equals("text")
-			o(nodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(nodes[1].childNodes.length).equals(1)
-			o(nodes[1].childNodes[0].nodeName).equals("#text")
-			o(nodes[1].childNodes[0].nodeValue).equals(" ")
-			o(nodes[2].nodeName).equals("text")
-			o(nodes[2].namespaceURI).equals("http://www.w3.org/2000/svg")
-			o(nodes[2].childNodes.length).equals(1)
-			o(nodes[2].childNodes[0].nodeName).equals("#text")
-			o(nodes[2].childNodes[0].nodeValue).equals("world")
 		})
 	})
 })

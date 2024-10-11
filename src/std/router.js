@@ -1,15 +1,13 @@
 /* global window: false */
 import m from "../core.js"
 
-import {p} from "../util.js"
-
 var mustReplace = false
-var routePrefix, currentUrl, currentPath, currentHref
+var redraw, routePrefix, currentUrl, currentPath, currentHref
 
-function updateRouteWithHref(href, update) {
+var updateRouteWithHref = (href, update) => {
 	if (currentHref === href) return
 	currentHref = href
-	if (update) m.redraw()
+	if (update && typeof redraw === "function") redraw()
 
 	var url = new URL(href)
 	var urlPath = url.pathname + url.search + url.hash
@@ -24,29 +22,31 @@ function updateRouteWithHref(href, update) {
 	mustReplace = false
 }
 
-function updateRoute() {
+var updateRoute = () => {
 	updateRouteWithHref(window.location.href, true)
 }
 
-function set(path, {replace, state} = {}) {
+var set = (path, {replace, state} = {}) => {
 	if (!currentUrl) {
 		throw new ReferenceError("Route state must be fully initialized first")
 	}
 	if (mustReplace) replace = true
 	mustReplace = true
-	p.then(updateRoute)
+	void (async () => {
+		await 0 // wait for next microtask
+		updateRoute()
+	})()
+	if (typeof redraw === "function") redraw()
 	if (typeof window === "object") {
-		m.redraw()
 		window.history[replace ? "replaceState" : "pushState"](state, "", routePrefix + path)
 	}
 }
 
 export default {
-	init(prefix = "#!", href) {
+	init(prefix = "#!", redrawFn, href) {
 		if (!href) {
 			if (typeof window !== "object") {
 				throw new TypeError("Outside the DOM, `href` must be provided")
-
 			}
 			window.addEventListener("popstate", updateRoute, false)
 			window.addEventListener("hashchange", updateRoute, false)
@@ -54,6 +54,7 @@ export default {
 		}
 
 		routePrefix = prefix
+		redraw = redrawFn
 		updateRouteWithHref(href, false)
 	},
 	set,

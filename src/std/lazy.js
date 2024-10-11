@@ -1,9 +1,13 @@
 import m from "../core.js"
 
-var lazy = (opts, redraw = m.redraw) => {
+var lazy = (opts) => {
 	// Capture the error here so stack traces make more sense
 	var error = new ReferenceError("Component not found")
-	var Comp = () => opts.pending && opts.pending()
+	var redraws = new Set()
+	var Comp = (_, __, context) => {
+		redraws.add(context.redraw)
+		return opts.pending && opts.pending()
+	}
 	var init = async () => {
 		try {
 			Comp = await opts.fetch()
@@ -15,7 +19,9 @@ var lazy = (opts, redraw = m.redraw) => {
 			console.error(e)
 			Comp = () => opts.error && opts.error(e)
 		}
-		redraw()
+		var r = redraws
+		redraws = null
+		for (var f of r) f()
 	}
 
 	return (attrs) => {

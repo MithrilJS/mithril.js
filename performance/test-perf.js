@@ -1,39 +1,166 @@
-/* Based off of preact's perf tests, so including their MIT license */
-/*
-The MIT License (MIT)
+/* global window, document */
 
-Copyright (c) 2017 Jason Miller
+import m from "../dist/mithril.esm.min.js"
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+import {runBenchmarks} from "./bench.js"
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+import {mutateStylesPropertiesTree} from "./components/mutate-styles-properties-tree.js"
+import {nestedTree} from "./components/nested-tree.js"
+import {repeatedTree} from "./components/repeated-tree.js"
+import {shuffledKeyedTree} from "./components/shuffled-keyed-tree.js"
+import {simpleTree} from "./components/simple-tree.js"
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+/** @type {Parameters<typeof runBenchmarks>[0]} */
+const benchmarks = Object.create(null)
 
-// Note: this tests against the generated bundle in browsers, but it tests
-// against `browser.js` in Node. Please do keep that in mind while testing.
-//
-// Mithril.js and Benchmark.js are loaded globally via bundle in the browser, so
-// this doesn't require a CommonJS sham polyfill.
+async function run() {
+	if (!isBrowser) await import("../test-utils/injectBrowserMock.js")
+	await runBenchmarks(benchmarks)
+	cycleRoot()
+}
 
-// So it can tell from Node that it's not actually in a real browser. This gets mucked with by the
-// global injection
-import "./is-browser.js"
+const isBrowser = typeof process === "undefined"
 
-// set up browser env on before running tests
-import "./inject-mock-globals.js"
+function nextFrame() {
+	return new Promise((resolve) => window.requestAnimationFrame(resolve))
+}
 
-import "./test-perf-impl.js"
+let rootElem, allElems
+
+function cycleRoot() {
+	if (allElems) {
+		for (const elem of allElems) {
+			elem.remove()
+			m.render(elem, null)
+		}
+	}
+	if (rootElem) {
+		rootElem.remove()
+		m.render(rootElem, null)
+	}
+	document.body.appendChild(rootElem = document.createElement("div"))
+}
+
+const allTrees = []
+
+function addTree(name, treeFn) {
+	allTrees.push(treeFn)
+
+	benchmarks[`construct ${name}`] = (b) => {
+		do {
+			b.start()
+			do {
+				treeFn()
+			} while (!b.tick())
+		} while (!b.done())
+	}
+
+	benchmarks[`render ${name}`] = async (b) => {
+		do {
+			cycleRoot()
+			b.start()
+			do {
+				m.render(rootElem, treeFn())
+			} while (!b.tick())
+			if (isBrowser) await nextFrame()
+		} while (!b.done())
+	}
+
+	benchmarks[`add/remove ${name}`] = async (b) => {
+		do {
+			cycleRoot()
+			b.start()
+			do {
+				m.render(rootElem, treeFn())
+				m.render(rootElem, null)
+			} while (!b.tick())
+			if (isBrowser) await nextFrame()
+		} while (!b.done())
+	}
+}
+
+benchmarks["null test"] = (b) => {
+	do {
+		cycleRoot()
+		b.start()
+		do {
+			// nothing
+		} while (!b.tick())
+	} while (!b.done())
+}
+
+addTree("simpleTree", simpleTree)
+addTree("nestedTree", nestedTree)
+addTree("mutateStylesPropertiesTree", mutateStylesPropertiesTree)
+addTree("repeatedTree", repeatedTree)
+addTree("shuffledKeyedTree", shuffledKeyedTree)
+
+benchmarks["mount simpleTree"] = async (b) => {
+	do {
+		cycleRoot()
+		b.start()
+		do {
+			m.mount(rootElem, simpleTree)
+		} while (!b.tick())
+		if (isBrowser) await nextFrame()
+	} while (!b.done())
+}
+
+benchmarks["redraw simpleTree"] = async (b) => {
+	do {
+		cycleRoot()
+		var redraw = m.mount(rootElem, simpleTree)
+		b.start()
+		do {
+			redraw.sync()
+		} while (!b.tick())
+		if (isBrowser) await nextFrame()
+	} while (!b.done())
+}
+
+benchmarks["mount all"] = async (b) => {
+	do {
+		cycleRoot()
+		allElems = allTrees.map(() => {
+			const elem = document.createElement("div")
+			rootElem.appendChild(elem)
+			return elem
+		})
+		b.start()
+		do {
+			for (let i = 0; i < allTrees.length; i++) {
+				m.mount(allElems[i], allTrees[i])
+			}
+		} while (!b.tick())
+		if (isBrowser) await nextFrame()
+	} while (!b.done())
+}
+
+benchmarks["redraw all"] = async (b) => {
+	do {
+		cycleRoot()
+		const allElems = allTrees.map(() => {
+			const elem = document.createElement("div")
+			rootElem.appendChild(elem)
+			return elem
+		})
+		const allRedraws = allElems.map((elem, i) => m.mount(elem, allTrees[i]))
+		try {
+			b.start()
+			do {
+				for (const redraw of allRedraws) redraw.sync()
+			} while (!b.tick())
+			if (isBrowser) await nextFrame()
+		} finally {
+			for (const elem of allElems) {
+				m.render(elem, null)
+			}
+		}
+	} while (!b.done())
+}
+
+if (isBrowser) {
+	window.onload = run
+} else {
+	run()
+}

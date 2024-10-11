@@ -1,5 +1,3 @@
-import m from "../core.js"
-
 /*
 Here's the intent.
 - Usage in model:
@@ -73,10 +71,10 @@ why that was removed in favor of this:
 /**
  * @template K, V
  * @param {Iterable<[K, V]>} [initial]
- * @param {() => void} [onUpdate]
+ * @param {() => void} redraw
  * @returns {Tracked<K, V>}
  */
-var tracked = (initial, onUpdate = m.redraw) => {
+var tracked = (redraw, initial) => {
 	/** @type {Map<K, TrackedHandle<K, V> & {_: AbortController}>} */ var state = new Map()
 	/** @type {Set<TrackedHandle<K, V>>} */ var live = new Set()
 
@@ -106,7 +104,7 @@ var tracked = (initial, onUpdate = m.redraw) => {
 				if (state.get(handle.key) === handle) {
 					handle._ = null
 				} else if (live.delete(handle)) {
-					onUpdate()
+					redraw()
 				}
 			},
 		}
@@ -116,7 +114,7 @@ var tracked = (initial, onUpdate = m.redraw) => {
 		if (bits & 1) live.delete(prev)
 		abort(prev)
 		// eslint-disable-next-line no-bitwise
-		if (bits & 2) onUpdate()
+		if (bits & 2) redraw()
 	}
 
 	for (var [k, v] of initial || []) setHandle(k, v, 1)
@@ -132,7 +130,7 @@ var tracked = (initial, onUpdate = m.redraw) => {
 			var prev = state.get(k)
 			var result = state.delete(k)
 			abort(prev)
-			onUpdate()
+			redraw()
 			return result
 		},
 	}

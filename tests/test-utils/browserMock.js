@@ -1,39 +1,35 @@
 import o from "ospec"
 
-import browserMock from "../../test-utils/browserMock.js"
 import {callAsync} from "../../test-utils/callAsync.js"
+import {setupGlobals} from "../../test-utils/global.js"
 
 o.spec("browserMock", function() {
-	var $window
-	o.beforeEach(function() {
-		$window = browserMock()
-	})
+	var G = setupGlobals()
 
-	o("Mocks DOM, pushState and XHR", function() {
-		o($window.location).notEquals(undefined)
-		o($window.document).notEquals(undefined)
-		o($window.XMLHttpRequest).notEquals(undefined)
+	o("Mocks DOM and pushState", function() {
+		o(G.window.location).notEquals(undefined)
+		o(G.window.document).notEquals(undefined)
 	})
-	o("$window.onhashchange can be reached from the pushStateMock functions", function(done) {
-		$window.onhashchange = o.spy()
-		$window.location.hash = "#a"
+	o("G.window.onhashchange can be reached from the pushStateMock functions", function(done) {
+		G.window.onhashchange = o.spy()
+		G.window.location.hash = "#a"
 
 		callAsync(function(){
-			o($window.onhashchange.callCount).equals(1)
+			o(G.window.onhashchange.callCount).equals(1)
 			done()
 		})
 	})
-	o("$window.onpopstate can be reached from the pushStateMock functions", function() {
-		$window.onpopstate = o.spy()
-		$window.history.pushState(null, null, "#a")
-		$window.history.back()
+	o("G.window.onpopstate can be reached from the pushStateMock functions", function() {
+		G.window.onpopstate = o.spy()
+		G.window.history.pushState(null, null, "#a")
+		G.window.history.back()
 
-		o($window.onpopstate.callCount).equals(1)
+		o(G.window.onpopstate.callCount).equals(1)
 	})
-	o("$window.onunload can be reached from the pushStateMock functions", function() {
-		$window.onunload = o.spy()
-		$window.location.href = "/a"
+	o("G.window.onunload can be reached from the pushStateMock functions", function() {
+		G.window.onunload = o.spy()
+		G.window.location.href = "/a"
 
-		o($window.onunload.callCount).equals(1)
+		o(G.window.onunload.callCount).equals(1)
 	})
 })

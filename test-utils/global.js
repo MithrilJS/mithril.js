@@ -1,45 +1,103 @@
-import {clearPending} from "./callAsync.js"
+// Load order is important for the imports.
 
 /* global globalThis, window, global */
-export const G = (
+
+import o from "ospec"
+
+import m from "../src/entry/mithril.esm.js"
+
+import browserMock from "./browserMock.js"
+import {clearPending} from "./callAsync.js"
+import throttleMocker from "./throttleMock.js"
+
+const G = (
 	typeof globalThis !== "undefined"
 		? globalThis
 		: typeof window !== "undefined" ? window : global
 )
 
-const keys = [
-	"window",
-	"document",
-	"requestAnimationFrame",
-	"setTimeout",
-	"clearTimeout",
-]
-
-const original = keys.map((k) => G[k])
+const originalWindow = G.window
+const originalDocument = G.document
 const originalConsoleError = console.error
 
-export function injectGlobals($window, rafMock, throttleMock) {
-	if ($window) {
-		for (const k of keys) {
-			if ({}.hasOwnProperty.call($window, k)) G[k] = $window[k]
+export function restoreDOMGlobals() {
+	G.window = originalWindow
+	G.document = originalDocument
+}
+
+export function setupGlobals(env = {}) {
+	let registeredRoots
+	/** @type {ReturnType<import("./browserMock.js")["default"]>} */ let $window
+	/** @type {ReturnType<import("./throttleMock.js")["default"]>} */ let rafMock
+
+	function register(root) {
+		registeredRoots.add(root)
+		return root
+	}
+
+	function initialize(env) {
+		$window = browserMock(env)
+		rafMock = throttleMocker()
+		registeredRoots = new Set([$window.document.body])
+
+		G.window = $window.window
+		G.document = $window.document
+		$window.requestAnimationFrame = rafMock.schedule
+		$window.cancelAnimationFrame = rafMock.clear
+
+		if (env && env.expectNoConsoleError) {
+			console.error = (...args) => {
+				if (typeof process === "function") process.exitCode = 1
+				console.trace("Unexpected `console.error` call")
+				originalConsoleError.apply(console, args)
+			}
 		}
 	}
-	if (rafMock) {
-		G.requestAnimationFrame = rafMock.schedule
-		G.cancelAnimationFrame = rafMock.clear
-	}
-	if (throttleMock) {
-		G.setTimeout = throttleMock.schedule
-		G.clearTimeout = throttleMock.clear
-	}
-}
 
-export function restoreDOMGlobals() {
-	for (let i = 0; i < keys.length; i++) G[keys[i]] = original[i]
-}
+	o.beforeEach(() => {
+		initialize(Object.assign({}, env))
+		return env.initialize && env.initialize()
+	})
 
-export function restoreGlobalState() {
-	restoreDOMGlobals()
-	clearPending()
-	console.error = originalConsoleError
+	o.afterEach(() => {
+		const errors = []
+		const roots = registeredRoots
+		registeredRoots = null
+		for (const root of roots) {
+			try {
+				m.render(root, null)
+			} catch (e) {
+				errors.push(e)
+			}
+		}
+		var mock = rafMock
+		$window = null
+		rafMock = null
+		restoreDOMGlobals()
+		console.error = originalConsoleError
+		clearPending()
+		o(errors).deepEquals([])
+		errors.length = 0
+		o(mock.queueLength()).equals(0)
+		return env.cleanup && env.cleanup()
+	})
+
+	return {
+		initialize,
+		register,
+
+		/** @returns {ReturnType<import("./browserMock.js")["default"]>} */
+		get window() {
+			return $window
+		},
+
+		/** @returns {ReturnType<import("./throttleMock.js")["default"]>} */
+		get rafMock() {
+			return rafMock
+		},
+
+		get root() {
+			return $window.document.body
+		},
+	}
 }

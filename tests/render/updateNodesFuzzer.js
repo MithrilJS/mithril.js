@@ -1,6 +1,7 @@
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
+
 import m from "../../src/entry/mithril.esm.js"
 
 o.spec("updateNodes keyed list Fuzzer", () => {
@@ -35,18 +36,17 @@ o.spec("updateNodes keyed list Fuzzer", () => {
 		}
 	}
 
+	var G = setupGlobals()
+
 	function fuzzGroup(label, view, assert) {
 		o.spec(label, () => {
 			for (let i = 0; i < testCount; i++) {
 				const from = randomUnique(fromUsed)
 				const to = randomUnique(toUsed)
 				o(`${i}: ${from} -> ${to}`, () => {
-					var $window = domMock()
-					var root = $window.document.body
-
-					m.render(root, from.map((x) => m.key(x, view(x))))
-					m.render(root, to.map((x) => m.key(x, view(x))))
-					assert(root, to)
+					m.render(G.root, from.map((x) => m.key(x, view(x))))
+					m.render(G.root, to.map((x) => m.key(x, view(x))))
+					assert(G.root, to)
 				})
 			}
 		})

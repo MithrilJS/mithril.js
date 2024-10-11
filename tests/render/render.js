@@ -1,49 +1,46 @@
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
+
 import m from "../../src/entry/mithril.esm.js"
 
 o.spec("render", function() {
-	var $window, root
-	o.beforeEach(function() {
-		$window = domMock()
-		root = $window.document.createElement("div")
-	})
+	var G = setupGlobals()
 
 	o("renders plain text", function() {
-		m.render(root, "a")
-		o(root.childNodes.length).equals(1)
-		o(root.childNodes[0].nodeValue).equals("a")
+		m.render(G.root, "a")
+		o(G.root.childNodes.length).equals(1)
+		o(G.root.childNodes[0].nodeValue).equals("a")
 	})
 
 	o("updates plain text", function() {
-		m.render(root, "a")
-		m.render(root, "b")
-		o(root.childNodes.length).equals(1)
-		o(root.childNodes[0].nodeValue).equals("b")
+		m.render(G.root, "a")
+		m.render(G.root, "b")
+		o(G.root.childNodes.length).equals(1)
+		o(G.root.childNodes[0].nodeValue).equals("b")
 	})
 
 	o("renders a number", function() {
-		m.render(root, 1)
-		o(root.childNodes.length).equals(1)
-		o(root.childNodes[0].nodeValue).equals("1")
+		m.render(G.root, 1)
+		o(G.root.childNodes.length).equals(1)
+		o(G.root.childNodes[0].nodeValue).equals("1")
 	})
 
 	o("updates a number", function() {
-		m.render(root, 1)
-		m.render(root, 2)
-		o(root.childNodes.length).equals(1)
-		o(root.childNodes[0].nodeValue).equals("2")
+		m.render(G.root, 1)
+		m.render(G.root, 2)
+		o(G.root.childNodes.length).equals(1)
+		o(G.root.childNodes[0].nodeValue).equals("2")
 	})
 
 	o("overwrites existing content", function() {
 		var vnodes = []
 
-		root.appendChild($window.document.createElement("div"));
+		G.root.appendChild(G.window.document.createElement("div"));
 
-		m.render(root, vnodes)
+		m.render(G.root, vnodes)
 
-		o(root.childNodes.length).equals(0)
+		o(G.root.childNodes.length).equals(0)
 	})
 
 	o("throws on invalid root node", function() {
@@ -60,12 +57,12 @@ o.spec("render", function() {
 		var A = o.spy(() => { throw new Error("error") })
 		var throwCount = 0
 
-		try {m.render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(G.root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(A.callCount).equals(1)
 
-		try {m.render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(G.root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(2)
 		o(A.callCount).equals(2)
@@ -74,13 +71,13 @@ o.spec("render", function() {
 		var A = o.spy(() => view)
 		var view = o.spy(() => { throw new Error("error") })
 		var throwCount = 0
-		try {m.render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(G.root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(A.callCount).equals(1)
 		o(view.callCount).equals(1)
 
-		try {m.render(root, m(A))} catch (e) {throwCount++}
+		try {m.render(G.root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(2)
 		o(A.callCount).equals(2)
@@ -89,133 +86,136 @@ o.spec("render", function() {
 	o("lifecycle methods work in keyed children of recycled keyed", function() {
 		var onabortA = o.spy()
 		var onabortB = o.spy()
-		var layoutA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var layoutB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var createA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var updateA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var createB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var updateB = o.spy((_, signal) => { signal.onabort = onabortB })
 		var a = function() {
 			return m.key(1, m("div",
-				m.key(11, m("div", m.layout(layoutA))),
+				m.key(11, m("div", m.layout(createA, updateA))),
 				m.key(12, m("div"))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m.key(21, m("div", m.layout(layoutB))),
+				m.key(21, m("div", m.layout(createB, updateB))),
 				m.key(22, m("div"))
 			))
 		}
-		m.render(root, a())
-		var first = root.firstChild.firstChild
-		m.render(root, b())
-		var second = root.firstChild.firstChild
-		m.render(root, a())
-		var third = root.firstChild.firstChild
+		m.render(G.root, a())
+		var first = G.root.firstChild.firstChild
+		m.render(G.root, b())
+		var second = G.root.firstChild.firstChild
+		m.render(G.root, a())
+		var third = G.root.firstChild.firstChild
 
-		o(layoutA.callCount).equals(2)
-		o(layoutA.calls[0].args[0]).equals(first)
-		o(layoutA.calls[0].args[1].aborted).equals(true)
-		o(layoutA.calls[0].args[2]).equals(true)
-		o(layoutA.calls[1].args[0]).equals(third)
-		o(layoutA.calls[1].args[1].aborted).equals(false)
-		o(layoutA.calls[1].args[2]).equals(true)
+		o(createA.callCount).equals(2)
+		o(createA.calls[0].args[0]).equals(first)
+		o(createA.calls[0].args[1].aborted).equals(true)
+		o(createA.calls[1].args[0]).equals(third)
+		o(createA.calls[1].args[1].aborted).equals(false)
+		o(updateA.callCount).equals(0)
 		o(onabortA.callCount).equals(1)
 
-		o(layoutB.callCount).equals(1)
-		o(layoutB.calls[0].args[0]).equals(second)
-		o(layoutB.calls[0].args[1]).notEquals(layoutA.calls[0].args[1])
-		o(layoutB.calls[0].args[1].aborted).equals(true)
-		o(layoutB.calls[0].args[2]).equals(true)
+		o(createB.callCount).equals(1)
+		o(createB.calls[0].args[0]).equals(second)
+		o(createB.calls[0].args[1]).notEquals(createA.calls[0].args[1])
+		o(createB.calls[0].args[1].aborted).equals(true)
+		o(updateB.callCount).equals(0)
 		o(onabortB.callCount).equals(1)
 	})
 	o("lifecycle methods work in unkeyed children of recycled keyed", function() {
 		var onabortA = o.spy()
 		var onabortB = o.spy()
-		var layoutA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var layoutB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var createA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var updateA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var createB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var updateB = o.spy((_, signal) => { signal.onabort = onabortB })
 		var a = function() {
 			return m.key(1, m("div",
-				m("div", m.layout(layoutA))
+				m("div", m.layout(createA, updateA))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m("div", m.layout(layoutB))
+				m("div", m.layout(createB, updateB))
 			))
 		}
-		m.render(root, a())
-		var first = root.firstChild.firstChild
-		m.render(root, b())
-		var second = root.firstChild.firstChild
-		m.render(root, a())
-		var third = root.firstChild.firstChild
+		m.render(G.root, a())
+		var first = G.root.firstChild.firstChild
+		m.render(G.root, b())
+		var second = G.root.firstChild.firstChild
+		m.render(G.root, a())
+		var third = G.root.firstChild.firstChild
 
-		o(layoutA.callCount).equals(2)
-		o(layoutA.calls[0].args[0]).equals(first)
-		o(layoutA.calls[0].args[1].aborted).equals(true)
-		o(layoutA.calls[0].args[2]).equals(true)
-		o(layoutA.calls[1].args[0]).equals(third)
-		o(layoutA.calls[1].args[1].aborted).equals(false)
-		o(layoutA.calls[1].args[2]).equals(true)
+		o(createA.callCount).equals(2)
+		o(createA.calls[0].args[0]).equals(first)
+		o(createA.calls[0].args[1].aborted).equals(true)
+		o(createA.calls[1].args[0]).equals(third)
+		o(createA.calls[1].args[1].aborted).equals(false)
 		o(onabortA.callCount).equals(1)
 
-		o(layoutB.callCount).equals(1)
-		o(layoutB.calls[0].args[0]).equals(second)
-		o(layoutB.calls[0].args[1]).notEquals(layoutA.calls[0].args[1])
-		o(layoutB.calls[0].args[1].aborted).equals(true)
-		o(layoutB.calls[0].args[2]).equals(true)
+		o(createB.callCount).equals(1)
+		o(createB.calls[0].args[0]).equals(second)
+		o(createB.calls[0].args[1]).notEquals(createA.calls[0].args[1])
+		o(createB.calls[0].args[1].aborted).equals(true)
 		o(onabortB.callCount).equals(1)
 	})
 	o("update lifecycle methods work on children of recycled keyed", function() {
 		var onabortA = o.spy()
 		var onabortB = o.spy()
-		var layoutA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var layoutB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var createA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var updateA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var createB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var updateB = o.spy((_, signal) => { signal.onabort = onabortB })
 
 		var a = function() {
 			return m.key(1, m("div",
-				m("div", m.layout(layoutA))
+				m("div", m.layout(createA, updateA))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m("div", m.layout(layoutB))
+				m("div", m.layout(createB, updateB))
 			))
 		}
-		m.render(root, a())
-		m.render(root, a())
-		var first = root.firstChild.firstChild
-		o(layoutA.callCount).equals(2)
-		o(layoutA.calls[0].args[0]).equals(first)
-		o(layoutA.calls[1].args[0]).equals(first)
-		o(layoutA.calls[0].args[1]).equals(layoutA.calls[1].args[1])
-		o(layoutA.calls[0].args[1].aborted).equals(false)
-		o(layoutA.calls[0].args[2]).equals(true)
-		o(layoutA.calls[1].args[2]).equals(false)
+		m.render(G.root, a())
+		m.render(G.root, a())
+		var first = G.root.firstChild.firstChild
+		o(createA.callCount).equals(1)
+		o(updateA.callCount).equals(1)
+		o(createA.calls[0].args[0]).equals(first)
+		o(updateA.calls[0].args[0]).equals(first)
+		o(createA.calls[0].args[1]).equals(updateA.calls[0].args[1])
+		o(createA.calls[0].args[1].aborted).equals(false)
 		o(onabortA.callCount).equals(0)
 
-		m.render(root, b())
-		var second = root.firstChild.firstChild
-		o(layoutA.callCount).equals(2)
-		o(layoutA.calls[0].args[1].aborted).equals(true)
+		m.render(G.root, b())
+		var second = G.root.firstChild.firstChild
+		o(createA.callCount).equals(1)
+		o(updateA.callCount).equals(1)
+		o(createA.calls[0].args[1].aborted).equals(true)
 		o(onabortA.callCount).equals(1)
 
-		o(layoutB.callCount).equals(1)
-		o(layoutB.calls[0].args[0]).equals(second)
-		o(layoutB.calls[0].args[1].aborted).equals(false)
-		o(layoutB.calls[0].args[2]).equals(true)
+		o(createB.callCount).equals(1)
+		o(updateB.callCount).equals(0)
+		o(createB.calls[0].args[0]).equals(second)
+		o(createB.calls[0].args[1].aborted).equals(false)
 		o(onabortB.callCount).equals(0)
 
-		m.render(root, a())
-		m.render(root, a())
-		var third = root.firstChild.firstChild
-		o(layoutB.callCount).equals(1)
-		o(layoutB.calls[0].args[1].aborted).equals(true)
+		m.render(G.root, a())
+		m.render(G.root, a())
+		var third = G.root.firstChild.firstChild
+		o(createB.callCount).equals(1)
+		o(updateB.callCount).equals(0)
+		o(createB.calls[0].args[1].aborted).equals(true)
 		o(onabortB.callCount).equals(1)
 
-		o(layoutA.callCount).equals(4)
-		o(layoutA.calls[2].args[0]).equals(third)
-		o(layoutA.calls[2].args[1]).notEquals(layoutA.calls[1].args[1])
-		o(layoutA.calls[2].args[1].aborted).equals(false)
-		o(layoutA.calls[2].args[2]).equals(true)
+		o(createA.callCount).equals(2)
+		o(updateA.callCount).equals(2)
+		o(createA.calls[1].args[0]).equals(third)
+		o(createA.calls[1].args[1]).notEquals(updateA.calls[0].args[1])
+		o(createA.calls[1].args[1].aborted).equals(false)
 		o(onabortA.callCount).equals(1)
 	})
 	o("svg namespace is preserved in keyed diff (#1820)", function(){
@@ -224,48 +224,48 @@ o.spec("render", function() {
 			m.key(0, m("g")),
 			m.key(1, m("g"))
 		)
-		m.render(root, svg)
+		m.render(G.root, svg)
 
-		o(svg.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
-		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
-		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.d.namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.d.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.d.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
 
 		svg = m("svg",
 			m.key(1, m("g", {x: 1})),
 			m.key(2, m("g", {x: 2}))
 		)
-		m.render(root, svg)
+		m.render(G.root, svg)
 
-		o(svg.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
-		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
-		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.d.namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.d.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.d.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
 	o("the namespace of the root is passed to children", function() {
-		m.render(root, m("svg"))
-		o(root.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
-		m.render(root.childNodes[0], m("g"))
-		o(root.childNodes[0].childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+		m.render(G.root, m("svg"))
+		o(G.root.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+		m.render(G.root.childNodes[0], m("g"))
+		o(G.root.childNodes[0].childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
 	o("does not allow reentrant invocations", function() {
 		var thrown = []
 		function A() {
-			try {m.render(root, m(A))} catch (e) {thrown.push("construct")}
+			try {m.render(G.root, m(A))} catch (e) {thrown.push("construct")}
 			return () => {
-				try {m.render(root, m(A))} catch (e) {thrown.push("view")}
+				try {m.render(G.root, m(A))} catch (e) {thrown.push("view")}
 			}
 		}
-		m.render(root, m(A))
+		m.render(G.root, m(A))
 		o(thrown).deepEquals([
 			"construct",
 			"view",
 		])
-		m.render(root, m(A))
+		m.render(G.root, m(A))
 		o(thrown).deepEquals([
 			"construct",
 			"view",
 			"view",
 		])
-		m.render(root, [])
+		m.render(G.root, [])
 		o(thrown).deepEquals([
 			"construct",
 			"view",

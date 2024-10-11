@@ -10,7 +10,8 @@ export default (source, notify) => {
 		type: "bytes",
 		start: (ctrl) => reader || ctrl.close(),
 		cancel: (reason) => reader.cancel(reason),
-		pull: (ctrl) => reader.read().then((result) => {
+		async pull(ctrl) {
+			var result = await reader.read()
 			if (result.done) {
 				ctrl.close()
 			} else {
@@ -18,6 +19,6 @@ export default (source, notify) => {
 				ctrl.enqueue(result.value)
 				notify(current)
 			}
-		}),
+		},
 	})
 }

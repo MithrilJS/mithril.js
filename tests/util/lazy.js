@@ -1,23 +1,11 @@
 import o from "ospec"
 
-import domMock from "../../test-utils/domMock.js"
+import {setupGlobals} from "../../test-utils/global.js"
+
 import m from "../../src/entry/mithril.esm.js"
-import makeLazy from "../../src/std/lazy.js"
 
 o.spec("lazy", () => {
-	var consoleError = console.error
-	var $window, root
-	o.beforeEach(() => {
-		$window = domMock()
-		root = $window.document.createElement("div")
-		console.error = (...args) => {
-			consoleError.apply(console, args)
-			throw new Error("should not be called")
-		}
-	})
-	o.afterEach(() => {
-		console.error = consoleError
-	})
+	var G = setupGlobals({expectNoConsoleError: true})
 
 	void [{name: "direct", wrap: (v) => v}, {name: "in module with default", wrap: (v) => ({default:v})}].forEach(({name, wrap}) => {
 		o.spec(name, () => {
@@ -30,22 +18,23 @@ o.spec("lazy", () => {
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((resolve) => send = resolve)
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -60,10 +49,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -72,10 +61,10 @@ o.spec("lazy", () => {
 					"view two",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -96,22 +85,23 @@ o.spec("lazy", () => {
 				var scheduled = 1
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((_, reject) => send = reject)
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -127,10 +117,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -138,10 +128,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -159,7 +149,11 @@ o.spec("lazy", () => {
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((resolve) => send = resolve)
@@ -167,17 +161,14 @@ o.spec("lazy", () => {
 					pending() {
 						calls.push("pending")
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -196,10 +187,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -210,10 +201,10 @@ o.spec("lazy", () => {
 					"view two",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -236,7 +227,11 @@ o.spec("lazy", () => {
 				var scheduled = 1
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((_, reject) => send = reject)
@@ -244,17 +239,14 @@ o.spec("lazy", () => {
 					pending() {
 						calls.push("pending")
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -274,10 +266,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -287,10 +279,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -310,7 +302,11 @@ o.spec("lazy", () => {
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((resolve) => send = resolve)
@@ -318,17 +314,14 @@ o.spec("lazy", () => {
 					error() {
 						calls.push("error")
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -343,10 +336,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -355,10 +348,10 @@ o.spec("lazy", () => {
 					"view two",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -379,7 +372,11 @@ o.spec("lazy", () => {
 				var scheduled = 1
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((_, reject) => send = reject)
@@ -387,17 +384,14 @@ o.spec("lazy", () => {
 					error(e) {
 						calls.push("error", e.message)
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -413,10 +407,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -426,10 +420,10 @@ o.spec("lazy", () => {
 					"error", "test",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -451,7 +445,11 @@ o.spec("lazy", () => {
 				})
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((resolve) => send = resolve)
@@ -462,17 +460,14 @@ o.spec("lazy", () => {
 					error() {
 						calls.push("error")
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -491,10 +486,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -505,10 +500,10 @@ o.spec("lazy", () => {
 					"view two",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -531,7 +526,11 @@ o.spec("lazy", () => {
 				var scheduled = 1
 				var send, notifyRedrawn
 				var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-				var C = makeLazy({
+				var redraw = () => {
+					notifyRedrawn()
+					calls.push(`scheduled ${scheduled++}`)
+				}
+				var C = m.lazy({
 					fetch() {
 						calls.push("fetch")
 						return new Promise((_, reject) => send = reject)
@@ -542,17 +541,14 @@ o.spec("lazy", () => {
 					error(e) {
 						calls.push("error", e.message)
 					},
-				}, () => {
-					notifyRedrawn()
-					calls.push(`scheduled ${scheduled++}`)
 				})
 
 				o(calls).deepEquals([])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -572,10 +568,10 @@ o.spec("lazy", () => {
 					"scheduled 1",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",
@@ -587,10 +583,10 @@ o.spec("lazy", () => {
 					"error", "test",
 				])
 
-				m.render(root, [
+				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				])
+				], redraw)
 
 				o(calls).deepEquals([
 					"fetch",

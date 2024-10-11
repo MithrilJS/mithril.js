@@ -1,6 +1,6 @@
 import o from "ospec"
 
-import makeTracked from "../../src/std/tracked.js"
+import m from "../../src/entry/mithril.esm.js"
 
 o.spec("tracked", () => {
 	/** @param {import("../tracked.js").Tracked<number, string>} t */
@@ -8,7 +8,7 @@ o.spec("tracked", () => {
 
 	o("initializes values correctly", () => {
 		var calls = 0
-		var t = makeTracked([[1, "one"], [2, "two"]], () => calls++)
+		var t = m.tracked(() => calls++, [[1, "one"], [2, "two"]])
 
 		o(live(t)).deepEquals([[1, "one", false], [2, "two", false]])
 		o(t.list()).deepEquals([[1, "one"], [2, "two"]])
@@ -23,7 +23,7 @@ o.spec("tracked", () => {
 
 	o("tracks values correctly", () => {
 		var calls = 0
-		var t = makeTracked(undefined, () => calls++)
+		var t = m.tracked(() => calls++)
 
 		t.set(1, "one")
 		o(calls).equals(1)
@@ -92,7 +92,7 @@ o.spec("tracked", () => {
 		var live1Aborted = false
 		var live2Aborted = false
 		var call = 0
-		var t = makeTracked(undefined, () => {
+		var t = m.tracked(() => {
 			switch (++call) {
 				case 1:
 					o(live(t)).deepEquals([[1, "one", false]])
@@ -207,7 +207,7 @@ o.spec("tracked", () => {
 
 	o("tracks parallel removes correctly", () => {
 		var calls = 0
-		var t = makeTracked(undefined, () => calls++)
+		var t = m.tracked(() => calls++)
 
 		t.set(1, "one")
 		var live1 = t.live()[0]
@@ -261,7 +261,7 @@ o.spec("tracked", () => {
 
 	o("tolerates release before abort", () => {
 		var calls = 0
-		var t = makeTracked(undefined, () => calls++)
+		var t = m.tracked(() => calls++)
 
 		t.set(1, "one")
 		o(calls).equals(1)
@@ -288,7 +288,7 @@ o.spec("tracked", () => {
 
 	o("tolerates double release before abort", () => {
 		var calls = 0
-		var t = makeTracked(undefined, () => calls++)
+		var t = m.tracked(() => calls++)
 
 		t.set(1, "one")
 		var live1 = t.live()[0]
@@ -311,7 +311,7 @@ o.spec("tracked", () => {
 
 	o("tolerates double release spanning delete", () => {
 		var calls = 0
-		var t = makeTracked(undefined, () => calls++)
+		var t = m.tracked(() => calls++)
 
 		t.set(1, "one")
 		var live1 = t.live()[0]
@@ -328,7 +328,7 @@ o.spec("tracked", () => {
 
 	o("tracks double release after delete", () => {
 		var calls = 0
-		var t = makeTracked(undefined, () => calls++)
+		var t = m.tracked(() => calls++)
 
 		t.set(1, "one")
 		var live1 = t.live()[0]
