@@ -94,6 +94,7 @@ var TYPE_ELEMENT = 3
 var TYPE_COMPONENT = 4
 var TYPE_LAYOUT = 5
 var TYPE_REMOVE = 6
+var TYPE_SET_CONTEXT = 7
 
 var FLAG_KEYED = 1 << 3
 var FLAG_USED = 1 << 4
@@ -226,10 +227,12 @@ m.TYPE_MASK = TYPE_MASK
 m.TYPE_RETAIN = TYPE_RETAIN
 m.TYPE_FRAGMENT = TYPE_FRAGMENT
 m.TYPE_KEY = TYPE_KEY
-m.TYPE_LAYOUT = TYPE_LAYOUT
 m.TYPE_TEXT = TYPE_TEXT
 m.TYPE_ELEMENT = TYPE_ELEMENT
 m.TYPE_COMPONENT = TYPE_COMPONENT
+m.TYPE_LAYOUT = TYPE_LAYOUT
+m.TYPE_REMOVE = TYPE_REMOVE
+m.TYPE_SET_CONTEXT = TYPE_SET_CONTEXT
 
 // Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
 // redrawing.
@@ -256,8 +259,14 @@ m.remove = (callback) => {
 }
 
 m.Fragment = (attrs) => attrs.children
+
 m.key = (key, ...children) =>
 	createParentVnode(TYPE_KEY, key, null, null,
+		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
+	)
+
+m.set = (entries, ...children) =>
+	createParentVnode(TYPE_SET_CONTEXT, null, null, entries,
 		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
 	)
 
@@ -310,6 +319,7 @@ var currentParent
 var currentRefNode
 var currentNamespace
 var currentDocument
+var currentContext
 
 var insertAfterCurrentRefNode = (child) => {
 	if (currentRefNode) {
@@ -325,9 +335,9 @@ var moveToPosition = (vnode) => {
 	while ((type = vnode.m & TYPE_MASK) === TYPE_COMPONENT) {
 		if (!(vnode = vnode.c)) return
 	}
-	if ((1 << TYPE_FRAGMENT | 1 << TYPE_KEY) & 1 << type) {
+	if ((1 << TYPE_FRAGMENT | 1 << TYPE_KEY | 1 << TYPE_SET_CONTEXT) & 1 << type) {
 		vnode.c.forEach(moveToPosition)
-	} else {
+	} else if ((1 << TYPE_TEXT | 1 << TYPE_ELEMENT) & 1 << type) {
 		insertAfterCurrentRefNode(vnode.d)
 	}
 }
@@ -467,6 +477,26 @@ var updateRemove = (_, vnode) => {
 	vnode.d = currentParent
 }
 
+var emptyObject = {}
+
+var updateSet = (old, vnode) => {
+	var descs = Object.getOwnPropertyDescriptors(vnode.a)
+	for (var key of Reflect.ownKeys(descs)) {
+		// Drop the descriptor entirely if it's not enumerable. Setting it to an empty object
+		// avoids changing its shape, which is useful.
+		if (!descs[key].enumerable) descs[key] = emptyObject
+		// Drop the setter if one is present, to keep it read-only.
+		else if ("set" in descs[key]) descs[key].set = undefined
+	}
+	var prevContext = currentContext
+	try {
+		currentContext = Object.freeze(Object.create(prevContext, descs))
+		updateFragment(old, vnode)
+	} finally {
+		currentContext = prevContext
+	}
+}
+
 var updateText = (old, vnode) => {
 	if (old == null) {
 		insertAfterCurrentRefNode(vnode.d = currentDocument.createTextNode(vnode.s))
@@ -584,23 +614,24 @@ var updateElement = (old, vnode) => {
 
 var updateComponent = (old, vnode) => {
 	var attrs = vnode.a
-	var context = {redraw: currentRedraw}
-	var tree, context, oldInstance, oldAttrs
+	var tree, oldInstance, oldAttrs
 	rendered: {
 		if (old != null) {
 			tree = old.s
 			oldInstance = old.c
 			oldAttrs = old.a
-		} else if (typeof (tree = (vnode.s = vnode.t)(attrs, null, context)) !== "function") {
+		} else if (typeof (tree = (vnode.s = vnode.t)(attrs, oldAttrs, currentContext)) !== "function") {
 			break rendered
 		}
-		tree = (vnode.s = tree)(attrs, oldAttrs, context)
+		tree = (vnode.s = tree)(attrs, oldAttrs, currentContext)
 	}
 	if (tree === vnode) {
 		throw new Error("A view cannot return the vnode it received as argument")
 	}
 	updateNode(oldInstance, vnode.c = m.normalize(tree))
 }
+
+var removeFragment = (old) => updateFragment(old, null)
 
 // Replaces an otherwise necessary `switch`.
 var updateNodeDispatch = [
@@ -611,11 +642,12 @@ var updateNodeDispatch = [
 	updateComponent,
 	updateLayout,
 	updateRemove,
+	updateSet,
 ]
 
 var removeNodeDispatch = [
-	(old) => updateFragment(old, null),
-	(old) => updateFragment(old, null),
+	removeFragment,
+	removeFragment,
 	(old) => old.d.remove(),
 	(old) => {
 		old.d.remove()
@@ -624,6 +656,7 @@ var removeNodeDispatch = [
 	(old) => updateNode(old.c, null),
 	() => {},
 	(old) => currentHooks.push(old),
+	removeFragment,
 ]
 
 //attrs
@@ -954,6 +987,10 @@ m.render = (dom, vnodes, redraw) => {
 		throw new TypeError("Node is currently being rendered to and thus is locked.")
 	}
 
+	if (redraw != null && typeof redraw !== "function") {
+		throw new TypeError("Redraw must be a function if given.")
+	}
+
 	var active = dom.ownerDocument.activeElement
 	var namespace = dom.namespaceURI
 
@@ -963,6 +1000,7 @@ m.render = (dom, vnodes, redraw) => {
 	var prevRefNode = currentRefNode
 	var prevNamespace = currentNamespace
 	var prevDocument = currentDocument
+	var prevContext = currentContext
 	var hooks = currentHooks = []
 
 	try {
@@ -971,6 +1009,7 @@ m.render = (dom, vnodes, redraw) => {
 		currentRefNode = null
 		currentNamespace = namespace === htmlNs ? null : namespace
 		currentDocument = dom.ownerDocument
+		currentContext = {redraw}
 
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
@@ -981,9 +1020,9 @@ m.render = (dom, vnodes, redraw) => {
 		if (active != null && currentDocument.activeElement !== active && typeof active.focus === "function") {
 			active.focus()
 		}
-		for (var v of hooks) {
+		for (var {s, d} of hooks) {
 			try {
-				(0, v.s)(v.d)
+				s(d)
 			} catch (e) {
 				console.error(e)
 			}
@@ -995,6 +1034,7 @@ m.render = (dom, vnodes, redraw) => {
 		currentRefNode = prevRefNode
 		currentNamespace = prevNamespace
 		currentDocument = prevDocument
+		currentContext = prevContext
 		currentlyRendering.pop()
 	}
 }

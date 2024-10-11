@@ -1,6 +1,6 @@
 import o from "ospec"
 
-import {restoreDOMGlobals, setupGlobals} from "../../test-utils/global.js"
+import {setupGlobals} from "../../test-utils/global.js"
 
 import m from "../../src/entry/mithril.esm.js"
 
@@ -16,36 +16,52 @@ o.spec("route", () => {
 				o("returns the right route on init", () => {
 					G.window.location.href = `${prefix}/`
 
-					m.route.init(prefix)
-					o(m.route.path).equals("/")
-					o([...m.route.params]).deepEquals([])
+					var App = o.spy()
+
+					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+
+					o(App.callCount).equals(1)
+					o(App.args[2].route.path).equals("/")
+					o([...App.args[2].route.params]).deepEquals([])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
 				o("returns alternate right route on init", () => {
 					G.window.location.href = `${prefix}/test`
 
-					m.route.init(prefix)
-					o(m.route.path).equals("/test")
-					o([...m.route.params]).deepEquals([])
+					var App = o.spy()
+
+					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+
+					o(App.callCount).equals(1)
+					o(App.args[2].route.path).equals("/test")
+					o([...App.args[2].route.params]).deepEquals([])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
 				o("returns right route on init with escaped unicode", () => {
 					G.window.location.href = `${prefix}/%C3%B6?%C3%B6=%C3%B6`
 
-					m.route.init(prefix)
-					o(m.route.path).equals("/ö")
-					o([...m.route.params]).deepEquals([["ö", "ö"]])
+					var App = o.spy()
+
+					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+
+					o(App.callCount).equals(1)
+					o(App.args[2].route.path).equals("/ö")
+					o([...App.args[2].route.params]).deepEquals([["ö", "ö"]])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
 				o("returns right route on init with unescaped unicode", () => {
 					G.window.location.href = `${prefix}/ö?ö=ö`
 
-					m.route.init(prefix)
-					o(m.route.path).equals("/ö")
-					o([...m.route.params]).deepEquals([["ö", "ö"]])
+					var App = o.spy()
+
+					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+
+					o(App.callCount).equals(1)
+					o(App.args[2].route.path).equals("/ö")
+					o([...App.args[2].route.params]).deepEquals([["ö", "ö"]])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
@@ -53,21 +69,24 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/a`
 					var spy1 = o.spy()
 					var spy2 = o.spy()
+					var route
 
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/a") {
+					var App = (_attrs, _old, context) => {
+						route = context.route
+						if (route.path === "/a") {
 							spy1()
-						} else if (m.route.path === "/b") {
+						} else if (route.path === "/b") {
 							spy2()
 						} else {
-							throw new Error(`Unknown path ${m.route.path}`)
+							throw new Error(`Unknown path ${route.path}`)
 						}
-					})
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					o(spy1.callCount).equals(1)
 					o(spy2.callCount).equals(0)
-					m.route.set("/b")
+					route.set("/b")
 					o(spy1.callCount).equals(1)
 					o(spy2.callCount).equals(0)
 
@@ -81,7 +100,13 @@ o.spec("route", () => {
 
 				o("sets route via pushState/onpopstate", async () => {
 					G.window.location.href = `${prefix}/test`
-					m.route.init(prefix)
+
+					var route
+					var App = (_attrs, _old, context) => {
+						route = context.route
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					await Promise.resolve()
 					G.rafMock.fire()
@@ -93,7 +118,7 @@ o.spec("route", () => {
 					G.rafMock.fire()
 
 					// Yep, before even the throttle mechanism takes hold.
-					o(m.route.get()).equals("/other/x/y/z?c=d#e=f")
+					o(route.current).equals("/other/x/y/z?c=d#e=f")
 
 					await Promise.resolve()
 					G.rafMock.fire()
@@ -103,9 +128,15 @@ o.spec("route", () => {
 
 				o("`replace: true` works", async () => {
 					G.window.location.href = `${prefix}/test`
-					m.route.init(prefix)
 
-					m.route.set("/other", {replace: true})
+					var route
+					var App = (_attrs, _old, context) => {
+						route = context.route
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+
+					route.set("/other", {replace: true})
 
 					await Promise.resolve()
 					G.rafMock.fire()
@@ -122,25 +153,25 @@ o.spec("route", () => {
 
 				o("`replace: true` works in links", async () => {
 					G.window.location.href = `${prefix}/test`
-					m.route.init(prefix)
 
 					var e = G.window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
 					e.button = 0
 
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/test") {
-							return m("a", m.route.link({href: "/other", replace: true}))
-						} else if (m.route.path === "/other") {
+					var App = (_attrs, _old, {route}) => {
+						if (route.path === "/test") {
+							return m("a", m(m.Link, {href: "/other", replace: true}))
+						} else if (route.path === "/other") {
 							return m("div")
-						} else if (m.route.path === "/") {
+						} else if (route.path === "/") {
 							return m("span")
 						} else {
-							throw new Error(`Unknown route: ${m.route.path}`)
+							throw new Error(`Unknown route: ${route.path}`)
 						}
-					})
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					G.root.firstChild.dispatchEvent(e)
 
@@ -159,9 +190,15 @@ o.spec("route", () => {
 
 				o("`replace: false` works", async () => {
 					G.window.location.href = `${prefix}/test`
-					m.route.init(prefix)
 
-					m.route.set("/other", {replace: false})
+					var route
+					var App = (_attrs, _old, context) => {
+						route = context.route
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+
+					route.set("/other", {replace: false})
 
 					await Promise.resolve()
 					G.rafMock.fire()
@@ -184,16 +221,17 @@ o.spec("route", () => {
 					e.initEvent("click", true, true)
 					e.button = 0
 
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/test") {
-							return m("a", m.route.link({href: "/other", replace: false}))
-						} else if (m.route.path === "/other") {
+					var App = (_attrs, _old, {route}) => {
+						if (route.path === "/test") {
+							return m("a", m(m.Link, {href: "/other", replace: false}))
+						} else if (route.path === "/other") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${m.route.path}`)
+							throw new Error(`Unknown route: ${route.path}`)
 						}
-					})
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					G.root.firstChild.dispatchEvent(e)
 
@@ -212,9 +250,15 @@ o.spec("route", () => {
 
 				o("state works", async () => {
 					G.window.location.href = `${prefix}/test`
-					m.route.init(prefix)
 
-					m.route.set("/other", {state: {a: 1}})
+					var route
+					var App = (_attrs, _old, context) => {
+						route = context.route
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+
+					route.set("/other", {state: {a: 1}})
 
 					await Promise.resolve()
 					G.rafMock.fire()
@@ -226,18 +270,30 @@ o.spec("route", () => {
 				o("adds trailing slash where needed", () => {
 					G.window.location.href = `${prefix}/test`
 
-					m.route.init(`${prefix}/`)
-					o(m.route.path).equals("/test")
-					o([...m.route.params]).deepEquals([])
+					var route
+					var App = (_attrs, _old, context) => {
+						route = context.route
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix: `${prefix}/`}, m(App)))
+
+					o(route.path).equals("/test")
+					o([...route.params]).deepEquals([])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
 				o("handles route with search", () => {
 					G.window.location.href = `${prefix}/test?a=b&c=d`
 
-					m.route.init(prefix)
-					o(m.route.path).equals("/test")
-					o([...m.route.params]).deepEquals([["a", "b"], ["c", "d"]])
+					var route
+					var App = (_attrs, _old, context) => {
+						route = context.route
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+
+					o(route.path).equals("/test")
+					o([...route.params]).deepEquals([["a", "b"], ["c", "d"]])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
@@ -245,7 +301,9 @@ o.spec("route", () => {
 					G.window.location.href = "http://old.com"
 					G.window.location.href = "http://new.com"
 
-					m.route.init(prefix)
+					var App = () => {}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					G.window.history.back()
 
@@ -261,16 +319,18 @@ o.spec("route", () => {
 					e.button = 0
 
 					G.window.location.href = `${prefix}/`
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/") {
-							return m("a", m.route.link({href: "/test"}))
-						} else if (m.route.path === "/test") {
+
+					var App = (_attrs, _old, {route}) => {
+						if (route.path === "/") {
+							return m("a", m(m.Link, {href: "/test"}))
+						} else if (route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${m.route.path}`)
+							throw new Error(`Unknown route: ${route.path}`)
 						}
-					})
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					o(G.window.location.href).equals(fullPrefix)
 
@@ -289,16 +349,18 @@ o.spec("route", () => {
 					e.initEvent("click", true, true)
 					e.button = 0
 					G.window.location.href = `${prefix}/`
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/") {
-							return m("a", m.route.link({href: "/test", state: {a: 1}}))
-						} else if (m.route.path === "/test") {
+
+					var App = (_attrs, _old, {route}) => {
+						if (route.path === "/") {
+							return m("a", m(m.Link, {href: "/test", state: {a: 1}}))
+						} else if (route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${m.route.path}`)
+							throw new Error(`Unknown route: ${route.path}`)
 						}
-					})
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					G.root.firstChild.dispatchEvent(e)
 
@@ -309,20 +371,6 @@ o.spec("route", () => {
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
-				o("route.Link can render without routes or dom access", () => {
-					restoreDOMGlobals()
-					m.route.init(prefix, null, "https://localhost/")
-
-					var enabled = m.route.link({href: "/test"})
-					o(Object.keys(enabled)).deepEquals(["href", "onclick"])
-					o(enabled.href).equals(`${prefix}/test`)
-					o(typeof enabled.onclick).equals("function")
-
-					var disabled = m.route.link({disabled: true, href: "/test"})
-					o(disabled).deepEquals({disabled: true, "aria-disabled": "true"})
-					o(G.rafMock.queueLength()).equals(0)
-				})
-
 				o("route.Link doesn't redraw on wrong button", async () => {
 					var e = G.window.document.createEvent("MouseEvents")
 
@@ -330,21 +378,22 @@ o.spec("route", () => {
 					e.button = 10
 
 					G.window.location.href = `${prefix}/`
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/") {
-							return m("a", m.route.link({href: "/test"}))
-						} else if (m.route.path === "/test") {
+
+					var App = (_attrs, _old, {route}) => {
+						if (route.path === "/") {
+							return m("a", m(m.Link, {href: "/test"}))
+						} else if (route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${m.route.path}`)
+							throw new Error(`Unknown route: ${route.path}`)
 						}
-					})
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					o(G.window.location.href).equals(fullPrefix)
 
 					G.root.firstChild.dispatchEvent(e)
-
 
 					await Promise.resolve()
 					G.rafMock.fire()
@@ -360,16 +409,18 @@ o.spec("route", () => {
 					e.button = 0
 
 					G.window.location.href = `${prefix}/`
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/") {
-							return m("a", m.route.link({href: "/test", onclick(e) { e.preventDefault() }}))
-						} else if (m.route.path === "/test") {
+
+					var App = (_attrs, _old, {route}) => {
+						if (route.path === "/") {
+							return m("a", {onclick(e) { e.preventDefault() }}, m(m.Link, {href: "/test"}))
+						} else if (route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${m.route.path}`)
+							throw new Error(`Unknown route: ${route.path}`)
 						}
-					})
+					}
+
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
 					o(G.window.location.href).equals(fullPrefix)
 
@@ -382,83 +433,32 @@ o.spec("route", () => {
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
-				o("route.Link ignores `return false`", async () => {
-					var e = G.window.document.createEvent("MouseEvents")
-
-					e.initEvent("click", true, true)
-					e.button = 0
-
+				o("`route.set(m.route.current)` re-runs the resolution logic (#1180)", async () => {
 					G.window.location.href = `${prefix}/`
-					m.mount(G.root, (isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
-						if (m.route.path === "/") {
-							return m("a", m.route.link({href: "/test", onclick: () => false}))
-						} else if (m.route.path === "/test") {
-							return m("div")
-						} else {
-							throw new Error(`Unknown route: ${m.route.path}`)
-						}
-					})
 
-					o(G.window.location.href).equals(fullPrefix)
-
-					G.root.firstChild.dispatchEvent(e)
-
-					await Promise.resolve()
-					G.rafMock.fire()
-
-					o(G.window.location.href).equals(`${fullPrefix}test`)
-					o(G.rafMock.queueLength()).equals(0)
-				})
-
-				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", async () => {
-					var render = o.spy((isInit, redraw) => {
-						if (isInit) m.route.init(prefix, redraw)
+					var route
+					var App = o.spy((_attrs, _old, context) => {
+						route = context.route
 						return m("div")
 					})
 
-					G.window.location.href = `${prefix}/`
-					m.mount(G.root, render)
+					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
 
-					o(render.callCount).equals(1)
-
-					await Promise.resolve()
-					G.rafMock.fire()
-
-					o(render.callCount).equals(1)
-
-					m.route.set(m.route.get())
+					o(App.callCount).equals(1)
 
 					await Promise.resolve()
 					G.rafMock.fire()
+
+					o(App.callCount).equals(1)
+
+					route.set(route.current)
+
+					await Promise.resolve()
+					G.rafMock.fire()
 					await Promise.resolve()
 					G.rafMock.fire()
 
-					o(render.callCount).equals(2)
-					o(G.rafMock.queueLength()).equals(0)
-				})
-
-				o("throttles", () => {
-					var i = 0
-
-					G.window.location.href = `${prefix}/`
-					var redraw = m.mount(G.root, (redraw, isInit) => {
-						if (isInit) m.route.init(prefix, redraw)
-						i++
-					})
-					var before = i
-
-					redraw()
-					redraw()
-					redraw()
-					redraw()
-					var after = i
-
-					G.rafMock.fire()
-
-					o(before).equals(1) // routes synchronously
-					o(after).equals(1) // redraws asynchronously
-					o(i).equals(2)
+					o(App.callCount).equals(2)
 					o(G.rafMock.queueLength()).equals(0)
 				})
 			})

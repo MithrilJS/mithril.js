@@ -72,18 +72,21 @@ o.spec("api", function() {
 		})
 	})
 
-	o.spec("m.route", function() {
+	o.spec("m.WithRouter, m.Link", function() {
 		o("works", async() => {
-			m.mount(G.root, (isInit, redraw) => {
-				if (isInit) m.route.init("#", redraw)
-				if (m.route.path === "/a") {
+			var route
+			var App = (_attrs, _old, context) => {
+				route = context.route
+				if (route.path === "/a") {
 					return m("div")
-				} else if (m.route.path === "/b") {
-					return m("span")
+				} else if (route.path === "/b") {
+					return m("a", m(m.Link, {href: "/a"}))
 				} else {
-					m.route.set("/a")
+					route.set("/a")
 				}
-			})
+			}
+
+			m.mount(G.root, () => m(m.WithRouter, {prefix: "#"}, m(App)))
 
 			await Promise.resolve()
 			G.rafMock.fire()
@@ -91,15 +94,15 @@ o.spec("api", function() {
 
 			o(G.root.childNodes.length).equals(1)
 			o(G.root.firstChild.nodeName).equals("DIV")
-			o(m.route.get()).equals("/a")
+			o(route.current).equals("/a")
 
-			m.route.set("/b")
+			route.set("/b")
 
 			await Promise.resolve()
 			G.rafMock.fire()
 			o(G.rafMock.queueLength()).equals(0)
 
-			o(m.route.get()).equals("/b")
+			o(route.current).equals("/b")
 		})
 	})
 })
