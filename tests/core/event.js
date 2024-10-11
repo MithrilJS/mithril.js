@@ -9,7 +9,7 @@ o.spec("event", function() {
 	var G = setupGlobals({initialize() { redraw = o.spy() }})
 
 	function render(dom, vnode) {
-		return m.render(dom, vnode, redraw)
+		return m.render(dom, vnode, {redraw})
 	}
 
 	function eventSpy(fn) {
@@ -286,7 +286,7 @@ o.spec("event", function() {
 	o("handles changed spy", function() {
 		var div1 = m("div", {ontransitionend: function() {}})
 
-		m.render(G.root, [div1], redraw)
+		m.render(G.root, [div1], {redraw})
 		var e = G.window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 		div1.d.dispatchEvent(e)
@@ -298,7 +298,7 @@ o.spec("event", function() {
 		var replacementRedraw = o.spy()
 		var div2 = m("div", {ontransitionend: function() {}})
 
-		m.render(G.root, [div2], replacementRedraw)
+		m.render(G.root, [div2], {redraw: replacementRedraw})
 		var e = G.window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 		div2.d.dispatchEvent(e)

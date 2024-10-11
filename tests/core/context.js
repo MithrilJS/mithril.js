@@ -32,7 +32,7 @@ o.spec("context", () => {
 		var Comp = o.spy()
 		var vnode = m.set({key: "value", one: "two"}, m(Comp))
 
-		m.render(G.root, vnode, redraw)
+		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(1)
 		o(allKeys(Comp.args[2])).deepEquals({
@@ -43,7 +43,7 @@ o.spec("context", () => {
 
 		var vnode = m.set({key: "updated", two: "three"}, m(Comp))
 
-		m.render(G.root, vnode, redraw)
+		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(2)
 		o(allKeys(Comp.args[2])).deepEquals({
@@ -64,7 +64,7 @@ o.spec("context", () => {
 		var Comp = o.spy()
 		var vnode = m.set({[key]: "value", [one]: "two"}, m(Comp))
 
-		m.render(G.root, vnode, redraw)
+		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(1)
 		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({
@@ -75,7 +75,7 @@ o.spec("context", () => {
 
 		var vnode = m.set({[key]: "updated", [two]: "three"}, m(Comp))
 
-		m.render(G.root, vnode, redraw)
+		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(2)
 		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({
@@ -94,7 +94,7 @@ o.spec("context", () => {
 		var Comp = o.spy()
 		var vnode = m.set({[key]: "value", one: "two"}, m(Comp))
 
-		m.render(G.root, vnode, redraw)
+		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(1)
 		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({
@@ -105,7 +105,7 @@ o.spec("context", () => {
 
 		var vnode = m.set({[key]: "updated", two: "three"}, m(Comp))
 
-		m.render(G.root, vnode, redraw)
+		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(2)
 		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({

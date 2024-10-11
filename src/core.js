@@ -981,7 +981,7 @@ class EventDict extends Map {
 
 var currentlyRendering = []
 
-m.render = (dom, vnodes, redraw) => {
+m.render = (dom, vnodes, {redraw} = {}) => {
 	if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 	if (currentlyRendering.some((d) => d === dom || d.contains(dom))) {
 		throw new TypeError("Node is currently being rendered to and thus is locked.")
@@ -1061,11 +1061,11 @@ m.mount = (root, view) => {
 	]
 	redraw.sync = () => {
 		unschedule()
-		m.render(root, m(Mount), redraw)
+		m.render(root, m(Mount), {redraw})
 	}
 
 	m.render(root, null)
-	m.render(root, m(Mount), redraw)
+	redraw.sync()
 
 	return redraw
 }

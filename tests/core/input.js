@@ -33,7 +33,7 @@ o.spec("form inputs", function() {
 			var updated = m("input", {value: "aaa", oninput: function() {}})
 			var redraw = o.spy()
 
-			m.render(G.root, input, redraw)
+			m.render(G.root, input, {redraw})
 
 			//simulate user typing
 			var e = G.window.document.createEvent("KeyboardEvent")
@@ -44,7 +44,7 @@ o.spec("form inputs", function() {
 			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			m.render(G.root, updated, redraw)
+			m.render(G.root, updated, {redraw})
 
 			o(updated.d.value).equals("aaa")
 			o(redraw.callCount).equals(1)
@@ -65,7 +65,7 @@ o.spec("form inputs", function() {
 			var updated = m("input", {type: "checkbox", checked: true, onclick: function() {}})
 			var redraw = o.spy()
 
-			m.render(G.root, input, redraw)
+			m.render(G.root, input, {redraw})
 
 			//simulate user clicking checkbox
 			var e = G.window.document.createEvent("MouseEvents")
@@ -75,7 +75,7 @@ o.spec("form inputs", function() {
 			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			m.render(G.root, updated, redraw)
+			m.render(G.root, updated, {redraw})
 
 			o(updated.d.checked).equals(true)
 			o(redraw.callCount).equals(1)

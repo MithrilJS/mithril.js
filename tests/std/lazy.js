@@ -34,7 +34,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -52,7 +52,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -64,7 +64,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -101,7 +101,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -120,7 +120,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -131,7 +131,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -168,7 +168,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -190,7 +190,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -204,7 +204,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -246,7 +246,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -269,7 +269,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -282,7 +282,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -321,7 +321,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -339,7 +339,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -351,7 +351,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -391,7 +391,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -410,7 +410,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -423,7 +423,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -467,7 +467,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -489,7 +489,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -503,7 +503,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -548,7 +548,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -571,7 +571,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",
@@ -586,7 +586,7 @@ o.spec("lazy", () => {
 				m.render(G.root, [
 					m(C, {name: "one"}),
 					m(C, {name: "two"}),
-				], redraw)
+				], {redraw})
 
 				o(calls).deepEquals([
 					"fetch",

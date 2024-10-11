@@ -12,7 +12,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return undefined })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -21,13 +21,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(1)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)
@@ -39,7 +39,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return Promise.resolve(undefined) })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -48,13 +48,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(1)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)
@@ -66,7 +66,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return null })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -75,13 +75,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(1)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)
@@ -93,7 +93,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return Promise.resolve(null) })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -102,13 +102,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(1)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)
@@ -120,7 +120,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return true })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -129,13 +129,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(1)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)
@@ -147,7 +147,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return Promise.resolve(true) })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -156,13 +156,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(1)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)
@@ -174,7 +174,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return false })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -183,13 +183,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)
@@ -201,7 +201,7 @@ o.spec("m.init", () => {
 		var initializer = o.spy((signal) => { signal.onabort = onabort; return Promise.resolve(false) })
 		var redraw = o.spy()
 
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 		o(initializer.callCount).equals(0)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
@@ -210,13 +210,13 @@ o.spec("m.init", () => {
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, m.init(initializer), redraw)
+		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
 		o(redraw.callCount).equals(0)
-		m.render(G.window.document.body, null, redraw)
+		m.render(G.root, null, {redraw})
 
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(1)

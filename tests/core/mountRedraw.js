@@ -475,7 +475,7 @@ o.spec("mount/redraw", function() {
 		o(G.rafMock.queueLength()).equals(0)
 	})
 
-	o("remounts after `m.render(G.root, null)` is invoked on the mounted root", function() {
+	o("remounts after `m.render(root, null)` is invoked on the mounted root", function() {
 		var onRemove = o.spy()
 		var onLayout = o.spy()
 
