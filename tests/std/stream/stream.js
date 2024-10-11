@@ -45,7 +45,7 @@ o.spec("stream", function() {
 	o.spec("combine", function() {
 		o("transforms value", function() {
 			var stream = Stream()
-			var doubled = Stream.combine(function(s) {return s() * 2}, [stream])
+			var doubled = Stream.combine(function() {return stream() * 2}, [stream])
 
 			stream(2)
 
@@ -53,14 +53,14 @@ o.spec("stream", function() {
 		})
 		o("transforms default value", function() {
 			var stream = Stream(2)
-			var doubled = Stream.combine(function(s) {return s() * 2}, [stream])
+			var doubled = Stream.combine(function() {return stream() * 2}, [stream])
 
 			o(doubled()).equals(4)
 		})
 		o("transforms multiple values", function() {
 			var s1 = Stream()
 			var s2 = Stream()
-			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
+			var added = Stream.combine(function() {return s1() + s2()}, [s1, s2])
 
 			s1(2)
 			s2(3)
@@ -70,14 +70,14 @@ o.spec("stream", function() {
 		o("transforms multiple default values", function() {
 			var s1 = Stream(2)
 			var s2 = Stream(3)
-			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
+			var added = Stream.combine(function() {return s1() + s2()}, [s1, s2])
 
 			o(added()).equals(5)
 		})
 		o("transforms mixed default and late-bound values", function() {
 			var s1 = Stream(2)
 			var s2 = Stream()
-			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
+			var added = Stream.combine(function() {return s1() + s2()}, [s1, s2])
 
 			s2(3)
 
@@ -86,9 +86,9 @@ o.spec("stream", function() {
 		o("combines atomically", function() {
 			var count = 0
 			var a = Stream()
-			var b = Stream.combine(function(a) {return a() * 2}, [a])
-			var c = Stream.combine(function(a) {return a() * a()}, [a])
-			var d = Stream.combine(function(b, c) {
+			var b = Stream.combine(function() {return a() * 2}, [a])
+			var c = Stream.combine(function() {return a() * a()}, [a])
+			var d = Stream.combine(function() {
 				count++
 				return b() + c()
 			}, [b, c])
@@ -102,9 +102,9 @@ o.spec("stream", function() {
 		o("combines default value atomically", function() {
 			var count = 0
 			var a = Stream(3)
-			var b = Stream.combine(function(a) {return a() * 2}, [a])
-			var c = Stream.combine(function(a) {return a() * a()}, [a])
-			var d = Stream.combine(function(b, c) {
+			var b = Stream.combine(function() {return a() * 2}, [a])
+			var c = Stream.combine(function() {return a() * a()}, [a])
+			var d = Stream.combine(function() {
 				count++
 				return b() + c()
 			}, [b, c])
@@ -115,11 +115,11 @@ o.spec("stream", function() {
 		o("combines and maps nested streams atomically", function() {
 			var count = 0
 			var a = Stream(3)
-			var b = Stream.combine(function(a) {return a() * 2}, [a])
-			var c = Stream.combine(function(a) {return a() * a()}, [a])
+			var b = Stream.combine(function() {return a() * 2}, [a])
+			var c = Stream.combine(function() {return a() * a()}, [a])
 			var d = c.map(function(x){return x})
-			var e = Stream.combine(function(x) {return x()}, [d])
-			var f = Stream.combine(function(b, e) {
+			var e = Stream.combine(function() {return d()}, [d])
+			var f = Stream.combine(function() {
 				count++
 				return b() + e()
 			}, [b, e])
@@ -131,7 +131,7 @@ o.spec("stream", function() {
 			var streams = []
 			var a = Stream()
 			var b = Stream()
-			Stream.combine(function(a, b, changed) {
+			Stream.combine(function(changed) {
 				streams = changed
 			}, [a, b])
 
@@ -145,7 +145,7 @@ o.spec("stream", function() {
 		o("combine continues with ended streams", function() {
 			var a = Stream()
 			var b = Stream()
-			var combined = Stream.combine(function(a, b) {
+			var combined = Stream.combine(function() {
 				return a() + b()
 			}, [a, b])
 
@@ -159,7 +159,7 @@ o.spec("stream", function() {
 			var streams = []
 			var a = Stream(3)
 			var b = Stream(5)
-			Stream.combine(function(a, b, changed) {
+			Stream.combine(function(changed) {
 				streams = changed
 			}, [a, b])
 
@@ -209,7 +209,7 @@ o.spec("stream", function() {
 			var count = 0
 			var skip = false
 			var a = Stream(1)
-			var b = Stream.combine(function(a) {
+			var b = Stream.combine(function() {
 				if (skip) {
 					return Stream.SKIP
 				}
@@ -418,7 +418,7 @@ o.spec("stream", function() {
 	o.spec("end", function() {
 		o("end stream works", function() {
 			var stream = Stream()
-			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
+			var doubled = Stream.combine(function() {return stream() * 2}, [stream])
 
 			stream.end(true)
 
@@ -428,7 +428,7 @@ o.spec("stream", function() {
 		})
 		o("end stream works with default value", function() {
 			var stream = Stream(2)
-			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
+			var doubled = Stream.combine(function() {return stream() * 2}, [stream])
 
 			stream.end(true)
 
@@ -440,14 +440,14 @@ o.spec("stream", function() {
 			var stream = Stream(2)
 			stream.end(true)
 
-			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
+			var doubled = Stream.combine(function() {return stream() * 2}, [stream])
 			stream(3)
 
 			o(doubled()).equals(undefined)
 		})
 		o("upstream does not affect ended stream", function() {
 			var stream = Stream(2)
-			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
+			var doubled = Stream.combine(function() {return stream() * 2}, [stream])
 
 			doubled.end(true)
 

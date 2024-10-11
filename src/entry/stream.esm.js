@@ -1,125 +1,115 @@
-Stream.SKIP = {}
-Stream.lift = lift
-Stream.scan = scan
-Stream.merge = merge
-Stream.combine = combine
-Stream.scanMerge = scanMerge
-Stream["fantasy-land/of"] = Stream
+var STATE_PENDING = 1
+var STATE_ACTIVE = 2
+var STATE_CHANGING = 3
+var STATE_ENDED = 4
 
-var warnedHalt = false
-Object.defineProperty(Stream, "HALT", {
-	get: function() {
-		warnedHalt || console.log("HALT is deprecated and has been renamed to SKIP");
-		warnedHalt = true
-		return Stream.SKIP
-	}
-})
-
-function Stream(value) {
-	var dependentStreams = []
-	var dependentFns = []
-
-	function stream(v) {
-		if (arguments.length && v !== Stream.SKIP) {
-			value = v
-			if (open(stream)) {
-				stream._changing()
-				stream._state = "active"
-				// Cloning the list to ensure it's still iterated in intended
-				// order
-				dependentStreams.slice().forEach(function(s, i) {
-					if (open(s)) s(this[i](value))
-				}, dependentFns.slice())
+var streamSet = (stream, value) => {
+	if (value !== SKIP) {
+		stream._v = value
+		if (stream._s !== STATE_ENDED) {
+			streamChanging(stream)
+			stream._s = STATE_ACTIVE
+			// Cloning the list to ensure it's still iterated in intended
+			// order
+			var streams = stream._d.slice()
+			var fns = stream._f.slice()
+			for (var i = 0; i < streams.length; i++) {
+				if (streams[i]._s !== STATE_ENDED) {
+					streamSet(streams[i], fns[i](stream._v))
+				}
 			}
 		}
-
-		return value
 	}
 
-	stream.constructor = Stream
-	stream._state = arguments.length && value !== Stream.SKIP ? "active" : "pending"
-	stream._parents = []
+	return stream._v
+}
 
-	stream._changing = function() {
-		if (open(stream)) stream._state = "changing"
-		dependentStreams.forEach(function(s) {
-			s._changing()
-		})
-	}
+var streamChanging = (stream) => {
+	if (stream._s !== STATE_ENDED) stream._s = STATE_CHANGING
+	for (var s of stream._d) streamChanging(s)
+}
 
-	stream._map = function(fn, ignoreInitial) {
-		var target = ignoreInitial ? Stream() : Stream(fn(value))
-		target._parents.push(stream)
-		dependentStreams.push(target)
-		dependentFns.push(fn)
-		return target
-	}
+var streamMap = (stream, fn, ignoreInitial) => {
+	var target = ignoreInitial ? Stream() : Stream(fn(stream._v))
+	target._p.push(stream)
+	stream._d.push(target)
+	stream._f.push(fn)
+	return target
+}
 
-	stream.map = function(fn) {
-		return stream._map(fn, stream._state !== "active")
-	}
+var Stream = (...args) => {
+	var stream = (...args) => streamSet(stream, args.length ? args[0] : SKIP)
 
-	var end
-	function createEnd() {
-		end = Stream()
-		end.map(function(value) {
-			if (value === true) {
-				stream._parents.forEach(function (p) {p._unregisterChild(stream)})
-				stream._state = "ended"
-				stream._parents.length = dependentStreams.length = dependentFns.length = 0
-			}
-			return value
-		})
-		return end
-	}
+	Object.setPrototypeOf(stream, Stream.prototype)
 
-	stream.toJSON = function() { return value != null && typeof value.toJSON === "function" ? value.toJSON() : value }
-
-	stream["fantasy-land/map"] = stream.map
-	stream["fantasy-land/ap"] = function(x) { return combine(function(s1, s2) { return s1()(s2()) }, [x, stream]) }
-
-	stream._unregisterChild = function(child) {
-		var childIndex = dependentStreams.indexOf(child)
-		if (childIndex !== -1) {
-			dependentStreams.splice(childIndex, 1)
-			dependentFns.splice(childIndex, 1)
-		}
-	}
-
-	Object.defineProperty(stream, "end", {
-		get: function() { return end || createEnd() }
-	})
+	stream._s = args.length && args[0] !== SKIP ? STATE_ACTIVE : STATE_PENDING
+	stream._v = args.length ? args[0] : undefined
+	stream._d = []
+	stream._f = []
+	stream._p = []
+	stream._e = null
 
 	return stream
 }
 
-function combine(fn, streams) {
-	var ready = streams.every(function(s) {
-		if (s.constructor !== Stream)
-			throw new Error("Ensure that each item passed to stream.combine/stream.merge/lift is a stream.")
-		return s._state === "active"
-	})
-	var stream = ready
-		? Stream(fn.apply(null, streams.concat([streams])))
-		: Stream()
+Stream["fantasy-land/of"] = Stream
+
+Stream.prototype = Object.create(Function.prototype, Object.getOwnPropertyDescriptors({
+	constructor: Stream,
+	map(fn) { return streamMap(this, fn, this._s !== STATE_ACTIVE) },
+	"fantasy-land/ap"(x) { return combine(() => (0, x._v)(this._v), [x, this]) },
+	toJSON() {
+		var value = this._v
+		return (value != null && typeof value.toJSON === "function" ? value.toJSON() : value)
+	},
+	get end() {
+		if (!this._e) {
+			this._e = Stream()
+			streamMap(this._e, (value) => {
+				if (value === true) {
+					for (var p of this._p) {
+						var childIndex = p._d.indexOf(this)
+						if (childIndex >= 0) {
+							p._d.splice(childIndex, 1)
+							p._f.splice(childIndex, 1)
+						}
+					}
+					this._s = STATE_ENDED
+					this._p.length = this._d.length = this._f.length = 0
+				}
+				return value
+			}, true)
+		}
+		return this._e
+	},
+}))
+
+Stream.prototype["fantasy-land/map"] = Stream.prototype.map
+
+var SKIP = Stream.SKIP = {}
+
+var combine = Stream.combine = (fn, streams) => {
+	if (streams.some((s) => s.constructor !== Stream)) {
+		throw new Error("Ensure that each item passed to stream.combine/stream.merge/lift is a stream.")
+	}
+	var ready = streams.every((s) => s._s === STATE_ACTIVE)
+	var stream = ready ? Stream(fn(streams)) : Stream()
 
 	var changed = []
 
-	var mappers = streams.map(function(s) {
-		return s._map(function(value) {
-			changed.push(s)
-			if (ready || streams.every(function(s) { return s._state !== "pending" })) {
-				ready = true
-				stream(fn.apply(null, streams.concat([changed])))
-				changed = []
-			}
-			return value
-		}, true)
-	})
+	var mappers = streams.map((s) => streamMap(s, (value) => {
+		changed.push(s)
+		if (ready || streams.every((s) => s._s !== STATE_PENDING)) {
+			ready = true
+			streamSet(stream, fn(changed))
+			changed = []
+		}
+		return value
+	}, true))
 
-	var endStream = stream.end.map(function(value) {
+	var endStream = stream.end.map((value) => {
 		if (value === true) {
-			mappers.forEach(function(mapper) { mapper.end(true) })
+			for (var mapper of mappers) mapper.end(true)
 			endStream.end(true)
 		}
 		return undefined
@@ -128,48 +118,35 @@ function combine(fn, streams) {
 	return stream
 }
 
-function merge(streams) {
-	return combine(function() { return streams.map(function(s) { return s() }) }, streams)
-}
+Stream.merge = (streams) => combine(() => streams.map((s) => s._v), streams)
 
-function scan(fn, acc, origin) {
-	var stream = origin.map(function(v) {
+Stream.scan = (fn, acc, origin) => {
+	var stream = streamMap(origin, (v) => {
 		var next = fn(acc, v)
-		if (next !== Stream.SKIP) acc = next
+		if (next !== SKIP) acc = next
 		return next
-	})
-	stream(acc)
+	}, origin._s !== STATE_ACTIVE)
+	streamSet(stream, acc)
 	return stream
 }
 
-function scanMerge(tuples, seed) {
-	var streams = tuples.map(function(tuple) { return tuple[0] })
+Stream.scanMerge = (tuples, seed) => {
+	var streams = tuples.map((tuple) => tuple[0])
 
-	var stream = combine(function() {
-		var changed = arguments[arguments.length - 1]
-		streams.forEach(function(stream, i) {
-			if (changed.indexOf(stream) > -1)
-				seed = tuples[i][1](seed, stream())
-		})
-
+	var stream = combine((changed) => {
+		for (var i = 0; i < streams.length; i++) {
+			if (changed.includes(streams[i])) {
+				seed = tuples[i][1](seed, streams[i]._v)
+			}
+		}
 		return seed
 	}, streams)
 
-	stream(seed)
+	streamSet(stream, seed)
 
 	return stream
 }
 
-function lift() {
-	var fn = arguments[0]
-	var streams = Array.prototype.slice.call(arguments, 1)
-	return merge(streams).map(function(streams) {
-		return fn.apply(undefined, streams)
-	})
-}
-
-function open(s) {
-	return s._state === "pending" || s._state === "active" || s._state === "changing"
-}
+Stream.lift = (fn, ...streams) => combine(() => fn(...streams.map((s) => s._v)), streams)
 
 export {Stream as default}
