@@ -1,6 +1,6 @@
 import o from "ospec"
 
-import Stream from "../../src/entry/stream.esm.js"
+import Stream from "../../../src/entry/stream.esm.js"
 
 o.spec("stream", function() {
 	o.spec("stream", function() {
@@ -40,26 +40,6 @@ o.spec("stream", function() {
 			a(5)
 
 			o(b()).equals(2)
-		})
-		// NOTE: this *must* be the *only* uses of `Stream.HALT` in the entire
-		// test suite.
-		o("HALT is a deprecated alias of SKIP and warns once", function() {
-			var log = console.log
-			var warnings = []
-			console.log = function(a) {
-				warnings.push(a)
-			}
-
-			try {
-				o(Stream.HALT).equals(Stream.SKIP)
-				o(warnings).deepEquals(["HALT is deprecated and has been renamed to SKIP"])
-				o(Stream.HALT).equals(Stream.SKIP)
-				o(warnings).deepEquals(["HALT is deprecated and has been renamed to SKIP"])
-				o(Stream.HALT).equals(Stream.SKIP)
-				o(warnings).deepEquals(["HALT is deprecated and has been renamed to SKIP"])
-			} finally {
-				console.log = log
-			}
 		})
 	})
 	o.spec("combine", function() {

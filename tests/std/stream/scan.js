@@ -1,6 +1,6 @@
 import o from "ospec"
 
-import stream from "../../src/entry/stream.esm.js"
+import stream from "../../../src/entry/stream.esm.js"
 
 o.spec("scan", function() {
 	o("defaults to seed", function() {
