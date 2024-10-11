@@ -48,7 +48,15 @@ export function setupGlobals(env = {}) {
 		if (env && env.expectNoConsoleError) {
 			console.error = (...args) => {
 				if (typeof process === "function") process.exitCode = 1
-				console.trace("Unexpected `console.error` call")
+				var replacement = console.error
+				// Node's `console.trace` delegates to `console.error` as a property. Have it
+				// actually call what it intended to call.
+				try {
+					console.error = originalConsoleError
+					console.trace("Unexpected `console.error` call")
+				} finally {
+					console.error = replacement
+				}
 				originalConsoleError.apply(console, args)
 			}
 		}

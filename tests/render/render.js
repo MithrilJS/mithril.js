@@ -84,21 +84,19 @@ o.spec("render", function() {
 		o(view.callCount).equals(2)
 	})
 	o("lifecycle methods work in keyed children of recycled keyed", function() {
-		var onabortA = o.spy()
-		var onabortB = o.spy()
-		var createA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var updateA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var createB = o.spy((_, signal) => { signal.onabort = onabortB })
-		var updateB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var removeA = o.spy()
+		var removeB = o.spy()
+		var layoutA = o.spy()
+		var layoutB = o.spy()
 		var a = function() {
 			return m.key(1, m("div",
-				m.key(11, m("div", m.layout(createA, updateA))),
+				m.key(11, m("div", m.layout(layoutA), m.remove(removeA))),
 				m.key(12, m("div"))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m.key(21, m("div", m.layout(createB, updateB))),
+				m.key(21, m("div", m.layout(layoutB), m.remove(removeB))),
 				m.key(22, m("div"))
 			))
 		}
@@ -109,36 +107,28 @@ o.spec("render", function() {
 		m.render(G.root, a())
 		var third = G.root.firstChild.firstChild
 
-		o(createA.callCount).equals(2)
-		o(createA.calls[0].args[0]).equals(first)
-		o(createA.calls[0].args[1].aborted).equals(true)
-		o(createA.calls[1].args[0]).equals(third)
-		o(createA.calls[1].args[1].aborted).equals(false)
-		o(updateA.callCount).equals(0)
-		o(onabortA.callCount).equals(1)
+		o(layoutA.callCount).equals(2)
+		o(layoutA.calls[0].args[0]).equals(first)
+		o(layoutA.calls[1].args[0]).equals(third)
+		o(removeA.callCount).equals(1)
 
-		o(createB.callCount).equals(1)
-		o(createB.calls[0].args[0]).equals(second)
-		o(createB.calls[0].args[1]).notEquals(createA.calls[0].args[1])
-		o(createB.calls[0].args[1].aborted).equals(true)
-		o(updateB.callCount).equals(0)
-		o(onabortB.callCount).equals(1)
+		o(layoutB.callCount).equals(1)
+		o(layoutB.calls[0].args[0]).equals(second)
+		o(removeB.callCount).equals(1)
 	})
 	o("lifecycle methods work in unkeyed children of recycled keyed", function() {
-		var onabortA = o.spy()
-		var onabortB = o.spy()
-		var createA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var updateA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var createB = o.spy((_, signal) => { signal.onabort = onabortB })
-		var updateB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var removeA = o.spy()
+		var removeB = o.spy()
+		var layoutA = o.spy()
+		var layoutB = o.spy()
 		var a = function() {
 			return m.key(1, m("div",
-				m("div", m.layout(createA, updateA))
+				m("div", m.layout(layoutA), m.remove(removeA))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m("div", m.layout(createB, updateB))
+				m("div", m.layout(layoutB), m.remove(removeB))
 			))
 		}
 		m.render(G.root, a())
@@ -148,75 +138,58 @@ o.spec("render", function() {
 		m.render(G.root, a())
 		var third = G.root.firstChild.firstChild
 
-		o(createA.callCount).equals(2)
-		o(createA.calls[0].args[0]).equals(first)
-		o(createA.calls[0].args[1].aborted).equals(true)
-		o(createA.calls[1].args[0]).equals(third)
-		o(createA.calls[1].args[1].aborted).equals(false)
-		o(onabortA.callCount).equals(1)
+		o(layoutA.callCount).equals(2)
+		o(layoutA.calls[0].args[0]).equals(first)
+		o(layoutA.calls[1].args[0]).equals(third)
+		o(removeA.callCount).equals(1)
 
-		o(createB.callCount).equals(1)
-		o(createB.calls[0].args[0]).equals(second)
-		o(createB.calls[0].args[1]).notEquals(createA.calls[0].args[1])
-		o(createB.calls[0].args[1].aborted).equals(true)
-		o(onabortB.callCount).equals(1)
+		o(layoutB.callCount).equals(1)
+		o(layoutB.calls[0].args[0]).equals(second)
+		o(removeB.callCount).equals(1)
 	})
 	o("update lifecycle methods work on children of recycled keyed", function() {
-		var onabortA = o.spy()
-		var onabortB = o.spy()
-		var createA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var updateA = o.spy((_, signal) => { signal.onabort = onabortA })
-		var createB = o.spy((_, signal) => { signal.onabort = onabortB })
-		var updateB = o.spy((_, signal) => { signal.onabort = onabortB })
+		var removeA = o.spy()
+		var removeB = o.spy()
+		var layoutA = o.spy()
+		var layoutB = o.spy()
 
 		var a = function() {
 			return m.key(1, m("div",
-				m("div", m.layout(createA, updateA))
+				m("div", m.layout(layoutA), m.remove(removeA))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m("div", m.layout(createB, updateB))
+				m("div", m.layout(layoutB), m.remove(removeB))
 			))
 		}
 		m.render(G.root, a())
 		m.render(G.root, a())
 		var first = G.root.firstChild.firstChild
-		o(createA.callCount).equals(1)
-		o(updateA.callCount).equals(1)
-		o(createA.calls[0].args[0]).equals(first)
-		o(updateA.calls[0].args[0]).equals(first)
-		o(createA.calls[0].args[1]).equals(updateA.calls[0].args[1])
-		o(createA.calls[0].args[1].aborted).equals(false)
-		o(onabortA.callCount).equals(0)
+		o(layoutA.callCount).equals(2)
+		o(layoutA.calls[0].args[0]).equals(first)
+		o(layoutA.calls[1].args[0]).equals(first)
+		o(removeA.callCount).equals(0)
 
 		m.render(G.root, b())
 		var second = G.root.firstChild.firstChild
-		o(createA.callCount).equals(1)
-		o(updateA.callCount).equals(1)
-		o(createA.calls[0].args[1].aborted).equals(true)
-		o(onabortA.callCount).equals(1)
+		o(layoutA.callCount).equals(2)
+		o(removeA.callCount).equals(1)
 
-		o(createB.callCount).equals(1)
-		o(updateB.callCount).equals(0)
-		o(createB.calls[0].args[0]).equals(second)
-		o(createB.calls[0].args[1].aborted).equals(false)
-		o(onabortB.callCount).equals(0)
+		o(layoutB.callCount).equals(1)
+		o(layoutB.calls[0].args[0]).equals(second)
+		o(removeB.callCount).equals(0)
 
 		m.render(G.root, a())
 		m.render(G.root, a())
 		var third = G.root.firstChild.firstChild
-		o(createB.callCount).equals(1)
-		o(updateB.callCount).equals(0)
-		o(createB.calls[0].args[1].aborted).equals(true)
-		o(onabortB.callCount).equals(1)
+		o(layoutB.callCount).equals(1)
+		o(removeB.callCount).equals(1)
 
-		o(createA.callCount).equals(2)
-		o(updateA.callCount).equals(2)
-		o(createA.calls[1].args[0]).equals(third)
-		o(createA.calls[1].args[1]).notEquals(updateA.calls[0].args[1])
-		o(createA.calls[1].args[1].aborted).equals(false)
-		o(onabortA.callCount).equals(1)
+		o(layoutA.callCount).equals(4)
+		o(layoutA.calls[2].args[0]).equals(third)
+		o(layoutA.calls[3].args[0]).equals(third)
+		o(removeA.callCount).equals(1)
 	})
 	o("svg namespace is preserved in keyed diff (#1820)", function(){
 		// note that this only exerciese one branch of the keyed diff algo

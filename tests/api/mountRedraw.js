@@ -112,15 +112,15 @@ o.spec("mount/redraw", function() {
 	})
 
 	o("should invoke remove callback on unmount", function() {
-		var onabort = o.spy()
-		var spy = o.spy(() => m.layout((_, signal) => { signal.onabort = onabort }))
+		var onRemove = o.spy()
+		var spy = o.spy(() => m.remove(onRemove))
 
 		m.mount(G.root, spy)
 		o(spy.callCount).equals(1)
 		m.render(G.root, null)
 
 		o(spy.callCount).equals(1)
-		o(onabort.callCount).equals(1)
+		o(onRemove.callCount).equals(1)
 
 		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
 		o(G.rafMock.queueLength()).equals(0)
@@ -366,11 +366,11 @@ o.spec("mount/redraw", function() {
 
 		m.mount(G.root, () => m("div", {
 			onclick: onclick,
-		}, m.layout(() => layout(true), () => layout(false))))
+		}, m.layout(layout)))
 
 		G.root.firstChild.dispatchEvent(e)
 
-		o(layout.calls.map((c) => c.args[0])).deepEquals([true])
+		o(layout.callCount).equals(1)
 
 		o(onclick.callCount).equals(1)
 		o(onclick.this).equals(G.root.firstChild)
@@ -379,7 +379,7 @@ o.spec("mount/redraw", function() {
 
 		G.rafMock.fire()
 
-		o(layout.calls.map((c) => c.args[0])).deepEquals([true, false])
+		o(layout.callCount).equals(2)
 
 		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
 		o(G.rafMock.queueLength()).equals(0)
@@ -401,15 +401,15 @@ o.spec("mount/redraw", function() {
 
 		m.mount(root1, () => m("div", {
 			onclick: onclick0,
-		}, m.layout(() => layout0(true), () => layout0(false))))
+		}, m.layout(layout0)))
 
-		o(layout0.calls.map((c) => c.args[0])).deepEquals([true])
+		o(layout0.callCount).equals(1)
 
 		m.mount(root2, () => m("div", {
 			onclick: onclick1,
-		}, m.layout(() => layout1(true), () => layout1(false))))
+		}, m.layout(layout1)))
 
-		o(layout1.calls.map((c) => c.args[0])).deepEquals([true])
+		o(layout1.callCount).equals(1)
 
 		root1.firstChild.dispatchEvent(e)
 		o(onclick0.callCount).equals(1)
@@ -417,8 +417,8 @@ o.spec("mount/redraw", function() {
 
 		G.rafMock.fire()
 
-		o(layout0.calls.map((c) => c.args[0])).deepEquals([true, false])
-		o(layout1.calls.map((c) => c.args[0])).deepEquals([true])
+		o(layout0.callCount).equals(2)
+		o(layout1.callCount).equals(1)
 
 		root2.firstChild.dispatchEvent(e)
 
@@ -427,8 +427,8 @@ o.spec("mount/redraw", function() {
 
 		G.rafMock.fire()
 
-		o(layout0.calls.map((c) => c.args[0])).deepEquals([true, false])
-		o(layout1.calls.map((c) => c.args[0])).deepEquals([true, false])
+		o(layout0.callCount).equals(2)
+		o(layout1.callCount).equals(2)
 
 		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
 		o(G.rafMock.queueLength()).equals(0)
@@ -444,15 +444,15 @@ o.spec("mount/redraw", function() {
 
 		m.mount(G.root, () => m("div", {
 			onclick: () => false,
-		}, m.layout(() => layout(true), () => layout(false))))
+		}, m.layout(layout)))
 
 		G.root.firstChild.dispatchEvent(e)
 
-		o(layout.calls.map((c) => c.args[0])).deepEquals([true])
+		o(layout.callCount).equals(1)
 
 		G.rafMock.fire()
 
-		o(layout.calls.map((c) => c.args[0])).deepEquals([true])
+		o(layout.callCount).equals(1)
 
 		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
 		o(G.rafMock.queueLength()).equals(0)
@@ -461,43 +461,39 @@ o.spec("mount/redraw", function() {
 	o("redraws when the render function is run", function() {
 		var layout = o.spy()
 
-		var redraw = m.mount(G.root, () => m("div", m.layout(() => layout(true), () => layout(false))))
+		var redraw = m.mount(G.root, () => m("div", m.layout(layout)))
 
-		o(layout.calls.map((c) => c.args[0])).deepEquals([true])
+		o(layout.callCount).equals(1)
 
 		redraw()
 
 		G.rafMock.fire()
 
-		o(layout.calls.map((c) => c.args[0])).deepEquals([true, false])
+		o(layout.callCount).equals(2)
 
 		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
 		o(G.rafMock.queueLength()).equals(0)
 	})
 
 	o("remounts after `m.render(G.root, null)` is invoked on the mounted root", function() {
-		var onabort = o.spy()
-		var onCreate = o.spy((_, signal) => { signal.onabort = onabort })
-		var onUpdate = o.spy((_, signal) => { signal.onabort = onabort })
+		var onRemove = o.spy()
+		var onLayout = o.spy()
 
-		var redraw = m.mount(G.root, () => m("div", m.layout(onCreate, onUpdate)))
+		var redraw = m.mount(G.root, () => m("div", m.layout(onLayout), m.remove(onRemove)))
 
-		o(onCreate.callCount).equals(1)
-		o(onUpdate.callCount).equals(0)
-		o(onabort.callCount).equals(0)
+		o(onLayout.callCount).equals(1)
+		o(onRemove.callCount).equals(0)
 
 		m.render(G.root, null)
-		o(onCreate.callCount).equals(1)
-		o(onUpdate.callCount).equals(0)
-		o(onabort.callCount).equals(1)
+		o(onLayout.callCount).equals(1)
+		o(onRemove.callCount).equals(1)
 
 		redraw()
 
 		G.rafMock.fire()
 
-		o(onCreate.callCount).equals(2)
-		o(onUpdate.callCount).equals(0)
-		o(onabort.callCount).equals(1)
+		o(onLayout.callCount).equals(2)
+		o(onRemove.callCount).equals(1)
 
 		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
 		o(G.rafMock.queueLength()).equals(0)

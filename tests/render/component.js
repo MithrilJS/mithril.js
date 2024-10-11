@@ -313,88 +313,47 @@ o.spec("component", function() {
 
 			o(component.callCount).equals(1)
 		})
-		o("calls inner `m.layout` create callback on first render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var updateSpy = o.spy((_, signal) => { signal.onabort = onabort })
+		o("calls inner `m.layout` callback on render", function() {
+			var layoutSpy = o.spy()
 			var component = () => [
-				m.layout(createSpy, updateSpy),
+				m.layout(layoutSpy),
 				m("div", {id: "a"}, "b"),
 			]
 
 			m.render(G.root, m(component))
 
-			o(createSpy.callCount).equals(1)
-			o(createSpy.args[0]).equals(G.root)
-			o(createSpy.args[1].aborted).equals(false)
-			o(updateSpy.callCount).equals(0)
-			o(onabort.callCount).equals(0)
+			o(layoutSpy.callCount).equals(1)
+			o(layoutSpy.calls[0].args[0]).equals(G.root)
+			o(G.root.firstChild.nodeName).equals("DIV")
+			o(G.root.firstChild.attributes["id"].value).equals("a")
+			o(G.root.firstChild.firstChild.nodeValue).equals("b")
+
+			m.render(G.root, m(component))
+
+			o(layoutSpy.callCount).equals(2)
+			o(layoutSpy.calls[1].args[0]).equals(G.root)
 			o(G.root.firstChild.nodeName).equals("DIV")
 			o(G.root.firstChild.attributes["id"].value).equals("a")
 			o(G.root.firstChild.firstChild.nodeValue).equals("b")
 		})
-		o("calls inner `m.layout` update callback on subsequent render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var updateSpy = o.spy((_, signal) => { signal.onabort = onabort })
+		o("calls inner `m.remove` callback after first render", function() {
+			var removeSpy = o.spy()
 			var component = () => [
-				m.layout(createSpy, updateSpy),
-				m("div", {id: "a"}, "b"),
-			]
-
-			m.render(G.root, m(component))
-			m.render(G.root, m(component))
-
-			o(createSpy.callCount).equals(1)
-			o(updateSpy.callCount).equals(1)
-			o(updateSpy.args[0]).equals(G.root)
-			o(updateSpy.args[1].aborted).equals(false)
-			o(updateSpy.args[1]).equals(createSpy.args[1])
-			o(onabort.callCount).equals(0)
-			o(G.root.firstChild.nodeName).equals("DIV")
-			o(G.root.firstChild.attributes["id"].value).equals("a")
-			o(G.root.firstChild.firstChild.nodeValue).equals("b")
-		})
-		o("calls inner `m.layout` update callback on subsequent render without a create callback", function() {
-			var onabort = o.spy()
-			var updateSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => [
-				m.layout(null, updateSpy),
-				m("div", {id: "a"}, "b"),
-			]
-
-			m.render(G.root, m(component))
-			m.render(G.root, m(component))
-
-			o(updateSpy.callCount).equals(1)
-			o(updateSpy.args[0]).equals(G.root)
-			o(updateSpy.args[1].aborted).equals(false)
-			o(onabort.callCount).equals(0)
-			o(G.root.firstChild.nodeName).equals("DIV")
-			o(G.root.firstChild.attributes["id"].value).equals("a")
-			o(G.root.firstChild.firstChild.nodeValue).equals("b")
-		})
-		o("aborts inner `m.layout` signal after first render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => [
-				m.layout(createSpy),
+				m.remove(removeSpy),
 				m("div", {id: "a"}, "b"),
 			]
 
 			m.render(G.root, m(component))
 			m.render(G.root, null)
 
-			o(createSpy.callCount).equals(1)
-			o(createSpy.args[1].aborted).equals(true)
-			o(onabort.callCount).equals(1)
+			o(removeSpy.callCount).equals(1)
+			o(removeSpy.args[0]).equals(G.root)
 			o(G.root.childNodes.length).equals(0)
 		})
-		o("aborts inner `m.layout` signal after subsequent render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
+		o("calls inner `m.remove` callback after subsequent render", function() {
+			var removeSpy = o.spy()
 			var component = () => [
-				m.layout(createSpy),
+				m.remove(removeSpy),
 				m("div", {id: "a"}, "b"),
 			]
 
@@ -402,116 +361,90 @@ o.spec("component", function() {
 			m.render(G.root, m(component))
 			m.render(G.root, null)
 
-			o(createSpy.callCount).equals(1)
-			o(createSpy.args[1].aborted).equals(true)
-			o(onabort.callCount).equals(1)
+			o(removeSpy.callCount).equals(1)
+			o(removeSpy.args[0]).equals(G.root)
 			o(G.root.childNodes.length).equals(0)
 		})
-		o("calls in-element inner `m.layout` create callback on first render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => m("div", {id: "a"}, m.layout(createSpy), "b")
+		o("calls in-element inner `m.layout` callback on render", function() {
+			var layoutSpy = o.spy()
+			var component = () => m("div", {id: "a"}, m.layout(layoutSpy), "b")
 			m.render(G.root, m(component))
 
-			o(createSpy.callCount).equals(1)
-			o(createSpy.args[0]).equals(G.root.firstChild)
-			o(createSpy.args[1].aborted).equals(false)
-			o(onabort.callCount).equals(0)
+			o(layoutSpy.callCount).equals(1)
+			o(layoutSpy.calls[0].args[0]).equals(G.root.firstChild)
+			o(G.root.firstChild.nodeName).equals("DIV")
+			o(G.root.firstChild.attributes["id"].value).equals("a")
+			o(G.root.firstChild.firstChild.nodeValue).equals("b")
+
+			m.render(G.root, m(component))
+
+			o(layoutSpy.callCount).equals(2)
+			o(layoutSpy.calls[1].args[0]).equals(G.root.firstChild)
 			o(G.root.firstChild.nodeName).equals("DIV")
 			o(G.root.firstChild.attributes["id"].value).equals("a")
 			o(G.root.firstChild.firstChild.nodeValue).equals("b")
 		})
-		o("calls in-element inner `m.layout` update callback on subsequent render", function() {
-			var onabort = o.spy()
-			var updateSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => m("div", {id: "a"}, m.layout(null, updateSpy), "b")
+		o("calls in-element inner `m.remove` callback after first render", function() {
+			var removeSpy = o.spy()
+			var component = () => m("div", {id: "a"}, m.remove(removeSpy), "b")
 			m.render(G.root, m(component))
-			m.render(G.root, m(component))
-
-			o(updateSpy.callCount).equals(1)
-			o(updateSpy.args[0]).equals(G.root.firstChild)
-			o(updateSpy.args[1].aborted).equals(false)
-			o(onabort.callCount).equals(0)
-			o(G.root.firstChild.nodeName).equals("DIV")
-			o(G.root.firstChild.attributes["id"].value).equals("a")
-			o(G.root.firstChild.firstChild.nodeValue).equals("b")
-		})
-		o("aborts in-element inner `m.layout` signal after first render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => m("div", {id: "a"}, m.layout(createSpy), "b")
-			m.render(G.root, m(component))
+			var firstChild = G.root.firstChild
 			m.render(G.root, null)
 
-			o(createSpy.callCount).equals(1)
-			o(createSpy.args[1].aborted).equals(true)
-			o(onabort.callCount).equals(1)
+			o(removeSpy.callCount).equals(1)
+			o(removeSpy.args[0]).equals(firstChild)
 			o(G.root.childNodes.length).equals(0)
 		})
-		o("aborts in-element inner `m.layout` signal after subsequent render", function() {
-			var onabort = o.spy()
-			var updateSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => m("div", {id: "a"}, m.layout(null, updateSpy), "b")
+		o("calls in-element inner `m.remove` callback after subsequent render", function() {
+			var removeSpy = o.spy()
+			var component = () => m("div", {id: "a"}, m.remove(removeSpy), "b")
 			m.render(G.root, m(component))
 			m.render(G.root, m(component))
+			var firstChild = G.root.firstChild
 			m.render(G.root, null)
 
-			o(updateSpy.callCount).equals(1)
-			o(updateSpy.args[1].aborted).equals(true)
-			o(onabort.callCount).equals(1)
+			o(removeSpy.callCount).equals(1)
+			o(removeSpy.args[0]).equals(firstChild)
 			o(G.root.childNodes.length).equals(0)
 		})
-		o("calls direct inner `m.layout` create callback on first render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
+		o("calls direct inner `m.layout` callback on render", function() {
+			var createSpy = o.spy()
 			var component = () => m.layout(createSpy)
+
 			m.render(G.root, m(component))
 
 			o(createSpy.callCount).equals(1)
-			o(createSpy.args[0]).equals(G.root)
-			o(createSpy.args[1].aborted).equals(false)
-			o(onabort.callCount).equals(0)
+			o(createSpy.calls[0].args[0]).equals(G.root)
 			o(G.root.childNodes.length).equals(0)
-		})
-		o("calls direct inner `m.layout` update callback on subsequent render", function() {
-			var onabort = o.spy()
-			var updateSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => m.layout(updateSpy)
-			m.render(G.root, m(component))
+
 			m.render(G.root, m(component))
 
-			o(updateSpy.callCount).equals(1)
-			o(updateSpy.args[0]).equals(G.root)
-			o(updateSpy.args[1].aborted).equals(false)
-			o(onabort.callCount).equals(0)
+			o(createSpy.callCount).equals(2)
+			o(createSpy.calls[1].args[0]).equals(G.root)
 			o(G.root.childNodes.length).equals(0)
 		})
-		o("aborts direct inner `m.layout` signal after first render", function() {
-			var onabort = o.spy()
-			var createSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => m.layout(createSpy)
+		o("calls direct inner `m.remove` callback after first render", function() {
+			var removeSpy = o.spy()
+			var component = () => m.layout(removeSpy)
 			m.render(G.root, m(component))
 			m.render(G.root, null)
 
-			o(createSpy.callCount).equals(1)
-			o(createSpy.args[1].aborted).equals(true)
-			o(onabort.callCount).equals(1)
+			o(removeSpy.callCount).equals(1)
+			o(removeSpy.args[0]).equals(G.root)
 			o(G.root.childNodes.length).equals(0)
 		})
-		o("aborts direct inner `m.layout` signal after subsequent render", function() {
-			var onabort = o.spy()
-			var updateSpy = o.spy((_, signal) => { signal.onabort = onabort })
-			var component = () => m.layout(updateSpy)
+		o("calls direct inner `m.remove` callback after subsequent render", function() {
+			var removeSpy = o.spy()
+			var component = () => m.remove(removeSpy)
 			m.render(G.root, m(component))
 			m.render(G.root, m(component))
 			m.render(G.root, null)
 
-			o(updateSpy.callCount).equals(1)
-			o(updateSpy.args[1].aborted).equals(true)
-			o(onabort.callCount).equals(1)
+			o(removeSpy.callCount).equals(1)
+			o(removeSpy.args[0]).equals(G.root)
 			o(G.root.childNodes.length).equals(0)
 		})
-		o("no recycling occurs (was: recycled components get a fresh state)", function() {
+		o("no recycling observable with `m.layout` (was: recycled components get a fresh state)", function() {
 			var createSpy = o.spy()
 			var component = o.spy(() => m("div", m.layout(createSpy)))
 
@@ -521,6 +454,20 @@ o.spec("component", function() {
 			m.render(G.root, [m("div", m.key(1, m(component)))])
 
 			o(child).notEquals(G.root.firstChild.firstChild) // this used to be a recycling pool test
+			o(component.callCount).equals(2)
+		})
+		o("no recycling observable with `m.remove` (was: recycled components get a fresh state)", function() {
+			var createSpy = o.spy()
+			var component = o.spy(() => m("div", m.remove(createSpy)))
+
+			m.render(G.root, [m("div", m.key(1, m(component)))])
+			var child = G.root.firstChild.firstChild
+			m.render(G.root, [])
+			m.render(G.root, [m("div", m.key(1, m(component)))])
+			var found = G.root.firstChild.firstChild
+			m.render(G.root, [])
+
+			o(child).notEquals(found) // this used to be a recycling pool test
 			o(component.callCount).equals(2)
 		})
 	})

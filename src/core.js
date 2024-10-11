@@ -21,45 +21,37 @@ export {m as default}
 This same structure is used for several nodes. Here's an explainer for each type.
 
 Retain:
-- `m` bits 0-2: `0`
+- `m`: `-1`
 - All other properties are unused
 - On ingest, the vnode itself is converted into the type of the element it's retaining. This
   includes changing its type.
 
 Fragments:
-- `m` bits 0-2: `1`
-- `t`: `FRAGMENT`
+- `m` bits 0-2: `0`
+- `t`: unused
 - `s`: unused
 - `a`: unused
 - `c`: virtual DOM children
 - `d`: unused
 
 Keys:
-- `m` bits 0-2: `2`
+- `m` bits 0-2: `1`
 - `t`: `KEY`
 - `s`: identity key (may be any arbitrary object)
 - `a`: unused
 - `c`: virtual DOM children
 - `d`: unused
 
-Layout:
-- `m` bits 0-2: `3`
-- `t`: `LAYOUT`
-- `s`: callback to schedule for create
-- `a`: callback to schedule for update
-- `c`: unused
-- `d`: abort controller reference
-
 Text:
-- `m` bits 0-2: `4`
-- `t`: `TEXT`
+- `m` bits 0-2: `2`
+- `t`: unused
 - `s`: text string
 - `a`: unused
 - `c`: unused
 - `d`: abort controller reference
 
 Components:
-- `m` bits 0-2: `5`
+- `m` bits 0-2: `3`
 - `t`: component reference
 - `s`: view function, may be same as component reference
 - `a`: most recently received attributes
@@ -67,24 +59,41 @@ Components:
 - `d`: unused
 
 DOM elements:
-- `m` bits 0-2: `6`
+- `m` bits 0-2: `4`
 - `t`: tag name string
 - `s`: event listener dictionary, if any events were ever registered
 - `a`: most recently received attributes
 - `c`: virtual DOM children
 - `d`: element reference
 
+Layout:
+- `m` bits 0-2: `5`
+- `t`: unused
+- `s`: callback to schedule
+- `a`: unused
+- `c`: unused
+- `d`: parent DOM reference, for easier queueing
+
+Remove:
+- `m` bits 0-2: `6`
+- `t`: unused
+- `s`: callback to schedule
+- `a`: unused
+- `c`: unused
+- `d`: parent DOM reference, for easier queueing
+
 The `m` field is also used for various assertions, that aren't described here.
 */
 
 var TYPE_MASK = 7
-var TYPE_RETAIN = 0
-var TYPE_FRAGMENT = 1
-var TYPE_KEY = 2
-var TYPE_LAYOUT = 3
-var TYPE_TEXT = 4
-var TYPE_ELEMENT = 5
-var TYPE_COMPONENT = 6
+var TYPE_RETAIN = -1
+var TYPE_FRAGMENT = 0
+var TYPE_KEY = 1
+var TYPE_TEXT = 2
+var TYPE_ELEMENT = 3
+var TYPE_COMPONENT = 4
+var TYPE_LAYOUT = 5
+var TYPE_REMOVE = 6
 
 var FLAG_KEYED = 1 << 3
 var FLAG_USED = 1 << 4
@@ -232,14 +241,18 @@ m.capture = (ev) => {
 
 m.retain = () => Vnode(TYPE_RETAIN, null, null, null, null)
 
-m.layout = (onCreate, onUpdate) => {
-	if (onCreate != null && typeof onCreate !== "function") {
-		throw new TypeError("`onCreate` callback must be a function if provided")
+m.layout = (callback) => {
+	if (typeof callback !== "function") {
+		throw new TypeError("Callback must be a function if provided")
 	}
-	if (onUpdate != null && typeof onUpdate !== "function") {
-		throw new TypeError("`onUpdate` callback must be a function if provided")
+	return Vnode(TYPE_LAYOUT, null, callback, null, null)
+}
+
+m.remove = (callback) => {
+	if (typeof callback !== "function") {
+		throw new TypeError("Callback must be a function if provided")
 	}
-	return Vnode(TYPE_LAYOUT, null, onCreate, onUpdate, null)
+	return Vnode(TYPE_REMOVE, null, callback, null, null)
 }
 
 m.Fragment = (attrs) => attrs.children
@@ -384,43 +397,36 @@ var updateFragment = (old, vnode) => {
 }
 
 var updateNode = (old, vnode) => {
+	// This is important. Declarative state bindings that rely on dependency tracking, like
+	// https://github.com/tc39/proposal-signals and related, memoize their results, but that's the
+	// absolute extent of what they necessarily reuse. They don't pool anything. That means all I
+	// need to do to support components based on them is just add this neat single line of code
+	// here.
+	//
+	// Code based on streams (see this repo here) will also potentially need this depending on how
+	// they do their combinators.
+	if (old === vnode) return
+
 	var type
 	if (old == null) {
 		if (vnode == null) return
+		if (vnode.m < 0) {
+			throw new Error("No node present to retain with `m.retain()`")
+		}
 		if (vnode.m & FLAG_USED) {
 			throw new TypeError("Vnodes must not be reused")
 		}
 		type = vnode.m & TYPE_MASK
 		vnode.m |= FLAG_USED
-		if (type === TYPE_RETAIN) {
-			throw new Error("No node present to retain with `m.retain()`")
-		}
 	} else {
 		type = old.m & TYPE_MASK
 
 		if (vnode == null) {
-			if (type === TYPE_COMPONENT) {
-				updateNode(old.c, null)
-			} else if (type === TYPE_LAYOUT) {
-				try {
-					old.d.abort()
-				} catch (e) {
-					console.error(e)
-				}
-			} else {
-				if ((1 << TYPE_TEXT | 1 << TYPE_ELEMENT) & 1 << type) old.d.remove()
-				if (type !== TYPE_TEXT) updateFragment(old, null)
-			}
+			removeNodeDispatch[type](old)
 			return
 		}
 
-		if (vnode.m & FLAG_USED) {
-			throw new TypeError("Vnodes must not be reused")
-		}
-
-		var newType = vnode.m & TYPE_MASK
-
-		if (newType === TYPE_RETAIN) {
+		if (vnode.m < 0) {
 			// If it's a retain node, transmute it into the node it's retaining. Makes it much easier
 			// to implement and work with.
 			//
@@ -434,10 +440,16 @@ var updateNode = (old, vnode) => {
 			return
 		}
 
+		if (vnode.m & FLAG_USED) {
+			throw new TypeError("Vnodes must not be reused")
+		}
+
+		var newType = vnode.m & TYPE_MASK
+
 		if (type === newType && vnode.t === old.t) {
 			vnode.m = old.m & ~FLAG_KEYED | vnode.m & FLAG_KEYED
 		} else {
-			updateNode(old, null)
+			removeNodeDispatch[type](old)
 			type = newType
 			old = null
 		}
@@ -446,9 +458,13 @@ var updateNode = (old, vnode) => {
 	updateNodeDispatch[type](old, vnode)
 }
 
-var updateLayout = (old, vnode) => {
-	vnode.d = old == null ? new AbortController() : old.d
-	currentHooks.push(old == null ? vnode.s : vnode.a, currentParent, vnode.d.signal)
+var updateLayout = (_, vnode) => {
+	vnode.d = currentParent
+	currentHooks.push(vnode)
+}
+
+var updateRemove = (_, vnode) => {
+	vnode.d = currentParent
 }
 
 var updateText = (old, vnode) => {
@@ -588,13 +604,26 @@ var updateComponent = (old, vnode) => {
 
 // Replaces an otherwise necessary `switch`.
 var updateNodeDispatch = [
-	null,
 	updateFragment,
 	updateFragment,
-	updateLayout,
 	updateText,
 	updateElement,
 	updateComponent,
+	updateLayout,
+	updateRemove,
+]
+
+var removeNodeDispatch = [
+	(old) => updateFragment(old, null),
+	(old) => updateFragment(old, null),
+	(old) => old.d.remove(),
+	(old) => {
+		old.d.remove()
+		updateFragment(old, null)
+	},
+	(old) => updateNode(old.c, null),
+	() => {},
+	(old) => currentHooks.push(old),
 ]
 
 //attrs
@@ -952,12 +981,9 @@ m.render = (dom, vnodes, redraw) => {
 		if (active != null && currentDocument.activeElement !== active && typeof active.focus === "function") {
 			active.focus()
 		}
-		for (var i = 0; i < hooks.length; i += 3) {
+		for (var v of hooks) {
 			try {
-				var f = hooks[i]
-				var p = hooks[i + 1]
-				var s = hooks[i + 2]
-				if (typeof f === "function") f(p, s)
+				(0, v.s)(v.d)
 			} catch (e) {
 				console.error(e)
 			}
@@ -973,15 +999,11 @@ m.render = (dom, vnodes, redraw) => {
 	}
 }
 
-m.mount = (root, view, signal) => {
+m.mount = (root, view) => {
 	if (!root) throw new TypeError("Root must be an element")
 
 	if (typeof view !== "function") {
 		throw new TypeError("View must be a function")
-	}
-
-	if (signal) {
-		signal.throwIfAborted()
 	}
 
 	var window = root.ownerDocument.defaultView
@@ -994,7 +1016,7 @@ m.mount = (root, view, signal) => {
 	}
 	var redraw = () => { if (!id) id = window.requestAnimationFrame(redraw.sync) }
 	var Mount = (_, old) => [
-		m.layout((_, signal) => { signal.onabort = unschedule }),
+		m.remove(unschedule),
 		view(!old, redraw)
 	]
 	redraw.sync = () => {
@@ -1003,21 +1025,7 @@ m.mount = (root, view, signal) => {
 	}
 
 	m.render(root, null)
-
-	if (signal) {
-		signal.throwIfAborted()
-	}
-
 	m.render(root, m(Mount), redraw)
-
-	if (signal) {
-		if (signal.aborted) {
-			m.render(root, null)
-			throw signal.reason
-		}
-
-		signal.addEventListener("abort", () => m.render(root, null), {once: true})
-	}
 
 	return redraw
 }

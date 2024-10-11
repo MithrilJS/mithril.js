@@ -9,88 +9,88 @@ o.spec("layout update", function() {
 
 	o("is not invoked when removing element", function() {
 		var update = o.spy()
-		var vnode = m("div", m.layout(null, update))
+		var vnode = m("div", m.layout(update))
 
 		m.render(G.root, vnode)
 		m.render(G.root, [])
 
-		o(update.callCount).equals(0)
+		o(update.callCount).equals(1)
 	})
 	o("is not updated when replacing keyed element", function() {
 		var update = o.spy()
-		var vnode = m.key(1, m("div", m.layout(null, update)))
-		var updated = m.key(1, m("a", m.layout(null, update)))
+		var vnode = m.key(1, m("div", m.layout(update)))
+		var updated = m.key(1, m("a", m.layout(update)))
 		m.render(G.root, vnode)
 		m.render(G.root, updated)
 
-		o(update.callCount).equals(0)
+		o(update.callCount).equals(2)
 	})
 	o("does not call old callback when removing layout vnode from new vnode", function() {
 		var update = o.spy()
 
-		m.render(G.root, m("a", m.layout(null, update)))
-		m.render(G.root, m("a", m.layout(null, update)))
+		m.render(G.root, m("a", m.layout(update)))
+		m.render(G.root, m("a", m.layout(update)))
 		m.render(G.root, m("a"))
 
-		o(update.callCount).equals(1)
+		o(update.callCount).equals(2)
 	})
 	o("invoked on noop", function() {
 		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = m("div", m.layout(null, preUpdate))
-		var updated = m("div", m.layout(null, update))
+		var vnode = m("div", m.layout(preUpdate))
+		var updated = m("div", m.layout(update))
 
 		m.render(G.root, vnode)
 		m.render(G.root, updated)
 
-		o(preUpdate.callCount).equals(0)
+		o(preUpdate.callCount).equals(1)
 		o(update.callCount).equals(1)
 	})
 	o("invoked on updating attr", function() {
 		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = m("div", m.layout(null, preUpdate))
-		var updated = m("div", {id: "a"}, m.layout(null, update))
+		var vnode = m("div", m.layout(preUpdate))
+		var updated = m("div", {id: "a"}, m.layout(update))
 
 		m.render(G.root, vnode)
 		m.render(G.root, updated)
 
-		o(preUpdate.callCount).equals(0)
+		o(preUpdate.callCount).equals(1)
 		o(update.callCount).equals(1)
 	})
 	o("invoked on updating children", function() {
 		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = m("div", m.layout(null, preUpdate), m("a"))
-		var updated = m("div", m.layout(null, update), m("b"))
+		var vnode = m("div", m.layout(preUpdate), m("a"))
+		var updated = m("div", m.layout(update), m("b"))
 
 		m.render(G.root, vnode)
 		m.render(G.root, updated)
 
-		o(preUpdate.callCount).equals(0)
+		o(preUpdate.callCount).equals(1)
 		o(update.callCount).equals(1)
 	})
 	o("invoked on updating fragment", function() {
 		var preUpdate = o.spy()
 		var update = o.spy()
-		var vnode = [m.layout(null, preUpdate)]
-		var updated = [m.layout(null, update)]
+		var vnode = [m.layout(preUpdate)]
+		var updated = [m.layout(update)]
 
 		m.render(G.root, vnode)
 		m.render(G.root, updated)
 
-		o(preUpdate.callCount).equals(0)
+		o(preUpdate.callCount).equals(1)
 		o(update.callCount).equals(1)
 	})
 	o("invoked on full DOM update", function() {
 		var called = false
 		var vnode = m("div", {id: "1"},
-			m("a", {id: "2"}, m.layout(null, null),
+			m("a", {id: "2"}, m.layout(() => {}),
 				m("b", {id: "3"})
 			)
 		)
 		var updated = m("div", {id: "11"},
-			m("a", {id: "22"}, m.layout(null, update),
+			m("a", {id: "22"}, m.layout(update),
 				m("b", {id: "33"})
 			)
 		)

@@ -548,11 +548,11 @@ o.spec("updateNodes", function() {
 		o(Array.from(G.root.childNodes[0].childNodes[0].childNodes, (n) => n.nodeName)).deepEquals(["A"])
 		o(Array.from(G.root.childNodes[1].childNodes, (n) => n.nodeName)).deepEquals([])
 	})
-	o("reused top-level element children are rejected against the same root", function () {
+	o("reused top-level element children are retained if against the same root and from the most recent render", function () {
 		var cached = m("a")
 
 		m.render(G.root, cached)
-		o(() => m.render(G.root, cached)).throws(Error)
+		m.render(G.root, cached)
 	})
 	o("reused top-level element children are rejected against a different root", function () {
 		var cached = m("a")
@@ -561,11 +561,11 @@ o.spec("updateNodes", function() {
 		m.render(G.root, cached)
 		o(() => m.render(otherRoot, cached)).throws(Error)
 	})
-	o("reused inner fragment element children are rejected against the same root", function () {
+	o("reused inner fragment element children are retained if against the same root and from the most recent render", function () {
 		var cached = m("a")
 
 		m.render(G.root, [cached])
-		o(() => m.render(G.root, [cached])).throws(Error)
+		m.render(G.root, [cached])
 	})
 	o("reused inner fragment element children are rejected against a different root", function () {
 		var cached = m("a")
@@ -574,11 +574,11 @@ o.spec("updateNodes", function() {
 		m.render(G.root, [cached])
 		o(() => m.render(otherRoot, [cached])).throws(Error)
 	})
-	o("reused inner element element children are rejected against the same root", function () {
+	o("reused inner element element children are retained if against the same root and from the most recent render", function () {
 		var cached = m("a")
 
 		m.render(G.root, m("div", cached))
-		o(() => m.render(G.root, m("div", cached))).throws(Error)
+		m.render(G.root, m("div", cached))
 	})
 	o("reused inner element element children are rejected against a different root", function () {
 		var cached = m("a")
@@ -587,12 +587,12 @@ o.spec("updateNodes", function() {
 		m.render(G.root, m("div", cached))
 		o(() => m.render(otherRoot, m("div", cached))).throws(Error)
 	})
-	o("reused top-level retain children are rejected against the same root", function () {
+	o("reused top-level retain children are retained if against the same root and from the most recent render", function () {
 		var cached = m.retain()
 
 		m.render(G.root, m("a"))
 		m.render(G.root, cached)
-		o(() => m.render(G.root, cached)).throws(Error)
+		m.render(G.root, cached)
 	})
 	o("reused top-level retain children are rejected against a different root", function () {
 		var cached = m.retain()
@@ -602,12 +602,12 @@ o.spec("updateNodes", function() {
 		m.render(G.root, cached)
 		o(() => m.render(otherRoot, cached)).throws(Error)
 	})
-	o("reused inner fragment retain children are rejected against the same root", function () {
+	o("reused inner fragment retain children are retained if against the same root and from the most recent render", function () {
 		var cached = m.retain()
 
 		m.render(G.root, [m("a")])
 		m.render(G.root, [cached])
-		o(() => m.render(G.root, [cached])).throws(Error)
+		m.render(G.root, [cached])
 	})
 	o("reused inner fragment retain children are rejected against a different root", function () {
 		var cached = m.retain()
@@ -617,12 +617,12 @@ o.spec("updateNodes", function() {
 		m.render(G.root, [cached])
 		o(() => m.render(otherRoot, [cached])).throws(Error)
 	})
-	o("reused inner element retain children are rejected against the same root", function () {
+	o("reused inner element retain children are retained if against the same root and from the most recent render", function () {
 		var cached = m.retain()
 
 		m.render(G.root, m("div", m("a")))
 		m.render(G.root, m("div", cached))
-		o(() => m.render(G.root, m("div", cached))).throws(Error)
+		m.render(G.root, m("div", cached))
 	})
 	o("reused inner element retain children are rejected against a different root", function () {
 		var cached = m.retain()
@@ -643,7 +643,7 @@ o.spec("updateNodes", function() {
 		var cached = m("a")
 
 		m.render(G.root, [cached])
-		m.render(G.root, null)
+		m.render(G.root, [null])
 		o(() => m.render(G.root, [cached])).throws(Error)
 	})
 	o("cross-removal reused inner element element children are rejected against the same root", function () {
@@ -667,11 +667,59 @@ o.spec("updateNodes", function() {
 
 		m.render(G.root, [m("a")])
 		m.render(G.root, [cached])
-		m.render(G.root, null)
+		m.render(G.root, [null])
 		m.render(G.root, [m("a")])
 		o(() => m.render(G.root, [cached])).throws(Error)
 	})
 	o("cross-removal reused inner element retain children are rejected against the same root", function () {
+		var cached = m.retain()
+
+		m.render(G.root, m("div", m("a")))
+		m.render(G.root, m("div", cached))
+		m.render(G.root, m("b"))
+		m.render(G.root, m("div", m("a")))
+		o(() => m.render(G.root, m("div", cached))).throws(Error)
+	})
+	o("cross-replacement reused top-level element children are rejected against the same root", function () {
+		var cached = m("a")
+
+		m.render(G.root, cached)
+		m.render(G.root, m("b"))
+		o(() => m.render(G.root, cached)).throws(Error)
+	})
+	o("cross-replacement reused inner fragment element children are rejected against the same root", function () {
+		var cached = m("a")
+
+		m.render(G.root, [cached])
+		m.render(G.root, [m("b")])
+		o(() => m.render(G.root, [cached])).throws(Error)
+	})
+	o("cross-replacement reused inner element element children are rejected against the same root", function () {
+		var cached = m("a")
+
+		m.render(G.root, m("div", cached))
+		m.render(G.root, m("b"))
+		o(() => m.render(G.root, m("div", cached))).throws(Error)
+	})
+	o("cross-replacement reused top-level retain children are rejected against the same root", function () {
+		var cached = m.retain()
+
+		m.render(G.root, m("a"))
+		m.render(G.root, cached)
+		m.render(G.root, m("b"))
+		m.render(G.root, m("a"))
+		o(() => m.render(G.root, cached)).throws(Error)
+	})
+	o("cross-replacement reused inner fragment retain children are rejected against the same root", function () {
+		var cached = m.retain()
+
+		m.render(G.root, [m("a")])
+		m.render(G.root, [cached])
+		m.render(G.root, [m("b")])
+		m.render(G.root, [m("a")])
+		o(() => m.render(G.root, [cached])).throws(Error)
+	})
+	o("cross-replacement reused inner element retain children are rejected against the same root", function () {
 		var cached = m.retain()
 
 		m.render(G.root, m("div", m("a")))
@@ -682,61 +730,53 @@ o.spec("updateNodes", function() {
 	})
 
 	o("null stays in place", function() {
-		var onabort = o.spy()
-		var create = o.spy((_, signal) => { signal.onabort = onabort })
-		var update = o.spy((_, signal) => { signal.onabort = onabort })
-		var vnodes = [m("div"), m("a", m.layout(create, update))]
-		var temp = [null, m("a", m.layout(create, update))]
-		var updated = [m("div"), m("a", m.layout(create, update))]
+		var remove = o.spy()
+		var layout = o.spy()
+		var vnodes = [m("div"), m("a", m.layout(layout), m.remove(remove))]
+		var temp = [null, m("a", m.layout(layout), m.remove(remove))]
+		var updated = [m("div"), m("a", m.layout(layout), m.remove(remove))]
 
 		m.render(G.root, vnodes)
 		var before = vnodes[1].d
 
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(0)
-		o(onabort.callCount).equals(0)
+		o(layout.callCount).equals(1)
+		o(remove.callCount).equals(0)
 
 		m.render(G.root, temp)
 
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(1)
-		o(onabort.callCount).equals(0)
+		o(layout.callCount).equals(2)
+		o(remove.callCount).equals(0)
 
 		m.render(G.root, updated)
 		var after = updated[1].d
 
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(2)
-		o(onabort.callCount).equals(0)
+		o(layout.callCount).equals(3)
+		o(remove.callCount).equals(0)
 		o(before).equals(after)
 	})
 	o("null stays in place if not first", function() {
-		var onabort = o.spy()
-		var create = o.spy((_, signal) => { signal.onabort = onabort })
-		var update = o.spy((_, signal) => { signal.onabort = onabort })
-		var vnodes = [m("b"), m("div"), m("a", m.layout(create, update))]
-		var temp = [m("b"), null, m("a", m.layout(create, update))]
-		var updated = [m("b"), m("div"), m("a", m.layout(create, update))]
+		var remove = o.spy()
+		var layout = o.spy()
+		var vnodes = [m("b"), m("div"), m("a", m.layout(layout), m.remove(remove))]
+		var temp = [m("b"), null, m("a", m.layout(layout), m.remove(remove))]
+		var updated = [m("b"), m("div"), m("a", m.layout(layout), m.remove(remove))]
 
 		m.render(G.root, vnodes)
 		var before = vnodes[2].d
 
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(0)
-		o(onabort.callCount).equals(0)
+		o(layout.callCount).equals(1)
+		o(remove.callCount).equals(0)
 
 		m.render(G.root, temp)
 
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(1)
-		o(onabort.callCount).equals(0)
+		o(layout.callCount).equals(2)
+		o(remove.callCount).equals(0)
 
 		m.render(G.root, updated)
 		var after = updated[2].d
 
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(2)
-		o(onabort.callCount).equals(0)
+		o(layout.callCount).equals(3)
+		o(remove.callCount).equals(0)
 		o(before).equals(after)
 	})
 	o("node is recreated if unwrapped from a key", function () {
@@ -783,16 +823,14 @@ o.spec("updateNodes", function() {
 		o(G.root.childNodes.length).equals(0)
 	})
 	o("handles null values in unkeyed lists of different length (#2003)", function() {
-		var onabort = o.spy()
-		var create = o.spy((_, signal) => { signal.onabort = onabort })
-		var update = o.spy((_, signal) => { signal.onabort = onabort })
+		var remove = o.spy()
+		var layout = o.spy()
 
-		m.render(G.root, [m("div", m.layout(create, update)), null])
-		m.render(G.root, [null, m("div", m.layout(create, update)), null])
+		m.render(G.root, [m("div", m.layout(layout), m.remove(remove)), null])
+		m.render(G.root, [null, m("div", m.layout(layout), m.remove(remove)), null])
 
-		o(create.callCount).equals(2)
-		o(update.callCount).equals(0)
-		o(onabort.callCount).equals(1)
+		o(layout.callCount).equals(2)
+		o(remove.callCount).equals(1)
 	})
 	o("supports changing the element of a keyed element in a list when traversed bottom-up", function() {
 		m.render(G.root, [m.key(2, m("a"))])
