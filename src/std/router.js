@@ -1,7 +1,7 @@
 /* global window: false */
 import m from "../core.js"
 
-export function WithRouter({prefix, initial: href}) {
+export var WithRouter = ({prefix, initial: href}) => {
 	if (prefix == null) prefix = ""
 
 	if (typeof prefix !== "string") {
@@ -77,7 +77,7 @@ export function WithRouter({prefix, initial: href}) {
 // showing the link in the first place. If you absolutely have to disable the link, disable it by
 // removing this component (like via `m("div", {disabled}, !disabled && m(Link))`). There's
 // friction here for a reason.
-export function Link() {
+export var Link = () => {
 	var opts, setRoute
 	var listener = (ev) => {
 		// Adapted from React Router's implementation:
