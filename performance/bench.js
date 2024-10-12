@@ -158,27 +158,34 @@ export async function runBenchmarks(tests) {
 		await test(state)
 		const {mean, marginOfError, ticks} = state.stats()
 
-		let min = mean - marginOfError
-		let max = mean + marginOfError
+		const min = mean - marginOfError
+		const max = mean + marginOfError
+
+		const maxOps = Math.floor(1000 / min).toLocaleString(undefined, {useGrouping: true})
+		const minOps = Math.floor(1000 / max).toLocaleString(undefined, {useGrouping: true})
+
+		let minDisplay = min
+		let maxDisplay = max
 		let unit = "ms"
 
-		if (max < 1) {
-			min *= 1000
-			max *= 1000
+		if (maxDisplay < 1) {
+			minDisplay *= 1000
+			maxDisplay *= 1000
 			unit = "µs"
-			if (max < 1) {
-				min *= 1000
-				max *= 1000
+			if (maxDisplay < 1) {
+				minDisplay *= 1000
+				maxDisplay *= 1000
 				unit = "ns"
 			}
 		}
 
-		min = min.toPrecision(3)
-		max = max.toPrecision(3)
+		minDisplay = minDisplay.toPrecision(3)
+		maxDisplay = maxDisplay.toPrecision(3)
 
-		const span = min === max ? min : `${min}-${max}`
+		const timeSpan = minDisplay === maxDisplay ? minDisplay : `${minDisplay}-${maxDisplay}`
+		const opsSpan = minOps === maxOps ? minOps : `${minOps}-${maxOps}`
 
-		console.log(`${name}: ${span} ${unit}/op, n = ${ticks}`)
+		console.log(`${name}: ${timeSpan} ${unit}/op, ${opsSpan} op/s, n = ${ticks}`)
 	}
 
 	const end = performance.now()
