@@ -851,13 +851,13 @@ var setAttr = (vnode, element, mask, key, old, attrs) => {
 							if (typeof newValue === "function") {
 								if (typeof oldValue !== "function") {
 									if (vnode.s == null) vnode.s = new EventDict()
-									element.addEventListener(key.slice(2), vnode.s, false)
+									element.addEventListener(key.slice(2), vnode.s)
 								}
 								// Save this, so the current redraw is correctly tracked.
 								vnode.s._ = currentRedraw
 								vnode.s.set(key, newValue)
 							} else if (typeof oldValue === "function") {
-								element.removeEventListener(key.slice(2), vnode.s, false)
+								element.removeEventListener(key.slice(2), vnode.s)
 								vnode.s.delete(key)
 							}
 							return

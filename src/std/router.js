@@ -49,7 +49,7 @@ export var WithRouter = ({prefix, initial: href}) => {
 			throw new TypeError("Outside the DOM, `href` must be set")
 		}
 		href = window.location.href
-		window.addEventListener("popstate", updateRoute, false)
+		window.addEventListener("popstate", updateRoute)
 	}
 
 	updateRouteWithHref()
@@ -58,7 +58,7 @@ export var WithRouter = ({prefix, initial: href}) => {
 		redraw = context.redraw
 
 		return [
-			m.remove(() => window.removeEventListener("popstate", updateRoute, false)),
+			m.remove(() => window.removeEventListener("popstate", updateRoute)),
 			m.set({
 				route: {
 					prefix,
