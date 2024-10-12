@@ -26,7 +26,7 @@ var lazy = (opts) => {
 
 	return (attrs) => {
 		var f = init
-		init = undefined
+		init = null
 		if (typeof f === "function") f()
 		return m(Comp, attrs)
 	}
