@@ -3,19 +3,36 @@ import {hasOwn} from "./util.js"
 
 export {m as default}
 
-// Caution: be sure to check the minified output. I've noticed an issue with Terser trying to
-// inline single-use functions as IIFEs, and this predictably causes perf issues since engines
-// don't seem to reliably lower this in either their bytecode generation *or* their optimized code.
-//
-// Rather than painfully trying to reduce that to an MVC and filing a bug against it, I'm just
-// inlining and commenting everything. It also gives me a better idea of the true cost of various
-// functions.
-//
-// In a few places, there's no-inline hints (`/* @__NOINLINE__ */`) to prevent Terser from
-// inlining, in code paths where it's relevant.
-//
-// Also, be aware: I use some bit operations here. Nothing super fancy like find-first-set, just
-// mainly ANDs, ORs, and a one-off XOR for inequality.
+/*
+Caution: be sure to check the minified output. I've noticed an issue with Terser trying to inline
+single-use functions as IIFEs, and this predictably causes perf issues since engines don't seem to
+reliably lower this in either their bytecode generation *or* their optimized code.
+
+Rather than painfully trying to reduce that to an MVC and filing a bug against it, I'm just
+inlining and commenting everything. It also gives me a better idea of the true cost of various
+functions.
+
+In `m`, I do use a no-inline hints (the `__NOINLINE__` in an inline block comment there) to
+prevent Terser from inlining a cold function in a very hot code path, to try to squeeze a little
+more performance out of the framework. Likewise, to try to preserve this through build scripts,
+Terser annotations are preserved in the ESM production bundle (but not the UMD bundle).
+
+Also, be aware: I use some bit operations here. Nothing super fancy like find-first-set, just
+mainly ANDs, ORs, and a one-off XOR for inequality.
+*/
+
+/*
+State note:
+
+If remove on throw is `true` and an error occurs:
+- All visited vnodes' new versions are removed.
+- All unvisited vnodes' old versions are removed.
+
+If remove on throw is `false` and an error occurs:
+- Attribute modification errors are logged.
+- Views that throw retain the previous version and log their error.
+- Errors other than the above cause the tree to be torn down as if remove on throw was `true`.
+*/
 
 /*
 This same structure is used for several nodes. Here's an explainer for each type.
@@ -320,6 +337,7 @@ var currentRefNode
 var currentNamespace
 var currentDocument
 var currentContext
+var currentRemoveOnThrow
 
 var insertAfterCurrentRefNode = (child) => {
 	if (currentRefNode) {
@@ -368,9 +386,16 @@ var updateFragment = (old, vnode) => {
 		//
 		// Note: if either `vnode` or `old` is `null`, the common length and its own length are
 		// both zero, so it can't actually throw.
-		for (var i = 0; i < commonLength; i++) updateNode(old.c[i], vnode.c[i])
-		for (var i = commonLength; i < oldLength; i++) updateNode(old.c[i], null)
-		for (var i = commonLength; i < newLength; i++) updateNode(null, vnode.c[i])
+		try {
+			for (var i = 0; i < commonLength; i++) updateNode(old.c[i], vnode.c[i])
+			for (var i = commonLength; i < newLength; i++) updateNode(null, vnode.c[i])
+		} finally {
+			if (i < newLength) {
+				commonLength = i
+				for (var i = 0; i < commonLength; i++) updateNode(vnode.c[i], null)
+			}
+			for (var i = commonLength; i < oldLength; i++) updateNode(old.c[i], null)
+		}
 	} else {
 		// Keyed. I take a pretty straightforward approach here to keep it simple:
 		// 1. Build a map from old map to old vnode.
@@ -386,23 +411,30 @@ var updateFragment = (old, vnode) => {
 		var oldMap = new Map()
 		for (var p of old.c) oldMap.set(p.t, p)
 
-		for (var n of vnode.c) {
-			var p = oldMap.get(n.t)
-			if (p == null) {
-				updateFragment(null, n)
-			} else {
-				oldMap.delete(n.t)
-				var prev = currentRefNode
-				try {
-					moveToPosition(p)
-				} finally {
-					currentRefNode = prev
+		try {
+			for (var i = 0; i < newLength; i++) {
+				var n = vnode.c[i]
+				var p = oldMap.get(n.t)
+				if (p == null) {
+					updateFragment(null, n)
+				} else {
+					oldMap.delete(n.t)
+					var prev = currentRefNode
+					try {
+						moveToPosition(p)
+					} finally {
+						currentRefNode = prev
+					}
+					updateFragment(p, n)
 				}
-				updateFragment(p, n)
 			}
+		} finally {
+			if (i < newLength) {
+				for (var j = 0; j < i; j++) updateNode(vnode.c[j], null)
+				updateNode(old.c[j], null)
+			}
+			oldMap.forEach((p) => updateNode(p, null))
 		}
-
-		oldMap.forEach((p) => updateNode(p, null))
 	}
 }
 
@@ -432,7 +464,11 @@ var updateNode = (old, vnode) => {
 		type = old.m & TYPE_MASK
 
 		if (vnode == null) {
-			removeNodeDispatch[type](old)
+			try {
+				removeNodeDispatch[type](old)
+			} catch (e) {
+				console.error(e)
+			}
 			return
 		}
 
@@ -459,13 +495,18 @@ var updateNode = (old, vnode) => {
 		if (type === newType && vnode.t === old.t) {
 			vnode.m = old.m & ~FLAG_KEYED | vnode.m & FLAG_KEYED
 		} else {
-			removeNodeDispatch[type](old)
+			updateNode(old, null)
 			type = newType
 			old = null
 		}
 	}
 
-	updateNodeDispatch[type](old, vnode)
+	try {
+		updateNodeDispatch[type](old, vnode)
+	} catch (e) {
+		updateNode(old, null)
+		throw e
+	}
 }
 
 var updateLayout = (_, vnode) => {
@@ -613,22 +654,29 @@ var updateElement = (old, vnode) => {
 }
 
 var updateComponent = (old, vnode) => {
-	var attrs = vnode.a
-	var tree, oldInstance, oldAttrs
-	rendered: {
-		if (old != null) {
-			tree = old.s
-			oldInstance = old.c
-			oldAttrs = old.a
-		} else if (typeof (tree = (vnode.s = vnode.t)(attrs, oldAttrs, currentContext)) !== "function") {
-			break rendered
+	try {
+		var attrs = vnode.a
+		var tree, oldInstance, oldAttrs
+		rendered: {
+			if (old != null) {
+				tree = old.s
+				oldInstance = old.c
+				oldAttrs = old.a
+			} else if (typeof (tree = (vnode.s = vnode.t)(attrs, oldAttrs, currentContext)) !== "function") {
+				break rendered
+			}
+			tree = (vnode.s = tree)(attrs, oldAttrs, currentContext)
 		}
-		tree = (vnode.s = tree)(attrs, oldAttrs, currentContext)
+		if (tree === vnode) {
+			throw new Error("A view cannot return the vnode it received as argument")
+		}
+		tree = m.normalize(tree)
+	} catch (e) {
+		if (currentRemoveOnThrow) throw e
+		console.error(e)
+		return
 	}
-	if (tree === vnode) {
-		throw new Error("A view cannot return the vnode it received as argument")
-	}
-	updateNode(oldInstance, vnode.c = m.normalize(tree))
+	updateNode(oldInstance, vnode.c = tree)
 }
 
 var removeFragment = (old) => updateFragment(old, null)
@@ -648,10 +696,19 @@ var updateNodeDispatch = [
 var removeNodeDispatch = [
 	removeFragment,
 	removeFragment,
-	(old) => old.d.remove(),
 	(old) => {
+		if (!old.d) return
 		old.d.remove()
-		updateFragment(old, null)
+		old.d = null
+	},
+	(old) => {
+		try {
+			if (!old.d) return
+			old.d.remove()
+			old.d = null
+		} finally {
+			updateFragment(old, null)
+		}
 	},
 	(old) => updateNode(old.c, null),
 	() => {},
@@ -759,198 +816,203 @@ Some of the optimizations it does:
   first place - it moves the check to just the create flow where it's only done once.
 */
 var setAttr = (eventDict, element, mask, key, old, attrs) => {
-	var newValue = getPropKey(attrs, key)
-	var oldValue = getPropKey(old, key)
+	try {
+		var newValue = getPropKey(attrs, key)
+		var oldValue = getPropKey(old, key)
 
-	if (mask & FLAG_IS_REMOVE && newValue !== null) return eventDict
+		if (mask & FLAG_IS_REMOVE && newValue !== null) return eventDict
 
-	forceSetAttribute: {
-		forceTryProperty: {
-			skipValueDiff: {
-				if (key.length > 1) {
-					var pair1 = key.charCodeAt(0) | key.charCodeAt(1) << 16
+		forceSetAttribute: {
+			forceTryProperty: {
+				skipValueDiff: {
+					if (key.length > 1) {
+						var pair1 = key.charCodeAt(0) | key.charCodeAt(1) << 16
 
-					if (key.length === 2 && pair1 === (ASCII_LOWER_I | ASCII_LOWER_S << 16)) {
-						return eventDict
-					} else if (pair1 === (ASCII_LOWER_O | ASCII_LOWER_N << 16)) {
-						if (newValue === oldValue) return eventDict
-						// Update the event
-						if (typeof newValue === "function") {
-							if (typeof oldValue !== "function") {
-								if (eventDict == null) eventDict = new EventDict()
-								element.addEventListener(key.slice(2), eventDict, false)
-							}
-							// Save this, so the current redraw is correctly tracked.
-							eventDict._ = currentRedraw
-							eventDict.set(key, newValue)
-						} else if (typeof oldValue === "function") {
-							element.removeEventListener(key.slice(2), eventDict, false)
-							eventDict.delete(key)
-						}
-						return eventDict
-					} else if (key.length > 3) {
-						var pair2 = key.charCodeAt(2) | key.charCodeAt(3) << 16
-						if (
-							key.length > 6 &&
-							pair1 === (ASCII_LOWER_X | ASCII_LOWER_L << 16) &&
-							pair2 === (ASCII_LOWER_I | ASCII_LOWER_N << 16) &&
-							(key.charCodeAt(4) | key.charCodeAt(5) << 16) === (ASCII_LOWER_K | ASCII_COLON << 16)
-						) {
-							key = key.slice(6)
-							if (newValue !== null) {
-								element.setAttributeNS(xlinkNs, key, newValue)
-							} else {
-								element.removeAttributeNS(xlinkNs, key)
+						if (key.length === 2 && pair1 === (ASCII_LOWER_I | ASCII_LOWER_S << 16)) {
+							return eventDict
+						} else if (pair1 === (ASCII_LOWER_O | ASCII_LOWER_N << 16)) {
+							if (newValue === oldValue) return eventDict
+							// Update the event
+							if (typeof newValue === "function") {
+								if (typeof oldValue !== "function") {
+									if (eventDict == null) eventDict = new EventDict()
+									element.addEventListener(key.slice(2), eventDict, false)
+								}
+								// Save this, so the current redraw is correctly tracked.
+								eventDict._ = currentRedraw
+								eventDict.set(key, newValue)
+							} else if (typeof oldValue === "function") {
+								element.removeEventListener(key.slice(2), eventDict, false)
+								eventDict.delete(key)
 							}
 							return eventDict
-						} else if (key.length === 4) {
+						} else if (key.length > 3) {
+							var pair2 = key.charCodeAt(2) | key.charCodeAt(3) << 16
 							if (
-								pair1 === (ASCII_LOWER_T | ASCII_LOWER_Y << 16) &&
-								pair2 === (ASCII_LOWER_P | ASCII_LOWER_E << 16)
+								key.length > 6 &&
+								pair1 === (ASCII_LOWER_X | ASCII_LOWER_L << 16) &&
+								pair2 === (ASCII_LOWER_I | ASCII_LOWER_N << 16) &&
+								(key.charCodeAt(4) | key.charCodeAt(5) << 16) === (ASCII_LOWER_K | ASCII_COLON << 16)
 							) {
-								if (!(mask & FLAG_INPUT_ELEMENT)) break skipValueDiff
-								if (newValue === null) break forceSetAttribute
-								break forceTryProperty
-							} else if (
-								// Try to avoid a few browser bugs on normal elements.
-								pair1 === (ASCII_LOWER_H | ASCII_LOWER_R << 16) && pair2 === (ASCII_LOWER_E | ASCII_LOWER_F << 16) ||
-								pair1 === (ASCII_LOWER_L | ASCII_LOWER_I << 16) && pair2 === (ASCII_LOWER_S | ASCII_LOWER_T << 16) ||
-								pair1 === (ASCII_LOWER_F | ASCII_LOWER_O << 16) && pair2 === (ASCII_LOWER_R | ASCII_LOWER_M << 16)
-							) {
-								// If it's a custom element, just keep it. Otherwise, force the attribute
-								// to be set.
-								if (!(mask & FLAG_CUSTOM_ELEMENT)) {
-									break forceSetAttribute
+								key = key.slice(6)
+								if (newValue !== null) {
+									element.setAttributeNS(xlinkNs, key, newValue)
+								} else {
+									element.removeAttributeNS(xlinkNs, key)
 								}
-							}
-						} else if (key.length > 4) {
-							switch (key) {
-								case "children":
-									return eventDict
-
-								case "class":
-								case "className":
-								case "title":
+								return eventDict
+							} else if (key.length === 4) {
+								if (
+									pair1 === (ASCII_LOWER_T | ASCII_LOWER_Y << 16) &&
+									pair2 === (ASCII_LOWER_P | ASCII_LOWER_E << 16)
+								) {
+									if (!(mask & FLAG_INPUT_ELEMENT)) break skipValueDiff
 									if (newValue === null) break forceSetAttribute
 									break forceTryProperty
-
-								case "value":
-									if (
-										// Filter out non-HTML keys and custom elements
-										(mask & (FLAG_HTML_ELEMENT | FLAG_CUSTOM_ELEMENT)) !== FLAG_HTML_ELEMENT ||
-										!(key in element)
-									) {
-										break
-									}
-
-									if (newValue === null) {
-										if (mask & (FLAG_OPTION_ELEMENT | FLAG_SELECT_ELEMENT)) {
-											break forceSetAttribute
-										} else {
-											break forceTryProperty
-										}
-									}
-
-									if (!(mask & (FLAG_INPUT_ELEMENT | FLAG_TEXTAREA_ELEMENT | FLAG_SELECT_ELEMENT | FLAG_OPTION_ELEMENT))) {
-										break
-									}
-
-									// It's always stringified, so it's okay to always coerce
-									if (element.value === (newValue = `${newValue}`)) {
-										// Setting `<input type="file" value="...">` to the same value causes an
-										// error to be generated if it's non-empty
-										if (mask & FLAG_IS_FILE_INPUT) return eventDict
-										// Setting `<input value="...">` to the same value by typing on focused
-										// element moves cursor to end in Chrome
-										if (mask & (FLAG_INPUT_ELEMENT | FLAG_TEXTAREA_ELEMENT)) {
-											if (element === currentDocument.activeElement) return eventDict
-										} else {
-											if (oldValue != null && oldValue !== false) return eventDict
-										}
-									}
-
-									if (mask & FLAG_IS_FILE_INPUT) {
-										//setting input[type=file][value] to different value is an error if it's non-empty
-										// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
-										if (newValue !== "") {
-											console.error("File input `value` attributes must either mirror the current value or be set to the empty string (to reset).")
-											return eventDict
-										}
-									}
-
-									break forceTryProperty
-
-								case "style":
-									if (oldValue === newValue) {
-										// Styles are equivalent, do nothing.
-									} else if (newValue === null) {
-										// New style is missing, just clear it.
-										element.style = ""
-									} else if (typeof newValue !== "object") {
-										// New style is a string, let engine deal with patching.
-										element.style = newValue
-									} else if (oldValue === null || typeof oldValue !== "object") {
-										// `old` is missing or a string, `style` is an object.
-										element.style = ""
-										// Add new style properties
-										setStyle(element.style, null, newValue, true)
-									} else {
-										// Both old & new are (different) objects, or `old` is missing.
-										// Update style properties that have changed, or add new style properties
-										setStyle(element.style, oldValue, newValue, true)
-										// Remove style properties that no longer exist
-										setStyle(element.style, newValue, oldValue, false)
-									}
-									return eventDict
-
-								case "selected":
-									var active = currentDocument.activeElement
-									if (
-										element === active ||
-										mask & FLAG_OPTION_ELEMENT && element.parentNode === active
-									) {
-										break
-									}
-									// falls through
-
-								case "checked":
-								case "selectedIndex":
-									break skipValueDiff
-
-								// Try to avoid a few browser bugs on normal elements.
-								case "width":
-								case "height":
+								} else if (
+									// Try to avoid a few browser bugs on normal elements.
+									pair1 === (ASCII_LOWER_H | ASCII_LOWER_R << 16) && pair2 === (ASCII_LOWER_E | ASCII_LOWER_F << 16) ||
+									pair1 === (ASCII_LOWER_L | ASCII_LOWER_I << 16) && pair2 === (ASCII_LOWER_S | ASCII_LOWER_T << 16) ||
+									pair1 === (ASCII_LOWER_F | ASCII_LOWER_O << 16) && pair2 === (ASCII_LOWER_R | ASCII_LOWER_M << 16)
+								) {
 									// If it's a custom element, just keep it. Otherwise, force the attribute
 									// to be set.
 									if (!(mask & FLAG_CUSTOM_ELEMENT)) {
 										break forceSetAttribute
 									}
+								}
+							} else if (key.length > 4) {
+								switch (key) {
+									case "children":
+										return eventDict
+
+									case "class":
+									case "className":
+									case "title":
+										if (newValue === null) break forceSetAttribute
+										break forceTryProperty
+
+									case "value":
+										if (
+											// Filter out non-HTML keys and custom elements
+											(mask & (FLAG_HTML_ELEMENT | FLAG_CUSTOM_ELEMENT)) !== FLAG_HTML_ELEMENT ||
+											!(key in element)
+										) {
+											break
+										}
+
+										if (newValue === null) {
+											if (mask & (FLAG_OPTION_ELEMENT | FLAG_SELECT_ELEMENT)) {
+												break forceSetAttribute
+											} else {
+												break forceTryProperty
+											}
+										}
+
+										if (!(mask & (FLAG_INPUT_ELEMENT | FLAG_TEXTAREA_ELEMENT | FLAG_SELECT_ELEMENT | FLAG_OPTION_ELEMENT))) {
+											break
+										}
+
+										// It's always stringified, so it's okay to always coerce
+										if (element.value === (newValue = `${newValue}`)) {
+											// Setting `<input type="file" value="...">` to the same value causes an
+											// error to be generated if it's non-empty
+											if (mask & FLAG_IS_FILE_INPUT) return eventDict
+											// Setting `<input value="...">` to the same value by typing on focused
+											// element moves cursor to end in Chrome
+											if (mask & (FLAG_INPUT_ELEMENT | FLAG_TEXTAREA_ELEMENT)) {
+												if (element === currentDocument.activeElement) return eventDict
+											} else {
+												if (oldValue != null && oldValue !== false) return eventDict
+											}
+										}
+
+										if (mask & FLAG_IS_FILE_INPUT) {
+											//setting input[type=file][value] to different value is an error if it's non-empty
+											// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
+											if (newValue !== "") {
+												console.error("File input `value` attributes must either mirror the current value or be set to the empty string (to reset).")
+												return eventDict
+											}
+										}
+
+										break forceTryProperty
+
+									case "style":
+										if (oldValue === newValue) {
+											// Styles are equivalent, do nothing.
+										} else if (newValue === null) {
+											// New style is missing, just clear it.
+											element.style = ""
+										} else if (typeof newValue !== "object") {
+											// New style is a string, let engine deal with patching.
+											element.style = newValue
+										} else if (oldValue === null || typeof oldValue !== "object") {
+											// `old` is missing or a string, `style` is an object.
+											element.style = ""
+											// Add new style properties
+											setStyle(element.style, null, newValue, true)
+										} else {
+											// Both old & new are (different) objects, or `old` is missing.
+											// Update style properties that have changed, or add new style properties
+											setStyle(element.style, oldValue, newValue, true)
+											// Remove style properties that no longer exist
+											setStyle(element.style, newValue, oldValue, false)
+										}
+										return eventDict
+
+									case "selected":
+										var active = currentDocument.activeElement
+										if (
+											element === active ||
+											mask & FLAG_OPTION_ELEMENT && element.parentNode === active
+										) {
+											break
+										}
+										// falls through
+
+									case "checked":
+									case "selectedIndex":
+										break skipValueDiff
+
+									// Try to avoid a few browser bugs on normal elements.
+									case "width":
+									case "height":
+										// If it's a custom element, just keep it. Otherwise, force the attribute
+										// to be set.
+										if (!(mask & FLAG_CUSTOM_ELEMENT)) {
+											break forceSetAttribute
+										}
+								}
 							}
 						}
 					}
+
+					if (newValue !== null && typeof newValue !== "object" && oldValue === newValue) return
 				}
 
-				if (newValue !== null && typeof newValue !== "object" && oldValue === newValue) return
+				// Filter out namespaced keys
+				if (!(mask & FLAG_HTML_ELEMENT)) {
+					break forceSetAttribute
+				}
 			}
 
 			// Filter out namespaced keys
-			if (!(mask & FLAG_HTML_ELEMENT)) {
-				break forceSetAttribute
+			// Defer the property check until *after* we check everything.
+			if (key in element) {
+				element[key] = newValue
+				return eventDict
 			}
 		}
 
-		// Filter out namespaced keys
-		// Defer the property check until *after* we check everything.
-		if (key in element) {
-			element[key] = newValue
-			return eventDict
+		if (newValue === null) {
+			if (oldValue !== null) element.removeAttribute(key)
+		} else {
+			element.setAttribute(key, newValue === true ? "" : newValue)
 		}
-	}
-
-	if (newValue === null) {
-		if (oldValue !== null) element.removeAttribute(key)
-	} else {
-		element.setAttribute(key, newValue === true ? "" : newValue)
+	} catch (e) {
+		if (currentRemoveOnThrow) throw e
+		console.error(e)
 	}
 
 	return eventDict
@@ -981,7 +1043,7 @@ class EventDict extends Map {
 
 var currentlyRendering = []
 
-m.render = (dom, vnodes, {redraw} = {}) => {
+m.render = (dom, vnodes, {redraw, removeOnThrow} = {}) => {
 	if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 	if (currentlyRendering.some((d) => d === dom || d.contains(dom))) {
 		throw new TypeError("Node is currently being rendered to and thus is locked.")
@@ -1001,6 +1063,7 @@ m.render = (dom, vnodes, {redraw} = {}) => {
 	var prevNamespace = currentNamespace
 	var prevDocument = currentDocument
 	var prevContext = currentContext
+	var prevRemoveOnThrow = currentRemoveOnThrow
 	var hooks = currentHooks = []
 
 	try {
@@ -1010,6 +1073,8 @@ m.render = (dom, vnodes, {redraw} = {}) => {
 		currentNamespace = namespace === htmlNs ? null : namespace
 		currentDocument = dom.ownerDocument
 		currentContext = {redraw}
+		// eslint-disable-next-line no-implicit-coercion
+		currentRemoveOnThrow = !!removeOnThrow
 
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
@@ -1035,6 +1100,7 @@ m.render = (dom, vnodes, {redraw} = {}) => {
 		currentNamespace = prevNamespace
 		currentDocument = prevDocument
 		currentContext = prevContext
+		currentRemoveOnThrow = prevRemoveOnThrow
 		currentlyRendering.pop()
 	}
 }

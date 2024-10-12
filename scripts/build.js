@@ -9,11 +9,23 @@ import terser from "@rollup/plugin-terser"
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-/** @type {{[key: import("rollup").ModuleFormat]: import("rollup").Plugin}} */
-const terserPlugin = terser({
-	compress: {passes: 3},
-	sourceMap: true,
-})
+/** @type {Partial<Record<import("rollup").ModuleFormat, import("rollup").Plugin>>} */
+const terserMinify = {
+	iife: terser({
+		compress: {passes: 3},
+		format: {wrap_func_args: false},
+		sourceMap: true,
+	}),
+	// See the comment in `src/core.js`
+	esm: terser({
+		compress: {passes: 3},
+		format: {
+			preserve_annotations: true,
+			wrap_func_args: false,
+		},
+		sourceMap: true,
+	}),
+}
 
 function format(n) {
 	return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
@@ -26,7 +38,7 @@ async function build(name, format) {
 	try {
 		await Promise.all([
 			bundle.write({file: path.resolve(dirname, `../dist/${name}.js`), format, sourcemap: true}),
-			bundle.write({file: path.resolve(dirname, `../dist/${name}.min.js`), format, plugins: [terserPlugin], sourcemap: true}),
+			bundle.write({file: path.resolve(dirname, `../dist/${name}.min.js`), format, plugins: [terserMinify[format]], sourcemap: true}),
 		])
 	} finally {
 		await bundle.close()

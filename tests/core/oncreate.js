@@ -159,10 +159,11 @@ o.spec("layout create", function() {
 			var updated = m("a", m.remove(createA))
 
 			m.render(G.root, m.key(1, vnode))
+			var dom = vnode.d
 			m.render(G.root, m.key(1, updated))
 
 			o(createDiv.callCount).equals(1)
-			o(createDiv.args[0]).equals(vnode.d)
+			o(createDiv.args[0]).equals(dom)
 			o(createA.callCount).equals(0)
 		})
 		o("works when creating other children", function() {

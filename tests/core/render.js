@@ -54,34 +54,35 @@ o.spec("render", function() {
 	})
 
 	o("tries to re-initialize a component that threw on create", function() {
-		var A = o.spy(() => { throw new Error("error") })
-		var throwCount = 0
+		var A = o.spy(() => { throw "error" })
+		console.error = o.spy()
 
-		try {m.render(G.root, m(A))} catch (e) {throwCount++}
+		m.render(G.root, m(A))
 
-		o(throwCount).equals(1)
 		o(A.callCount).equals(1)
 
-		try {m.render(G.root, m(A))} catch (e) {throwCount++}
+		m.render(G.root, m(A))
 
-		o(throwCount).equals(2)
 		o(A.callCount).equals(2)
+
+		o(console.error.calls.map((c) => c.args[0])).deepEquals(["error", "error"])
 	})
 	o("tries to re-initialize a stateful component whose view threw on create", function() {
 		var A = o.spy(() => view)
-		var view = o.spy(() => { throw new Error("error") })
-		var throwCount = 0
-		try {m.render(G.root, m(A))} catch (e) {throwCount++}
+		var view = o.spy(() => { throw "error" })
+		console.error = o.spy()
 
-		o(throwCount).equals(1)
+		m.render(G.root, m(A))
+
 		o(A.callCount).equals(1)
 		o(view.callCount).equals(1)
 
-		try {m.render(G.root, m(A))} catch (e) {throwCount++}
+		m.render(G.root, m(A))
 
-		o(throwCount).equals(2)
-		o(A.callCount).equals(2)
+		o(A.callCount).equals(1)
 		o(view.callCount).equals(2)
+
+		o(console.error.calls.map((c) => c.args[0])).deepEquals(["error", "error"])
 	})
 	o("lifecycle methods work in keyed children of recycled keyed", function() {
 		var removeA = o.spy()

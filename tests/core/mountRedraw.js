@@ -226,7 +226,7 @@ o.spec("mount/redraw", function() {
 
 		var redraw1 = m.mount(root1, () => { calls.push("root1") })
 		var redraw2 = m.mount(root2, (isInit) => {
-			if (!isInit) { m.render(root1, null); throw new Error("fail") }
+			if (!isInit) { m.render(root1, null); throw "fail" }
 			calls.push("root2")
 		})
 		var redraw3 = m.mount(root3, () => { calls.push("root3") })
@@ -235,14 +235,14 @@ o.spec("mount/redraw", function() {
 		])
 
 		redraw1.sync()
-		o(() => redraw2.sync()).throws("fail")
+		redraw2.sync()
 		redraw3.sync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", "root3",
 		])
 
-		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
+		o(console.error.calls.map((c) => c.args[0])).deepEquals(["fail"])
 		o(G.rafMock.queueLength()).equals(0)
 	})
 
@@ -265,14 +265,15 @@ o.spec("mount/redraw", function() {
 		])
 
 		redraw1.sync()
-		o(() => redraw2.sync()).throws(TypeError)
+		redraw2.sync()
 		redraw3.sync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", "root3",
 		])
 
-		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
+		o(console.error.callCount).equals(1)
+		o(console.error.args[0] instanceof TypeError).equals(true)
 		o(G.rafMock.queueLength()).equals(0)
 	})
 
@@ -294,14 +295,15 @@ o.spec("mount/redraw", function() {
 		])
 
 		redraw1.sync()
-		o(() => redraw2.sync()).throws(TypeError)
+		redraw2.sync()
 		redraw3.sync()
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 			"root1", "root3",
 		])
 
-		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
+		o(console.error.callCount).equals(1)
+		o(console.error.args[0] instanceof TypeError).equals(true)
 		o(G.rafMock.queueLength()).equals(0)
 	})
 
@@ -500,7 +502,8 @@ o.spec("mount/redraw", function() {
 	})
 
 	o("propagates mount errors synchronously", function() {
-		o(() => m.mount(G.root, () => { throw new Error("foo") })).throws("foo")
+		m.mount(G.root, () => { throw "foo" })
+		o(console.error.calls.map((c) => c.args[0])).deepEquals(["foo"])
 	})
 
 	o("propagates redraw errors synchronously", function() {
@@ -509,19 +512,19 @@ o.spec("mount/redraw", function() {
 		var redraw = m.mount(G.root, () => {
 			switch (++counter) {
 				case 1: return null
-				case 2: throw new Error("foo")
-				case 3: throw new Error("bar")
-				case 4: throw new Error("baz")
+				case 2: throw "foo"
+				case 3: throw "bar"
+				case 4: throw "baz"
 				default: return null
 			}
 		})
 
-		o(() => redraw.sync()).throws("foo")
-		o(() => redraw.sync()).throws("bar")
-		o(() => redraw.sync()).throws("baz")
+		redraw.sync()
+		redraw.sync()
+		redraw.sync()
 
 		o(counter).equals(4)
-		o(console.error.calls.map((c) => c.args[0])).deepEquals([])
+		o(console.error.calls.map((c) => c.args[0])).deepEquals(["foo", "bar", "baz"])
 		o(G.rafMock.queueLength()).equals(0)
 	})
 

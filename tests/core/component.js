@@ -169,39 +169,34 @@ o.spec("component", function() {
 		})
 		o("throws a custom error if it returns itself when created", function() {
 			// A view that returns its vnode would otherwise trigger an infinite loop
-			var threw = false
 			var component = () => vnode
+
+			console.error = o.spy()
+
 			var vnode = m(component)
-			try {
-				m.render(G.root, vnode)
-			}
-			catch (e) {
-				threw = true
-				o(e instanceof Error).equals(true)
-				// Call stack exception is a RangeError
-				o(e instanceof RangeError).equals(false)
-			}
-			o(threw).equals(true)
+			m.render(G.root, vnode)
+
+			o(console.error.callCount).equals(1)
+			o(console.error.args[0] instanceof Error).equals(true)
+			// Call stack exception is a RangeError
+			o(console.error.args[0] instanceof RangeError).equals(false)
 		})
 		o("throws a custom error if it returns itself when updated", function() {
 			// A view that returns its vnode would otherwise trigger an infinite loop
-			var threw = false
 			var component = () => vnode
 			m.render(G.root, m(component))
 
 			o(G.root.childNodes.length).equals(0)
 
+			console.error = o.spy()
+
 			var vnode = m(component)
-			try {
-				m.render(G.root, m(component))
-			}
-			catch (e) {
-				threw = true
-				o(e instanceof Error).equals(true)
-				// Call stack exception is a RangeError
-				o(e instanceof RangeError).equals(false)
-			}
-			o(threw).equals(true)
+			m.render(G.root, m(component))
+
+			o(console.error.callCount).equals(1)
+			o(console.error.args[0] instanceof Error).equals(true)
+			// Call stack exception is a RangeError
+			o(console.error.args[0] instanceof RangeError).equals(false)
 		})
 		o("can update when returning fragments", function() {
 			var component = () => [

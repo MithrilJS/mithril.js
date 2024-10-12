@@ -19,11 +19,17 @@
   "exports": {
     "./stream.js": {
       "import": "./dist/stream.esm.js",
-      "require": "./dist/stream.umd.js"
+      "require": "./dist/stream.umd.js",
+      "production": {
+        "import": "./dist/stream.esm.min.js"
+      }
     },
     ".": {
       "import": "./dist/mithril.esm.js",
-      "require": "./dist/mithril.umd.js"
+      "require": "./dist/mithril.umd.js",
+      "production": {
+        "import": "./dist/mithril.esm.min.js"
+      }
     }
   },
   "scripts": {
