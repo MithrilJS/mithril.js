@@ -1055,7 +1055,7 @@ class EventDict extends Map {
 
 var currentlyRendering = []
 
-m.render = (dom, vnodes, {redraw, removeOnThrow} = {}) => {
+m.render = (dom, vnode, {redraw, removeOnThrow} = {}) => {
 	if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 	if (currentlyRendering.some((d) => d === dom || d.contains(dom))) {
 		throw new TypeError("Node is currently being rendered to and thus is locked.")
@@ -1090,9 +1090,8 @@ m.render = (dom, vnodes, {redraw, removeOnThrow} = {}) => {
 
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
-		vnodes = m.normalize(Array.isArray(vnodes) ? vnodes.slice() : [vnodes])
-		updateNode(dom.vnodes, vnodes)
-		dom.vnodes = vnodes
+		updateNode(dom.vnodes, vnode = m.normalize(vnode))
+		dom.vnodes = vnode
 		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 		if (active != null && currentDocument.activeElement !== active && typeof active.focus === "function") {
 			active.focus()
