@@ -58,20 +58,6 @@ async function report(file) {
 	console.log(`${file}.js:`)
 	console.log(`    Original: ${format(originalGzipSize)} bytes gzipped (${format(originalSize)} bytes uncompressed)`)
 	console.log(`    Minified: ${format(compressedGzipSize)} bytes gzipped (${format(compressedSize)} bytes uncompressed)`)
-
-	return compressedGzipSize
-}
-
-async function saveToReadme(size) {
-	const readme = await fs.readFile(path.resolve(dirname, "../README.md"), "utf8")
-	const kb = size / 1000
-
-	await fs.writeFile(path.resolve(dirname, "../README.md"),
-		readme.replace(
-			/(<!--\s*size\s*-->)(.+?)(<!--\s*\/size\s*-->)/,
-			`\$1${kb % 1 ? kb.toFixed(2) : kb} KB\$3`
-		)
-	)
 }
 
 async function main() {
@@ -84,12 +70,10 @@ async function main() {
 		build("stream.esm", "esm"),
 	])
 
-	const mithrilSize = await report("mithril.umd")
+	await report("mithril.umd")
 	await report("mithril.esm")
 	await report("stream.umd")
 	await report("stream.esm")
-
-	if (process.argv.includes("--save", 2)) await saveToReadme(mithrilSize)
 }
 
 main()
