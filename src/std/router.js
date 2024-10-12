@@ -50,7 +50,6 @@ export var WithRouter = ({prefix, initial: href}) => {
 		}
 		href = window.location.href
 		window.addEventListener("popstate", updateRoute, false)
-		window.addEventListener("hashchange", updateRoute, false)
 	}
 
 	updateRouteWithHref()
@@ -58,15 +57,18 @@ export var WithRouter = ({prefix, initial: href}) => {
 	return ({children}, _, context) => {
 		redraw = context.redraw
 
-		return m.set({
-			route: {
-				prefix,
-				path: currentPath,
-				params: currentUrl.searchParams,
-				current: currentPath + currentUrl.search + currentUrl.hash,
-				set,
-			},
-		}, children)
+		return [
+			m.remove(() => window.removeEventListener("popstate", updateRoute, false)),
+			m.set({
+				route: {
+					prefix,
+					path: currentPath,
+					params: currentUrl.searchParams,
+					current: currentPath + currentUrl.search + currentUrl.hash,
+					set,
+				},
+			}, children),
+		]
 	}
 }
 
