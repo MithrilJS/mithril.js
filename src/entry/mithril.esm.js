@@ -1,6 +1,7 @@
 import m from "../core.js"
 
 import {Link, WithRouter} from "../std/router.js"
+import {debouncer, throttler} from "../std/rate-limit.js"
 import init from "../std/init.js"
 import lazy from "../std/lazy.js"
 import p from "../std/p.js"
@@ -16,5 +17,7 @@ m.lazy = lazy
 m.init = init
 m.use = use
 m.tracked = tracked
+m.throttler = throttler
+m.debouncer = debouncer
 
 export default m
