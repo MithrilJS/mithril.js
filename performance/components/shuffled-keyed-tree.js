@@ -19,7 +19,7 @@ export const shuffledKeyedTree = () => {
 	shuffle()
 	var vnodes = []
 	for (const key of keys) {
-		vnodes.push(m("div.item", {key}))
+		vnodes.push(m.key(key, m("div.item")))
 	}
 	return vnodes
 }
