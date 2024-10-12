@@ -17,9 +17,9 @@
 
 A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->9.05 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
-Mithril.js is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
+Mithril.js has been used by companies like Vimeo, Nike, and Amazon, and open source platforms like Lichess. 👍
 
-Mithril.js supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
+Mithril.js supports Firefox ESR and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
 
 ## Installation
 
