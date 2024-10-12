@@ -27,8 +27,9 @@ export var WithRouter = ({prefix, initial: href}) => {
 	var updateRoute = () => {
 		if (href === window.location.href) return
 		href = window.location.href
-		redraw()
+		var prevUrl = currentUrl
 		updateRouteWithHref()
+		if (currentUrl.href !== prevUrl.href) redraw()
 	}
 
 	var set = (path, {replace, state} = {}) => {
