@@ -389,13 +389,13 @@ var updateFragment = (old, vnode) => {
 		try {
 			for (var i = 0; i < commonLength; i++) updateNode(old.c[i], vnode.c[i])
 			for (var i = commonLength; i < newLength; i++) updateNode(null, vnode.c[i])
-		} finally {
-			if (i < newLength) {
-				commonLength = i
-				for (var i = 0; i < commonLength; i++) updateNode(vnode.c[i], null)
-			}
+		} catch (e) {
+			commonLength = i
+			for (var i = 0; i < commonLength; i++) updateNode(vnode.c[i], null)
 			for (var i = commonLength; i < oldLength; i++) updateNode(old.c[i], null)
+			throw e
 		}
+		for (var i = commonLength; i < oldLength; i++) updateNode(old.c[i], null)
 	} else {
 		// Keyed. I take a pretty straightforward approach here to keep it simple:
 		// 1. Build a map from old map to old vnode.
@@ -420,21 +420,18 @@ var updateFragment = (old, vnode) => {
 				} else {
 					oldMap.delete(n.t)
 					var prev = currentRefNode
-					try {
-						moveToPosition(p)
-					} finally {
-						currentRefNode = prev
-					}
+					moveToPosition(p)
+					currentRefNode = prev
 					updateFragment(p, n)
 				}
 			}
-		} finally {
-			if (i < newLength) {
-				for (var j = 0; j < i; j++) updateNode(vnode.c[j], null)
-				updateNode(old.c[j], null)
-			}
+		} catch (e) {
+			for (var j = 0; j < i; j++) updateNode(vnode.c[j], null)
+			updateNode(old.c[j], null)
 			oldMap.forEach((p) => updateNode(p, null))
+			throw e
 		}
+		oldMap.forEach((p) => updateNode(p, null))
 	}
 }
 
@@ -530,12 +527,9 @@ var updateSet = (old, vnode) => {
 		else if ("set" in descs[key]) descs[key].set = undefined
 	}
 	var prevContext = currentContext
-	try {
-		currentContext = Object.freeze(Object.create(prevContext, descs))
-		updateFragment(old, vnode)
-	} finally {
-		currentContext = prevContext
-	}
+	currentContext = Object.freeze(Object.create(prevContext, descs))
+	updateFragment(old, vnode)
+	currentContext = prevContext
 }
 
 var updateText = (old, vnode) => {
@@ -547,12 +541,21 @@ var updateText = (old, vnode) => {
 	}
 }
 
+var handleAttributeError = (old, e, force) => {
+	if (currentRemoveOnThrow || force) {
+		removeNode(old)
+		updateFragment(old, null)
+		throw e
+	}
+	console.error(e)
+}
+
 var updateElement = (old, vnode) => {
 	var prevParent = currentParent
 	var prevNamespace = currentNamespace
 	var mask = vnode.m
 	var attrs = vnode.a
-	var element, eventDict, oldAttrs
+	var element , oldAttrs
 
 	if (old == null) {
 		var entry = selectorCache.get(vnode.t)
@@ -593,7 +596,7 @@ var updateElement = (old, vnode) => {
 		currentParent = element
 		currentNamespace = ns
 	} else {
-		eventDict = vnode.s = old.s
+		vnode.s = old.s
 		oldAttrs = old.a
 		currentNamespace = (currentParent = element = vnode.d = old.d).namespaceURI
 		if (currentNamespace === htmlNs) currentNamespace = null
@@ -615,18 +618,22 @@ var updateElement = (old, vnode) => {
 			}
 
 			for (var key in attrs) {
-				eventDict = setAttr(eventDict, element, mask, key, oldAttrs, attrs)
+				setAttr(vnode, element, mask, key, oldAttrs, attrs)
 			}
 		}
 
 		for (var key in oldAttrs) {
 			mask |= FLAG_IS_REMOVE
-			eventDict = setAttr(eventDict, element, mask, key, oldAttrs, attrs)
+			setAttr(vnode, element, mask, key, oldAttrs, attrs)
 		}
+	} catch (e) {
+		return handleAttributeError(old, e, true)
+	}
 
-		updateFragment(old, vnode)
+	updateFragment(old, vnode)
 
-		if (mask & FLAG_SELECT_ELEMENT && old == null) {
+	if (mask & FLAG_SELECT_ELEMENT && old == null) {
+		try {
 			// This does exactly what I want, so I'm reusing it to save some code
 			var normalized = getStyleKey(attrs, "value")
 			if ("value" in attrs) {
@@ -640,17 +647,24 @@ var updateElement = (old, vnode) => {
 					}
 				}
 			}
-
-			if ("selectedIndex" in attrs) {
-				element.selectedIndex = attrs.selectedIndex
-			}
+		} catch (e) {
+			handleAttributeError(old, e, false)
 		}
-	} finally {
-		vnode.s = eventDict
-		currentParent = prevParent
-		currentRefNode = element
-		currentNamespace = prevNamespace
+
+		try {
+			// This does exactly what I want, so I'm reusing it to save some code
+			var normalized = getPropKey(attrs, "selectedIndex")
+			if (normalized !== null) {
+				element.selectedIndex = normalized
+			}
+		} catch (e) {
+			handleAttributeError(old, e, false)
+		}
 	}
+
+	currentParent = prevParent
+	currentRefNode = element
+	currentNamespace = prevNamespace
 }
 
 var updateComponent = (old, vnode) => {
@@ -681,6 +695,16 @@ var updateComponent = (old, vnode) => {
 
 var removeFragment = (old) => updateFragment(old, null)
 
+var removeNode = (old) => {
+	try {
+		if (!old.d) return
+		old.d.remove()
+		old.d = null
+	} catch (e) {
+		console.error(e)
+	}
+}
+
 // Replaces an otherwise necessary `switch`.
 var updateNodeDispatch = [
 	updateFragment,
@@ -696,19 +720,10 @@ var updateNodeDispatch = [
 var removeNodeDispatch = [
 	removeFragment,
 	removeFragment,
+	removeNode,
 	(old) => {
-		if (!old.d) return
-		old.d.remove()
-		old.d = null
-	},
-	(old) => {
-		try {
-			if (!old.d) return
-			old.d.remove()
-			old.d = null
-		} finally {
-			updateFragment(old, null)
-		}
+		removeNode(old)
+		updateFragment(old, null)
 	},
 	(old) => updateNode(old.c, null),
 	() => {},
@@ -804,9 +819,6 @@ Some of the optimizations it does:
   attribute name is matchable.
 - For small attribute names (4 characters or less), the code handles them in full, with no full
   string comparison.
-- The events object is read prior to calling this, while the rest of the vnode is already in the
-  CPU cache, and it's just passed as an argument. This ensures it's always in easy access, only
-  a few cycles of latency away, without becoming too costly for vnodes without events.
 - I fuse all the conditions, `hasOwn` and existence checks, and all the add/remove logic into just
   this, to reduce startup overhead and keep outer loop code size down.
 - I use a lot of labels to reuse as much code as possible, and thus more ICs, to make optimization
@@ -815,12 +827,12 @@ Some of the optimizations it does:
   actually the real reason why I'm using bit flags for stuff like `<input type="file">` in the
   first place - it moves the check to just the create flow where it's only done once.
 */
-var setAttr = (eventDict, element, mask, key, old, attrs) => {
+var setAttr = (vnode, element, mask, key, old, attrs) => {
 	try {
 		var newValue = getPropKey(attrs, key)
 		var oldValue = getPropKey(old, key)
 
-		if (mask & FLAG_IS_REMOVE && newValue !== null) return eventDict
+		if (mask & FLAG_IS_REMOVE && newValue !== null) return
 
 		forceSetAttribute: {
 			forceTryProperty: {
@@ -829,23 +841,23 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 						var pair1 = key.charCodeAt(0) | key.charCodeAt(1) << 16
 
 						if (key.length === 2 && pair1 === (ASCII_LOWER_I | ASCII_LOWER_S << 16)) {
-							return eventDict
+							return
 						} else if (pair1 === (ASCII_LOWER_O | ASCII_LOWER_N << 16)) {
-							if (newValue === oldValue) return eventDict
+							if (newValue === oldValue) return
 							// Update the event
 							if (typeof newValue === "function") {
 								if (typeof oldValue !== "function") {
-									if (eventDict == null) eventDict = new EventDict()
-									element.addEventListener(key.slice(2), eventDict, false)
+									if (vnode.s == null) vnode.s = new EventDict()
+									element.addEventListener(key.slice(2), vnode.s, false)
 								}
 								// Save this, so the current redraw is correctly tracked.
-								eventDict._ = currentRedraw
-								eventDict.set(key, newValue)
+								vnode.s._ = currentRedraw
+								vnode.s.set(key, newValue)
 							} else if (typeof oldValue === "function") {
-								element.removeEventListener(key.slice(2), eventDict, false)
-								eventDict.delete(key)
+								element.removeEventListener(key.slice(2), vnode.s, false)
+								vnode.s.delete(key)
 							}
-							return eventDict
+							return
 						} else if (key.length > 3) {
 							var pair2 = key.charCodeAt(2) | key.charCodeAt(3) << 16
 							if (
@@ -860,7 +872,7 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 								} else {
 									element.removeAttributeNS(xlinkNs, key)
 								}
-								return eventDict
+								return
 							} else if (key.length === 4) {
 								if (
 									pair1 === (ASCII_LOWER_T | ASCII_LOWER_Y << 16) &&
@@ -884,7 +896,7 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 							} else if (key.length > 4) {
 								switch (key) {
 									case "children":
-										return eventDict
+										return
 
 									case "class":
 									case "className":
@@ -917,13 +929,13 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 										if (element.value === (newValue = `${newValue}`)) {
 											// Setting `<input type="file" value="...">` to the same value causes an
 											// error to be generated if it's non-empty
-											if (mask & FLAG_IS_FILE_INPUT) return eventDict
+											if (mask & FLAG_IS_FILE_INPUT) return
 											// Setting `<input value="...">` to the same value by typing on focused
 											// element moves cursor to end in Chrome
 											if (mask & (FLAG_INPUT_ELEMENT | FLAG_TEXTAREA_ELEMENT)) {
-												if (element === currentDocument.activeElement) return eventDict
+												if (element === currentDocument.activeElement) return
 											} else {
-												if (oldValue != null && oldValue !== false) return eventDict
+												if (oldValue != null && oldValue !== false) return
 											}
 										}
 
@@ -932,7 +944,7 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 											// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
 											if (newValue !== "") {
 												console.error("File input `value` attributes must either mirror the current value or be set to the empty string (to reset).")
-												return eventDict
+												return
 											}
 										}
 
@@ -959,7 +971,7 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 											// Remove style properties that no longer exist
 											setStyle(element.style, newValue, oldValue, false)
 										}
-										return eventDict
+										return
 
 									case "selected":
 										var active = currentDocument.activeElement
@@ -1001,7 +1013,7 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 			// Defer the property check until *after* we check everything.
 			if (key in element) {
 				element[key] = newValue
-				return eventDict
+				return
 			}
 		}
 
@@ -1011,11 +1023,8 @@ var setAttr = (eventDict, element, mask, key, old, attrs) => {
 			element.setAttribute(key, newValue === true ? "" : newValue)
 		}
 	} catch (e) {
-		if (currentRemoveOnThrow) throw e
-		console.error(e)
+		handleAttributeError(old, e, false)
 	}
-
-	return eventDict
 }
 
 // Here's an explanation of how this works:
