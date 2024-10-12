@@ -12,6 +12,8 @@ var serializeQueryValue = (key, value) => {
 	}
 }
 
+var q = (params) => Object.entries(params).map(([k, v]) => serializeQueryValue(k, v)).join("&")
+
 var invalidTemplateChars = /:([^\/\.-]+)(\.{3})?:/
 
 // Returns `path` from `template` + `params`
@@ -44,11 +46,11 @@ var p = (template, params) => {
 
 	if (queryIndex >= 0) result += template.slice(queryIndex, queryEnd)
 	if (newQueryIndex >= 0) result += (queryIndex < 0 ? "?" : "&") + resolved.slice(newQueryIndex, newQueryEnd)
-	var querystring = Object.entries(query).map(([k, v]) => serializeQueryValue(k, v)).join("&")
+	var querystring = q(query)
 	if (querystring) result += (queryIndex < 0 && newQueryIndex < 0 ? "?" : "&") + querystring
 	if (hashIndex >= 0) result += template.slice(hashIndex)
 	if (newHashIndex >= 0) result += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)
 	return result
 }
 
-export {p as default}
+export {p, q}
