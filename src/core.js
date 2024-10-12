@@ -560,7 +560,8 @@ var updateElement = (old, vnode) => {
 	if (old == null) {
 		var entry = selectorCache.get(vnode.t)
 		var tag = entry ? entry.t : vnode.t
-		var is = attrs && attrs.is
+		var customTag = tag.includes("-")
+		var is = !customTag && attrs && attrs.is
 		var ns = attrs && attrs.xmlns || nameSpace[tag] || prevNamespace
 		var opts = is ? {is} : null
 
@@ -580,7 +581,7 @@ var updateElement = (old, vnode) => {
 			// right code.
 			/* eslint-disable indent */
 			vnode.m = mask |= (
-				is || tag.includes("-")
+				is || customTag
 					? FLAG_HTML_ELEMENT | FLAG_CUSTOM_ELEMENT
 					: (tag = tag.toUpperCase(), (
 						tag === "INPUT" ? FLAG_HTML_ELEMENT | FLAG_INPUT_ELEMENT
@@ -591,6 +592,8 @@ var updateElement = (old, vnode) => {
 					))
 			)
 			/* eslint-enable indent */
+
+			if (is) element.setAttribute("is", is)
 		}
 
 		currentParent = element

@@ -74,11 +74,14 @@ o.spec("attributes", function() {
 			o(spies[0].callCount).equals(0)
 			o(spies[2].callCount).equals(0)
 			o(spies[3].calls).deepEquals([{this: spies[3].elem, args: ["custom", "x"]}])
-			o(spies[4].calls).deepEquals([{this: spies[4].elem, args: ["custom", "x"]}])
+			o(spies[4].calls).deepEquals([
+				{this: spies[4].elem, args: ["is", "something-special"]},
+				{this: spies[4].elem, args: ["custom", "x"]},
+			])
 			o(spies[5].calls).deepEquals([{this: spies[5].elem, args: ["custom", "x"]}])
 		})
 
-		o("when vnode is customElement with property, custom setAttribute not called", function(){
+		o("when vnode is customElement with property, custom setAttribute only called for `is`", function(){
 			var f = G.window.document.createElement
 			var spies = []
 			var getters = []
@@ -118,7 +121,8 @@ o.spec("attributes", function() {
 			o(spies[1].callCount).equals(0)
 			o(spies[2].callCount).equals(0)
 			o(spies[3].callCount).equals(0)
-			o(spies[4].callCount).equals(0)
+			o(spies[4].callCount).equals(1)
+			o(spies[4].args[0]).equals("is")
 			o(spies[5].callCount).equals(0)
 			o(getters[0].callCount).equals(0)
 			o(getters[1].callCount).equals(0)
@@ -126,6 +130,16 @@ o.spec("attributes", function() {
 			o(setters[0].calls).deepEquals([{this: spies[3].elem, args: ["x"]}])
 			o(setters[1].calls).deepEquals([{this: spies[4].elem, args: ["x"]}])
 			o(setters[2].calls).deepEquals([{this: spies[5].elem, args: ["x"]}])
+		})
+
+		o("`is` attribute is not removed when the attribute is removed from hyperscript", function(){
+			var vnode = m("input")
+
+			m.render(G.root, m("input", {is: "something-special"}))
+			m.render(G.root, vnode)
+
+			o(G.root.firstChild).equals(vnode.d)
+			o(G.root.firstChild.attributes["is"].value).equals("something-special")
 		})
 
 	})
