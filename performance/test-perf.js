@@ -89,6 +89,90 @@ benchmarks["null test"] = (b) => {
 	} while (!b.done())
 }
 
+const {routes, vars, templates} = (() => {
+const routes = []
+const vars = []
+const templates = []
+
+for (let i = 0; i < 16; i++) {
+	for (let j = 0; j < 16; j++) {
+		templates.push(`/foo${i}/:id${i}/bar${j}/:sub${j}`)
+		routes.push(`/foo${i}/${i}/bar${j}/${j}`)
+		vars.push({
+			[`id${i}`]: `${i}`,
+			[`sub${j}`]: `${j}`,
+		})
+	}
+}
+
+return {
+	// Flatten everything, since they're usually flat strings in practice.
+	routes: JSON.parse(JSON.stringify(routes)).map((path) => ({path, params: new URLSearchParams()})),
+	templates: JSON.parse(JSON.stringify(templates)),
+	vars: JSON.parse(JSON.stringify(vars)),
+}
+})()
+
+
+// This just needs to be sub-millisecond
+benchmarks["route match"] = (b) => {
+	let i = 0
+	do {
+		cycleRoot()
+		do {
+			// eslint-disable-next-line no-bitwise
+			i = (i - 1) & 255
+			globalThis.test = m.match(routes[i], templates[i])
+		} while (!b.tick())
+	} while (!b.done())
+}
+
+// This needs to be at most a few microseconds, as 300 of these * 3 us/op = 0.9 ms. (And yes, while
+// 300 may seem like a lot, I've worked with apps that exceeded 100, and for 60 FPS, you only truly
+// have room for about 5ms total for logic.)
+benchmarks["route non-match"] = (b) => {
+	let i = 0
+	do {
+		cycleRoot()
+		do {
+			const j = i
+			// eslint-disable-next-line no-bitwise
+			i = (i - 1) & 255
+			globalThis.test = m.match(routes[i], templates[j])
+		} while (!b.tick())
+	} while (!b.done())
+}
+
+// This needs to be at most a few microseconds, as 300 of these * 3 us/op = 0.9 ms. (And yes, while
+// 300 may seem like a lot, I've worked with apps that exceeded 100, and for 60 FPS, you only truly
+// have room for about 5ms total for logic.)
+benchmarks["path generate with vars"] = (b) => {
+	let i = 0
+	do {
+		cycleRoot()
+		do {
+			// eslint-disable-next-line no-bitwise
+			i = (i - 1) & 255
+			globalThis.test = m.p(templates[i], vars[i])
+		} while (!b.tick())
+	} while (!b.done())
+}
+
+// This needs to be at most a few microseconds, as 300 of these * 3 us/op = 0.9 ms. (And yes, while
+// 300 may seem like a lot, I've worked with apps that exceeded 100, and for 60 FPS, you only truly
+// have room for about 5ms total for logic.)
+benchmarks["path generate no vars"] = (b) => {
+	let i = 0
+	do {
+		cycleRoot()
+		do {
+			// eslint-disable-next-line no-bitwise
+			i = (i - 1) & 255
+			globalThis.test = m.p(templates[i])
+		} while (!b.tick())
+	} while (!b.done())
+}
+
 addTree("simpleTree", simpleTree)
 addTree("nestedTree", nestedTree)
 addTree("mutateStylesPropertiesTree", mutateStylesPropertiesTree)

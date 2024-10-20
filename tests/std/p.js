@@ -5,87 +5,112 @@ import m from "../../src/entry/mithril.esm.js"
 o.spec("p", () => {
 	function test(prefix) {
 		o("returns path if no params", () => {
-			var string = m.p(prefix + "/route/foo", undefined)
+			var string = m.p(`${prefix}/route/foo`, undefined)
 
 			o(string).equals(`${prefix}/route/foo`)
 		})
 		o("skips interpolation if no params", () => {
-			var string = m.p(prefix + "/route/:id", undefined)
+			var string = m.p(`${prefix}/route/:id`, undefined)
 
 			o(string).equals(`${prefix}/route/:id`)
 		})
 		o("appends query strings", () => {
-			var string = m.p(prefix + "/route/foo", {a: "b", c: 1})
+			var string = m.p(`${prefix}/route/foo`, {a: "b", c: 1})
 
 			o(string).equals(`${prefix}/route/foo?a=b&c=1`)
 		})
 		o("inserts template parameters at end", () => {
-			var string = m.p(prefix + "/route/:id", {id: "1"})
+			var string = m.p(`${prefix}/route/:id`, {id: "1"})
 
 			o(string).equals(`${prefix}/route/1`)
 		})
 		o("inserts template parameters at beginning", () => {
-			var string = m.p(prefix + "/:id/foo", {id: "1"})
+			var string = m.p(`${prefix}/:id/foo`, {id: "1"})
 
 			o(string).equals(`${prefix}/1/foo`)
 		})
 		o("inserts template parameters at middle", () => {
-			var string = m.p(prefix + "/route/:id/foo", {id: "1"})
+			var string = m.p(`${prefix}/route/:id/foo`, {id: "1"})
 
 			o(string).equals(`${prefix}/route/1/foo`)
 		})
+		o("inserts non-special escapes", () => {
+			var string = m.p(`${prefix}/route/\\a`)
+
+			o(string).equals(`${prefix}/route/a`)
+		})
+		o("inserts normal interpolation escapes without parameters", () => {
+			var string = m.p(`${prefix}/route/\\:id/foo`)
+
+			o(string).equals(`${prefix}/route/:id/foo`)
+		})
+		o("inserts raw interpolation escapes without parameters", () => {
+			var string = m.p(`${prefix}/route/\\*foo`)
+
+			o(string).equals(`${prefix}/route/*foo`)
+		})
+		o("inserts normal interpolation escapes", () => {
+			var string = m.p(`${prefix}/route/\\:id/foo`, {id: "1"})
+
+			o(string).equals(`${prefix}/route/:id/foo?id=1`)
+		})
+		o("inserts raw interpolation escapes", () => {
+			var string = m.p(`${prefix}/route/\\*foo`, {foo: "id/1"})
+
+			o(string).equals(`${prefix}/route/*foo?foo=id%2F1`)
+		})
 		o("inserts variadic paths", () => {
-			var string = m.p(prefix + "/route/:foo...", {foo: "id/1"})
+			var string = m.p(`${prefix}/route/*foo`, {foo: "id/1"})
 
 			o(string).equals(`${prefix}/route/id/1`)
 		})
 		o("inserts variadic paths with initial slashes", () => {
-			var string = m.p(prefix + "/route/:foo...", {foo: "/id/1"})
+			var string = m.p(`${prefix}/route/*foo`, {foo: "/id/1"})
 
 			o(string).equals(`${prefix}/route//id/1`)
 		})
 		o("skips template parameters at end if param missing", () => {
-			var string = m.p(prefix + "/route/:id", {param: 1})
+			var string = m.p(`${prefix}/route/:id`, {param: 1})
 
 			o(string).equals(`${prefix}/route/:id?param=1`)
 		})
 		o("skips template parameters at beginning if param missing", () => {
-			var string = m.p(prefix + "/:id/foo", {param: 1})
+			var string = m.p(`${prefix}/:id/foo`, {param: 1})
 
 			o(string).equals(`${prefix}/:id/foo?param=1`)
 		})
 		o("skips template parameters at middle if param missing", () => {
-			var string = m.p(prefix + "/route/:id/foo", {param: 1})
+			var string = m.p(`${prefix}/route/:id/foo`, {param: 1})
 
 			o(string).equals(`${prefix}/route/:id/foo?param=1`)
 		})
 		o("skips variadic template parameters if param missing", () => {
-			var string = m.p(prefix + "/route/:foo...", {param: "/id/1"})
+			var string = m.p(`${prefix}/route/*foo`, {param: "/id/1"})
 
-			o(string).equals(`${prefix}/route/:foo...?param=%2Fid%2F1`)
+			o(string).equals(`${prefix}/route/*foo?param=%2Fid%2F1`)
 		})
 		o("handles escaped values", () => {
-			var data = m.p(prefix + "/route/:foo", {"foo": ";:@&=+$,/?%#"})
+			var data = m.p(`${prefix}/route/:foo`, {"foo": ";:@&=+$,/?%#"})
 
 			o(data).equals(`${prefix}/route/%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23`)
 		})
 		o("handles unicode", () => {
-			var data = m.p(prefix + "/route/:ö", {"ö": "ö"})
+			var data = m.p(`${prefix}/route/:ö`, {"ö": "ö"})
 
 			o(data).equals(`${prefix}/route/%C3%B6`)
 		})
 		o("handles zero", () => {
-			var string = m.p(prefix + "/route/:a", {a: 0})
+			var string = m.p(`${prefix}/route/:a`, {a: 0})
 
 			o(string).equals(`${prefix}/route/0`)
 		})
 		o("handles false", () => {
-			var string = m.p(prefix + "/route/:a", {a: false})
+			var string = m.p(`${prefix}/route/:a`, {a: false})
 
 			o(string).equals(`${prefix}/route/false`)
 		})
 		o("handles dashes", () => {
-			var string = m.p(prefix + "/:lang-:region/route", {
+			var string = m.p(`${prefix}/:lang-:region/route`, {
 				lang: "en",
 				region: "US"
 			})
@@ -93,7 +118,7 @@ o.spec("p", () => {
 			o(string).equals(`${prefix}/en-US/route`)
 		})
 		o("handles dots", () => {
-			var string = m.p(prefix + "/:file.:ext/view", {
+			var string = m.p(`${prefix}/:file.:ext/view`, {
 				file: "image",
 				ext: "png"
 			})
@@ -101,17 +126,17 @@ o.spec("p", () => {
 			o(string).equals(`${prefix}/image.png/view`)
 		})
 		o("merges query strings", () => {
-			var string = m.p(prefix + "/item?a=1&b=2", {c: 3})
+			var string = m.p(`${prefix}/item?a=1&b=2`, {c: 3})
 
 			o(string).equals(`${prefix}/item?a=1&b=2&c=3`)
 		})
 		o("merges query strings with other parameters", () => {
-			var string = m.p(prefix + "/item/:id?a=1&b=2", {id: "foo", c: 3})
+			var string = m.p(`${prefix}/item/:id?a=1&b=2`, {id: "foo", c: 3})
 
 			o(string).equals(`${prefix}/item/foo?a=1&b=2&c=3`)
 		})
 		o("consumes template parameters without modifying query string", () => {
-			var string = m.p(prefix + "/item/:id?a=1&b=2", {id: "foo"})
+			var string = m.p(`${prefix}/item/:id?a=1&b=2`, {id: "foo"})
 
 			o(string).equals(`${prefix}/item/foo?a=1&b=2`)
 		})

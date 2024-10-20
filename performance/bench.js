@@ -185,7 +185,7 @@ export async function runBenchmarks(tests) {
 		const timeSpan = minDisplay === maxDisplay ? minDisplay : `${minDisplay}-${maxDisplay}`
 		const opsSpan = minOps === maxOps ? minOps : `${minOps}-${maxOps}`
 
-		console.log(`${name}: ${timeSpan} ${unit}/op, ${opsSpan} op/s, n = ${ticks}`)
+		console.log(`${name}: ${timeSpan} ${unit}/op, ${opsSpan} op/s, n = ${ticks.toLocaleString()}`)
 	}
 
 	const end = performance.now()
