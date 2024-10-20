@@ -63,7 +63,7 @@ export function setupGlobals(env = {}) {
 	}
 
 	o.beforeEach(() => {
-		initialize(Object.assign({}, env))
+		initialize({...env})
 		return env.initialize && env.initialize()
 	})
 

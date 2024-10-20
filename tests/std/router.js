@@ -11,7 +11,7 @@ o.spec("route", () => {
 				var fullHost = `${env.protocol}//${env.hostname === "/" ? "" : env.hostname}`
 				var fullPrefix = `${fullHost}${prefix[0] === "/" ? "" : "/"}${prefix ? `${prefix}/` : ""}`
 
-				var G = setupGlobals(Object.assign({}, env, {expectNoConsoleError: true}))
+				var G = setupGlobals({...env, expectNoConsoleError: true})
 
 				o("returns the right route on init", () => {
 					G.window.location.href = `${prefix}/`

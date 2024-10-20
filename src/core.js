@@ -211,7 +211,7 @@ var m = function (selector, attrs) {
 		if (selector === m.Fragment) {
 			return createParentVnode(TYPE_FRAGMENT, null, null, null, children)
 		} else {
-			return Vnode(TYPE_COMPONENT, selector, null, Object.assign({children}, attrs), null)
+			return Vnode(TYPE_COMPONENT, selector, null, {children, ...attrs}, null)
 		}
 	}
 
@@ -226,11 +226,11 @@ var m = function (selector, attrs) {
 	}
 
 	if (state.a != null) {
-		attrs = Object.assign({}, state.a, attrs)
+		attrs = {...state.a, ...attrs}
 	}
 
 	if (dynamicClass != null || state.c != null) {
-		if (attrs !== original) attrs = Object.assign({}, attrs)
+		if (attrs !== original) attrs = {...attrs}
 		attrs.class = dynamicClass != null
 			? state.c != null ? `${state.c} ${dynamicClass}` : dynamicClass
 			: state.c

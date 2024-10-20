@@ -19,12 +19,12 @@ o.spec("context", () => {
 
 	function allKeys(context) {
 		if (context === null || typeof context !== "object") return undefined
-		const chain = []
+		let result = {...context}
 		while (context !== null && context !== Object.prototype) {
-			chain.push(context)
 			context = Object.getPrototypeOf(context)
+			result = {...context, ...result}
 		}
-		return symbolsToStrings(chain.reduceRight((a, b) => Object.assign(a, b), {}))
+		return symbolsToStrings(result)
 	}
 
 	o("string keys are set in context", () => {
