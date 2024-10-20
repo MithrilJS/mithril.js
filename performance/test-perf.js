@@ -59,6 +59,7 @@ function addTree(name, treeFn) {
 	benchmarks[`render ${name}`] = async (b) => {
 		do {
 			cycleRoot()
+			m.render(rootElem, treeFn())
 			b.start()
 			do {
 				m.render(rootElem, treeFn())
