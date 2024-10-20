@@ -223,23 +223,17 @@ benchmarks["mount all"] = async (b) => {
 benchmarks["redraw all"] = async (b) => {
 	do {
 		cycleRoot()
-		const allElems = allTrees.map(() => {
+		allElems = allTrees.map(() => {
 			const elem = document.createElement("div")
 			rootElem.appendChild(elem)
 			return elem
 		})
 		const allRedraws = allElems.map((elem, i) => m.mount(elem, allTrees[i]))
-		try {
-			b.start()
-			do {
-				for (const redraw of allRedraws) redraw.sync()
-			} while (!b.tick())
-			if (isBrowser) await nextFrame()
-		} finally {
-			for (const elem of allElems) {
-				m.render(elem, null)
-			}
-		}
+		b.start()
+		do {
+			for (const redraw of allRedraws) redraw.sync()
+		} while (!b.tick())
+		if (isBrowser) await nextFrame()
 	} while (!b.done())
 }
 
