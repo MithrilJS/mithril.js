@@ -14,7 +14,7 @@ var NestedHeader = () => m("header",
 	)
 )
 
-var NestedForm = () => m("form", {onSubmit: function () {}},
+var NestedForm = () => m("form", {onsubmit() {}},
 	m("input[type=checkbox][checked]"),
 	m("input[type=checkbox]", {checked: false}),
 	m("fieldset",

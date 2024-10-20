@@ -16,7 +16,7 @@ export const simpleTree = () => m(".foo.bar[data-foo=bar]", {p: 2},
 	),
 	m("main",
 		m("form",
-			{onSubmit() {}},
+			{onsubmit() {}},
 			m("input[type=checkbox][checked]"),
 			m("input[type=checkbox]"),
 			m("fieldset", fields.map((field) =>

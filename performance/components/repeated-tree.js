@@ -8,7 +8,7 @@ const RepeatedHeader = () => m("header",
 	)
 )
 
-const RepeatedForm = () => m("form", {onSubmit() {}},
+const RepeatedForm = () => m("form", {onsubmit() {}},
 	m("input", {type: "checkbox", checked: true}),
 	m("input", {type: "checkbox", checked: false}),
 	m("fieldset",
