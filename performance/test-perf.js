@@ -17,6 +17,7 @@ async function run() {
 	if (!isBrowser) await import("../test-utils/injectBrowserMock.js")
 	await runBenchmarks(benchmarks)
 	cycleRoot()
+	if (isBrowser) document.body.innerHTML = "Benchmarks completed. See console."
 }
 
 const isBrowser = typeof process === "undefined"
