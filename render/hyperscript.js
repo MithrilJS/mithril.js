@@ -6,7 +6,7 @@ var hasOwn = require("../util/hasOwn")
 var assign = require("../util/assign")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
-var selectorCache = {}
+var selectorCache = Object.create(null)
 
 function isEmpty(object) {
 	for (var key in object) if (hasOwn.call(object, key)) return false
