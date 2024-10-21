@@ -3,6 +3,7 @@
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
 var hasOwn = require("../util/hasOwn")
+var assign = require("../util/assign")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
@@ -38,20 +39,9 @@ function execSelector(state, vnode) {
 	vnode.tag = state.tag
 
 	if (!isEmpty(state.attrs)) {
-		var newAttrs = {}
-
-		for (var key in attrs) {
-			if (hasOwn.call(attrs, key)) newAttrs[key] = attrs[key]
-		}
-
-		attrs = newAttrs
+		attrs = assign({}, state.attrs, attrs)
 	}
 
-	for (var key in state.attrs) {
-		if (hasOwn.call(state.attrs, key) && key !== "className" && !hasOwn.call(attrs, key)){
-			attrs[key] = state.attrs[key]
-		}
-	}
 	if (className != null || state.attrs.className != null) attrs.className =
 		className != null
 			? state.attrs.className != null
