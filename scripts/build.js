@@ -61,7 +61,7 @@ async function report(file) {
 }
 
 async function main() {
-	await fs.rm(path.resolve(dirname, "../dist"), {recursive: true})
+	await fs.rm(path.resolve(dirname, "../dist"), {recursive: true, force: true})
 
 	await Promise.all([
 		build("mithril.umd", "iife"),
