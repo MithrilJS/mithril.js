@@ -28,6 +28,7 @@ function compileSelector(selector) {
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
+	if (isEmpty(attrs)) attrs = null
 	return selectorCache[selector] = {tag: tag, attrs: attrs}
 }
 
@@ -38,7 +39,7 @@ function execSelector(state, vnode) {
 
 	vnode.tag = state.tag
 
-	if (!isEmpty(state.attrs)) {
+	if (state.attrs != null) {
 		attrs = assign({}, state.attrs, attrs)
 	}
 
