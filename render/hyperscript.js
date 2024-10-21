@@ -41,16 +41,18 @@ function execSelector(state, vnode) {
 
 	if (state.attrs != null) {
 		attrs = assign({}, state.attrs, attrs)
-	}
 
-	if (className != null || state.attrs.className != null) attrs.className =
-		className != null
-			? state.attrs.className != null
-				? String(state.attrs.className) + " " + String(className)
-				: className
-			: state.attrs.className != null
-				? state.attrs.className
-				: null
+		if (className != null || state.attrs.className != null) attrs.className =
+			className != null
+				? state.attrs.className != null
+					? String(state.attrs.className) + " " + String(className)
+					: className
+				: state.attrs.className != null
+					? state.attrs.className
+					: null
+	} else {
+		if (className != null) attrs.className = className
+	}
 
 	if (hasClass) attrs.class = null
 
