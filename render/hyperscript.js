@@ -56,6 +56,13 @@ function execSelector(state, vnode) {
 
 	if (hasClass) attrs.class = null
 
+	// workaround for #2622 (reorder keys in attrs to set "type" first)
+	// The DOM does things to inputs based on the "type", so it needs set first.
+	// See: https://github.com/MithrilJS/mithril.js/issues/2622
+	if (state.tag === "input" && hasOwn.call(attrs, "type")) {
+		attrs = assign({type: attrs.type}, attrs)
+	}
+
 	vnode.attrs = attrs
 
 	return vnode
