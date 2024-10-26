@@ -671,9 +671,8 @@ module.exports = function() {
 
 	//attrs
 	function setAttrs(vnode, attrs, ns) {
-		var isFileInput = attrs != null && vnode.tag === "input" && attrs.type === "file"
 		for (var key in attrs) {
-			setAttr(vnode, key, null, attrs[key], ns, isFileInput)
+			setAttr(vnode, key, null, attrs[key], ns)
 		}
 	}
 	function setAttr(vnode, key, old, value, ns, isFileInput) {
@@ -685,6 +684,7 @@ module.exports = function() {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
+				var isFileInput = vnode.tag === "input" && vnode.attrs.type === "file"
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
 				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && (isFileInput || vnode.dom === activeElement(vnode.dom))) return
@@ -747,9 +747,8 @@ module.exports = function() {
 			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
 		}
 		if (attrs != null) {
-			var isFileInput = vnode.tag === "input" && attrs.type === "file"
 			for (var key in attrs) {
-				setAttr(vnode, key, old && old[key], attrs[key], ns, isFileInput)
+				setAttr(vnode, key, old && old[key], attrs[key], ns)
 			}
 		}
 		var val
