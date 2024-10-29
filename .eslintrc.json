@@ -2,7 +2,7 @@
 	"overrides": [
 		{"files": "*.cjs", "parserOptions": {"sourceType": "script"}},
 		{
-			"files": ["scripts/**", "performance/**"],
+			"files": ["scripts/**"],
 			"env": {
 				"node": true,
 				"es2022": true
@@ -16,12 +16,30 @@
 			}
 		},
 		{
+			"files": ["performance/**"],
+			"env": {
+				"browser": true
+			},
+			"rules": {
+				"no-restricted-syntax": ["error",
+					{"selector": "Literal[bigint]", "message": "BigInts are not supported in ES2018"},
+					{"selector": "ChainExpression", "message": "Optional chaining is not supported in ES2018"},
+					{"selector": "BinaryExpression[operator='??']", "message": "Nullish coalescing is not supported in ES2018"},
+					{"selector": "MetaProperty[meta.name='import'][property.name='meta']", "message": "`import.meta` is not supported in ES2018"},
+					{"selector": "ExportAllDeclaration[exported!=null]", "message": "`export * as foo from ...` is not supported in ES2018"},
+					{"selector": "CatchClause[param=null]", "message": "Omitted `catch` bindings are not supported in ES2018"},
+					{"selector": "Literal[regex.flags=/s/]", "message": "`/.../s` is not supported in ES2018"},
+					{"selector": "Literal[regex.flags=/v/]", "message": "`/.../v` is not supported in ES2018"},
+
+					{"selector": "MemberExpression[property.name='matchAll']", "message": "`string.matchAll` is not supported in ES2018"},
+					{"selector": "MemberExpression[property.name='trimStart']", "message": "`string.trimStart` is not supported in ES2018"}
+				]
+			}
+		},
+		{
 			"files": ["tests/**", "test-utils/**"],
 			"env": {
 				"node": true
-			},
-			"parserOptions": {
-				"ecmaVersion": 2020
 			},
 			"rules": {
 				"no-process-env": "off",
@@ -42,7 +60,7 @@
 		}
 	],
 	"env": {
-		"es6": true
+		"es2018": true
 	},
 	"globals": {
 		"ReadableStream": true,

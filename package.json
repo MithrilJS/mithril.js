@@ -35,7 +35,6 @@
   "scripts": {
     "build": "node scripts/build.js",
     "lint": "eslint . --cache",
-    "perf": "node performance/test-perf.js",
     "pretest": "npm run lint",
     "test": "ospec"
   },

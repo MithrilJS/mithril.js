@@ -27,6 +27,8 @@ is while charging, the higher end is while on battery.
 	- This provides headroom for up to about 100 calls per frame.
 - Switch from using match strings to computing positions from `exec.index`: 6.5-12 microseconds
 	- This provides headroom for up to about 150 calls per frame.
+- Switch from using match strings to computing positions from `exec.index`: 6.5-12 microseconds
+	- This provides headroom for up to about 150 calls per frame.
 - Iterate string directly: 2-3.5 microseconds
 	- This provides headroom for up to about 500 calls per frame.
 
