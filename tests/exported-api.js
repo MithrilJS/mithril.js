@@ -73,7 +73,7 @@ o.spec("api", function() {
 		})
 	})
 
-	o.spec("m.WithRouter, m.Link", function() {
+	o.spec("m.route, m.link", function() {
 		o("works", async() => {
 			var route
 			var App = function () {
@@ -87,7 +87,7 @@ o.spec("api", function() {
 				}
 			}
 
-			m.mount(G.root, () => m(m.WithRouter, {prefix: "#"}, m(App)))
+			m.mount(G.root, () => m.route("#", () => m(App)))
 
 			await Promise.resolve()
 			G.rafMock.fire()

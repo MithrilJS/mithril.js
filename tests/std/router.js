@@ -18,7 +18,7 @@ o.spec("route", () => {
 
 					var App = o.spy()
 
-					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+					m.render(G.root, m.route(prefix, App))
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/")
@@ -31,7 +31,7 @@ o.spec("route", () => {
 
 					var App = o.spy()
 
-					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+					m.render(G.root, m.route(prefix, App))
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/test")
@@ -44,7 +44,7 @@ o.spec("route", () => {
 
 					var App = o.spy()
 
-					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+					m.render(G.root, m.route(prefix, App))
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/ö")
@@ -57,7 +57,7 @@ o.spec("route", () => {
 
 					var App = o.spy()
 
-					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
+					m.render(G.root, m.route(prefix, App))
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/ö")
@@ -82,7 +82,7 @@ o.spec("route", () => {
 						}
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					o(spy1.callCount).equals(1)
 					o(spy2.callCount).equals(0)
@@ -106,7 +106,7 @@ o.spec("route", () => {
 						route = this.route
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					await Promise.resolve()
 					G.rafMock.fire()
@@ -134,7 +134,7 @@ o.spec("route", () => {
 						route = this.route
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					route.set("/other", {replace: true})
 
@@ -171,7 +171,7 @@ o.spec("route", () => {
 						}
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					G.root.firstChild.dispatchEvent(e)
 
@@ -196,7 +196,7 @@ o.spec("route", () => {
 						route = this.route
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					route.set("/other", {replace: false})
 
@@ -231,7 +231,7 @@ o.spec("route", () => {
 						}
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					G.root.firstChild.dispatchEvent(e)
 
@@ -256,7 +256,7 @@ o.spec("route", () => {
 						route = this.route
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					route.set("/other", {state: {a: 1}})
 
@@ -275,7 +275,7 @@ o.spec("route", () => {
 						route = this.route
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix: `${prefix}/`}, m(App)))
+					m.mount(G.root, () => m.route(`${prefix}/`, App))
 
 					o(route.path).equals("/test")
 					o([...route.params]).deepEquals([])
@@ -290,7 +290,7 @@ o.spec("route", () => {
 						route = this.route
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					o(route.path).equals("/test")
 					o([...route.params]).deepEquals([["a", "b"], ["c", "d"]])
@@ -303,7 +303,7 @@ o.spec("route", () => {
 
 					var App = () => {}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					G.window.history.back()
 
@@ -330,7 +330,7 @@ o.spec("route", () => {
 						}
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					o(G.window.location.href).equals(fullPrefix)
 
@@ -360,7 +360,7 @@ o.spec("route", () => {
 						}
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					G.root.firstChild.dispatchEvent(e)
 
@@ -389,7 +389,7 @@ o.spec("route", () => {
 						}
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					o(G.window.location.href).equals(fullPrefix)
 
@@ -420,7 +420,7 @@ o.spec("route", () => {
 						}
 					}
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					o(G.window.location.href).equals(fullPrefix)
 
@@ -442,7 +442,7 @@ o.spec("route", () => {
 						return m("div")
 					})
 
-					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
+					m.mount(G.root, () => m.route(prefix, App))
 
 					o(App.callCount).equals(1)
 

@@ -1,14 +1,10 @@
 /* global window: false */
 import m from "../core.js"
 
-export var WithRouter = ({prefix, initial: href}) => {
-	if (prefix == null) prefix = ""
-
-	if (typeof prefix !== "string") {
-		throw new TypeError("The route prefix must be a string if given")
-	}
-
-	var mustReplace, redraw, currentUrl, currentPath
+var Route = function ({p: prefix}) {
+	var href = this.href
+	var mustReplace, redraw, currentParsedHref
+	var currentRoute
 
 	var updateRouteWithHref = () => {
 		var url = new URL(href)
@@ -19,17 +15,24 @@ export var WithRouter = ({prefix, initial: href}) => {
 		if (index >= 0) urlPath = urlPath.slice(index + decodedPrefix.length)
 		if (urlPath[0] !== "/") urlPath = `/${urlPath}`
 
-		currentUrl = new URL(urlPath, href)
-		currentPath = decodeURI(currentUrl.pathname)
+		var parsedUrl = new URL(urlPath, href)
+		var path = decodeURI(parsedUrl.pathname)
 		mustReplace = false
+		currentRoute = {
+			prefix,
+			path,
+			params: parsedUrl.searchParams,
+			current: path + parsedUrl.search + parsedUrl.hash,
+			set,
+			match,
+		}
+		return currentParsedHref = parsedUrl.href
 	}
 
 	var updateRoute = () => {
 		if (href === window.location.href) return
 		href = window.location.href
-		var prevUrl = currentUrl
-		updateRouteWithHref()
-		if (currentUrl.href !== prevUrl.href) redraw()
+		if (currentParsedHref !== updateRouteWithHref()) redraw()
 	}
 
 	var set = (path, {replace, state} = {}) => {
@@ -45,32 +48,40 @@ export var WithRouter = ({prefix, initial: href}) => {
 		}
 	}
 
+	var match = (path) => m.match(currentRoute, path)
+
 	if (!href) {
 		if (typeof window !== "object") {
 			throw new TypeError("Outside the DOM, `href` must be set")
 		}
 		href = window.location.href
 		window.addEventListener("popstate", updateRoute)
+	} else if (typeof href !== "string") {
+		throw new TypeError("The initial route href must be a string if given")
 	}
 
 	updateRouteWithHref()
 
-	return function ({children}) {
+	return function ({v: view}) {
 		redraw = this.redraw
 
 		return [
 			m.remove(() => window.removeEventListener("popstate", updateRoute)),
-			m.set({
-				route: {
-					prefix,
-					path: currentPath,
-					params: currentUrl.searchParams,
-					current: currentPath + currentUrl.search + currentUrl.hash,
-					set,
-				},
-			}, children),
+			m.set({route: currentRoute}, m.inline(view)),
 		]
 	}
+}
+
+export var route = (prefix, view) => {
+	if (typeof prefix !== "string") {
+		throw new TypeError("The route prefix must be a string")
+	}
+
+	if (typeof view !== "function") {
+		throw new TypeError("Router view must be a function.")
+	}
+
+	return m(Route, {v: view, p: prefix})
 }
 
 // Let's provide a *right* way to manage a route link, rather than letting people screw up

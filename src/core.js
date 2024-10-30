@@ -115,6 +115,14 @@ Use dependencies:
 - `c`: virtual DOM children
 - `d`: unused
 
+Inline:
+- `m` bits 0-3: `8`
+- `t`: unused
+- `s`: unused
+- `a`: view function
+- `c`: instance vnode
+- `d`: unused
+
 The `m` field is also used for various assertions, that aren't described here.
 */
 
@@ -129,6 +137,7 @@ var TYPE_LAYOUT = 5
 var TYPE_REMOVE = 6
 var TYPE_SET_CONTEXT = 7
 var TYPE_USE = 8
+var TYPE_INLINE = 9
 // var TYPE_RETAIN = 15
 
 var FLAG_USED = 1 << 4
@@ -275,6 +284,7 @@ m.TYPE_LAYOUT = TYPE_LAYOUT
 m.TYPE_REMOVE = TYPE_REMOVE
 m.TYPE_SET_CONTEXT = TYPE_SET_CONTEXT
 m.TYPE_USE = TYPE_USE
+m.TYPE_INLINE = TYPE_INLINE
 
 // Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
 // redrawing.
@@ -286,16 +296,23 @@ m.capture = (ev) => {
 
 m.retain = () => Vnode(TYPE_RETAIN, null, null, null)
 
+m.inline = (callback) => {
+	if (typeof callback !== "function") {
+		throw new TypeError("Callback must be a function.")
+	}
+	return Vnode(TYPE_INLINE, null, callback, null)
+}
+
 m.layout = (callback) => {
 	if (typeof callback !== "function") {
-		throw new TypeError("Callback must be a function if provided")
+		throw new TypeError("Callback must be a function.")
 	}
 	return Vnode(TYPE_LAYOUT, null, callback, null)
 }
 
 m.remove = (callback) => {
 	if (typeof callback !== "function") {
-		throw new TypeError("Callback must be a function if provided")
+		throw new TypeError("Callback must be a function.")
 	}
 	return Vnode(TYPE_REMOVE, null, callback, null)
 }
@@ -366,7 +383,7 @@ var insertAfterCurrentRefNode = (child) => {
 //update
 var moveToPosition = (vnode) => {
 	var type
-	while ((type = vnode.m & TYPE_MASK) === TYPE_COMPONENT) {
+	while ((1 << TYPE_COMPONENT | 1 << TYPE_INLINE) & 1 << (type = vnode.m & TYPE_MASK)) {
 		if (!(vnode = vnode.c)) return
 	}
 	if ((1 << TYPE_FRAGMENT | 1 << TYPE_USE | 1 << TYPE_SET_CONTEXT) & 1 << type) {
@@ -710,16 +727,20 @@ var updateComponent = (old, vnode) => {
 			}
 			tree = (vnode.s = tree).call(currentContext, attrs, oldAttrs)
 		}
-		if (tree === vnode) {
-			throw new Error("A view cannot return the vnode it received as argument")
-		}
-		tree = m.normalize(tree)
+		updateNode(oldInstance, vnode.c = m.normalize(tree))
 	} catch (e) {
 		if (currentRemoveOnThrow) throw e
 		console.error(e)
-		return
 	}
-	updateNode(oldInstance, vnode.c = tree)
+}
+
+var updateInline = (old, vnode) => {
+	try {
+		updateNode(old != null ? old.c : null, vnode.c = m.normalize(vnode.a.call(currentContext, currentContext)))
+	} catch (e) {
+		if (currentRemoveOnThrow) throw e
+		console.error(e)
+	}
 }
 
 var removeFragment = (old) => updateFragment(old, null)
@@ -736,6 +757,8 @@ var removeNode = (old) => {
 	}
 }
 
+var removeInstance = (old) => updateNode(old.c, null)
+
 // Replaces an otherwise necessary `switch`.
 var updateNodeDispatch = [
 	updateFragment,
@@ -747,6 +770,7 @@ var updateNodeDispatch = [
 	updateRemove,
 	updateSet,
 	updateUse,
+	updateInline,
 ]
 
 var removeNodeDispatch = [
@@ -757,11 +781,12 @@ var removeNodeDispatch = [
 		removeNode(old)
 		updateFragment(old, null)
 	},
-	(old) => updateNode(old.c, null),
+	removeInstance,
 	() => {},
 	(old) => currentHooks.push(old),
 	removeFragment,
 	removeFragment,
+	removeInstance,
 ]
 
 //attrs
