@@ -31,8 +31,13 @@ o.spec("retain", function() {
 		o(updated).deepEquals(vnode)
 	})
 
-	o("throws on creation", function() {
-		o(() => m.render(G.root, m.retain())).throws(Error)
+	o("ignored if used on creation", function() {
+		var retain = m.retain()
+
+		m.render(G.root, retain)
+
+		o(G.root.childNodes.length).equals(0)
+		o(retain.m).equals(-1)
 	})
 
 	o("prevents update in component", function() {
@@ -71,9 +76,13 @@ o.spec("retain", function() {
 		o(updated).deepEquals(vnode)
 	})
 
-	o("throws if used on component creation", function() {
-		var component = () => m.retain()
+	o("ignored if used on component creation", function() {
+		var retain = m.retain()
+		var component = () => retain
 
-		o(() => m.render(G.root, m(component))).throws(Error)
+		m.render(G.root, m(component))
+
+		o(G.root.childNodes.length).equals(0)
+		o(retain.m).equals(-1)
 	})
 })

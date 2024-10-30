@@ -1,6 +1,6 @@
 import m from "../core.js"
 
-import {Link, WithRouter} from "../std/router.js"
+import {WithRouter, link} from "../std/router.js"
 import {debouncer, throttler} from "../std/rate-limit.js"
 import {match, p, query} from "../std/path-query.js"
 import init from "../std/init.js"
@@ -9,7 +9,7 @@ import tracked from "../std/tracked.js"
 import withProgress from "../std/with-progress.js"
 
 m.WithRouter = WithRouter
-m.Link = Link
+m.link = link
 m.p = p
 m.query = query
 m.match = match

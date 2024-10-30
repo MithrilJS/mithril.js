@@ -161,7 +161,7 @@ o.spec("route", () => {
 
 					var App = function () {
 						if (this.route.path === "/test") {
-							return m("a", m(m.Link, {href: "/other", replace: true}))
+							return m("a", m.link("/other", {replace: true}))
 						} else if (this.route.path === "/other") {
 							return m("div")
 						} else if (this.route.path === "/") {
@@ -223,7 +223,7 @@ o.spec("route", () => {
 
 					var App = function () {
 						if (this.route.path === "/test") {
-							return m("a", m(m.Link, {href: "/other", replace: false}))
+							return m("a", m.link("/other", {replace: false}))
 						} else if (this.route.path === "/other") {
 							return m("div")
 						} else {
@@ -322,7 +322,7 @@ o.spec("route", () => {
 
 					var App = function () {
 						if (this.route.path === "/") {
-							return m("a", m(m.Link, {href: "/test"}))
+							return m("a", m.link("/test"))
 						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {
@@ -352,7 +352,7 @@ o.spec("route", () => {
 
 					var App = function () {
 						if (this.route.path === "/") {
-							return m("a", m(m.Link, {href: "/test", state: {a: 1}}))
+							return m("a", m.link("/test", {state: {a: 1}}))
 						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {
@@ -381,7 +381,7 @@ o.spec("route", () => {
 
 					var App = function () {
 						if (this.route.path === "/") {
-							return m("a", m(m.Link, {href: "/test"}))
+							return m("a", m.link("/test"))
 						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {
@@ -412,7 +412,7 @@ o.spec("route", () => {
 
 					var App = function () {
 						if (this.route.path === "/") {
-							return m("a", {onclick(e) { e.preventDefault() }}, m(m.Link, {href: "/test"}))
+							return m("a", {onclick(e) { e.preventDefault() }}, m.link("/test"))
 						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {

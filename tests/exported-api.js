@@ -81,7 +81,7 @@ o.spec("api", function() {
 				if (route.path === "/a") {
 					return m("div")
 				} else if (route.path === "/b") {
-					return m("a", m(m.Link, {href: "/a"}))
+					return m("a", m.link("/a"))
 				} else {
 					route.set("/a")
 				}

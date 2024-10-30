@@ -163,7 +163,8 @@ var throttler = (delay) => rateLimiterImpl(delay, 1)
  *     m.remove(debounced.dispose),
  *     m("input[type=text].value", {
  *         async oninput(ev) {
- *             if ((await debounced()) !== false) return
+ *             // Skip redraw if rate limited - it's pointless
+ *             if ((await debounced()) !== false) return false
  *             try {
  *                 const response = await fetch(m.p("/save/:id", {id: attrs.id}), {
  *                     body: JSON.stringify({value: ev.target.value}),

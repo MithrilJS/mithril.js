@@ -44,7 +44,7 @@ Retain:
   includes changing its type.
 
 Fragments:
-- `m` bits 0-2: `0`
+- `m` bits 0-3: `0`
 - `t`: unused
 - `s`: unused
 - `a`: unused
@@ -52,15 +52,15 @@ Fragments:
 - `d`: unused
 
 Keyed:
-- `m` bits 0-2: `1`
+- `m` bits 0-3: `1`
 - `t`: unused
 - `s`: unused
-- `a`: key array
-- `c`: virtual DOM children
+- `a`: key to child map, also holds children
+- `c`: unused
 - `d`: unused
 
 Text:
-- `m` bits 0-2: `2`
+- `m` bits 0-3: `2`
 - `t`: unused
 - `s`: unused
 - `a`: text string
@@ -68,7 +68,7 @@ Text:
 - `d`: abort controller reference
 
 Components:
-- `m` bits 0-2: `3`
+- `m` bits 0-3: `3`
 - `t`: component reference
 - `s`: view function, may be same as component reference
 - `a`: most recently received attributes
@@ -76,7 +76,7 @@ Components:
 - `d`: unused
 
 DOM elements:
-- `m` bits 0-2: `4`
+- `m` bits 0-3: `4`
 - `t`: tag name string
 - `s`: event listener dictionary, if any events were ever registered
 - `a`: most recently received attributes
@@ -84,7 +84,7 @@ DOM elements:
 - `d`: element reference
 
 Layout:
-- `m` bits 0-2: `5`
+- `m` bits 0-3: `5`
 - `t`: unused
 - `s`: uncaught
 - `a`: callback to schedule
@@ -92,12 +92,28 @@ Layout:
 - `d`: parent DOM reference, for easier queueing
 
 Remove:
-- `m` bits 0-2: `6`
+- `m` bits 0-3: `6`
 - `t`: unused
 - `s`: unused
 - `a`: callback to schedule
 - `c`: unused
 - `d`: parent DOM reference, for easier queueing
+
+Set context:
+- `m` bits 0-3: `7`
+- `t`: unused
+- `s`: unused
+- `a`: unused
+- `c`: virtual DOM children
+- `d`: unused
+
+Use dependencies:
+- `m` bits 0-3: `8`
+- `t`: unused
+- `s`: unused
+- `a`: Dependency array
+- `c`: virtual DOM children
+- `d`: unused
 
 The `m` field is also used for various assertions, that aren't described here.
 */
@@ -113,6 +129,7 @@ var TYPE_LAYOUT = 5
 var TYPE_REMOVE = 6
 var TYPE_SET_CONTEXT = 7
 var TYPE_USE = 8
+// var TYPE_RETAIN = 15
 
 var FLAG_USED = 1 << 4
 var FLAG_IS_REMOVE = 1 << 5
@@ -123,6 +140,8 @@ var FLAG_SELECT_ELEMENT = 1 << 9
 var FLAG_OPTION_ELEMENT = 1 << 10
 var FLAG_TEXTAREA_ELEMENT = 1 << 11
 var FLAG_IS_FILE_INPUT = 1 << 12
+// Implicitly used as part of checking for `m.retain()`.
+// var FLAG_IS_RETAIN = 1 << 31
 
 var Vnode = (mask, tag, attrs, children) => ({
 	m: mask,
@@ -460,9 +479,7 @@ var updateNode = (old, vnode) => {
 	var type
 	if (old == null) {
 		if (vnode == null) return
-		if (vnode.m < 0) {
-			throw new Error("No node present to retain with `m.retain()`")
-		}
+		if (vnode.m < 0) return
 		if (vnode.m & FLAG_USED) {
 			throw new TypeError("Vnodes must not be reused")
 		}
@@ -473,7 +490,7 @@ var updateNode = (old, vnode) => {
 
 		if (vnode == null) {
 			try {
-				removeNodeDispatch[type](old)
+				if (type !== (TYPE_RETAIN & TYPE_MASK)) removeNodeDispatch[type](old)
 			} catch (e) {
 				console.error(e)
 			}
@@ -1145,10 +1162,9 @@ m.mount = (root, view) => {
 		}
 	}
 	var redraw = () => { if (!id) id = window.requestAnimationFrame(redraw.sync) }
-	var Mount = (_, old) => [
-		m.remove(unschedule),
-		view(!old, redraw)
-	]
+	var Mount = function (_, old) {
+		return [m.remove(unschedule), view.call(this, !old)]
+	}
 	redraw.sync = () => {
 		unschedule()
 		m.render(root, m(Mount), {redraw})

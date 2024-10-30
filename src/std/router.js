@@ -80,8 +80,8 @@ export var WithRouter = ({prefix, initial: href}) => {
 // showing the link in the first place. If you absolutely have to disable the link, disable it by
 // removing this component (like via `m("div", {disabled}, !disabled && m(Link))`). There's
 // friction here for a reason.
-export var Link = () => {
-	var opts, setRoute
+var Link = () => {
+	var href, opts, setRoute
 	var listener = (ev) => {
 		// Adapted from React Router's implementation:
 		// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom/modules/Link.js
@@ -102,7 +102,7 @@ export var Link = () => {
 			// No modifier keys
 			!ev.ctrlKey && !ev.metaKey && !ev.shiftKey && !ev.altKey
 		) {
-			setRoute(opts.href, opts)
+			setRoute(href, opts)
 			// Capture the event, and don't double-call `redraw`.
 			return m.capture(ev)
 		}
@@ -110,10 +110,11 @@ export var Link = () => {
 
 	return function (attrs, old) {
 		setRoute = this.route.set
-		opts = attrs
+		href = attrs.h
+		opts = attrs.o
 		return [
 			m.layout((dom) => {
-				dom.href = this.route.prefix + opts.href
+				dom.href = this.route.prefix + href
 				if (!old) dom.addEventListener("click", listener)
 			}),
 			m.remove((dom) => {
@@ -122,3 +123,5 @@ export var Link = () => {
 		]
 	}
 }
+
+export var link = (href, opts) => m(Link, {h: `${href}`, o: opts})
