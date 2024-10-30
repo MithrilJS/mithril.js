@@ -16,3 +16,5 @@ export var checkCallback = (callback, allowNull, label = "callback") => {
 
 	throw new TypeError(`\`${label}\` must be a function${allowNull ? " if provided." : "."}`)
 }
+
+export var noop = () => {}

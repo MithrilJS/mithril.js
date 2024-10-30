@@ -65,7 +65,7 @@ import {checkCallback} from "../util.js"
  * @property {() => Array<[K, V]>} list
  * @property {(key: K) => boolean} has
  * @property {(key: K) => undefined | V} get
- * @property {(key: K, value: V) => void} track
+ * @property {(key: K, value: V) => void} set
  * @property {(key: K, value: V) => void} replace
  * @property {(key: K) => boolean} delete
  */

@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import {checkCallback, hasOwn, invokeRedrawable} from "./util.js"
+import {checkCallback, hasOwn, invokeRedrawable, noop} from "./util.js"
 
 export {m as default}
 
@@ -773,7 +773,7 @@ var removeNodeDispatch = [
 	removeNode,
 	removeElement,
 	removeInstance,
-	() => {},
+	noop,
 	(old) => currentHooks.push(old),
 	removeFragment,
 	removeFragment,

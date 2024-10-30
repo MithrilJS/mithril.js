@@ -1,5 +1,7 @@
 /* global performance, setTimeout, clearTimeout */
 
+import {noop} from "../util.js"
+
 var validateDelay = (delay) => {
 	if (!Number.isFinite(delay) || delay <= 0) {
 		throw new RangeError("Timer delay must be finite and positive")
@@ -12,14 +14,12 @@ var rateLimiterImpl = (delay = 500, isThrottler) => {
 	var closed = false
 	var start = 0
 	var timer = 0
-	var resolveNext
+	var resolveNext = noop
 
 	var callback = () => {
 		timer = undefined
-		if (typeof resolveNext === "function") {
-			resolveNext(false)
-			resolveNext = undefined
-		}
+		resolveNext(false)
+		resolveNext = noop
 	}
 
 	var rateLimiter = async (ignoreLeading) => {
@@ -27,10 +27,8 @@ var rateLimiterImpl = (delay = 500, isThrottler) => {
 			return true
 		}
 
-		if (typeof resolveNext === "function") {
-			resolveNext(true)
-			resolveNext = null
-		}
+		resolveNext(true)
+		resolveNext = noop
 
 		if (timer) {
 			if (isThrottler) {
@@ -66,10 +64,8 @@ var rateLimiterImpl = (delay = 500, isThrottler) => {
 		if (closed) return
 		closed = true
 		clearTimeout(timer)
-		if (typeof resolveNext === "function") {
-			resolveNext(true)
-			resolveNext = null
-		}
+		resolveNext(true)
+		resolveNext = noop
 	}
 
 	return rateLimiter

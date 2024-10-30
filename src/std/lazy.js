@@ -1,6 +1,6 @@
 import m from "../core.js"
 
-import {checkCallback} from "../util.js"
+import {checkCallback, noop} from "../util.js"
 
 var lazy = (opts) => {
 	checkCallback(opts.fetch, false, "opts.fetch")
@@ -15,6 +15,7 @@ var lazy = (opts) => {
 		return opts.pending && opts.pending()
 	}
 	var init = async () => {
+		init = noop
 		try {
 			Comp = await opts.fetch()
 			if (typeof Comp !== "function") {
@@ -31,9 +32,7 @@ var lazy = (opts) => {
 	}
 
 	return (attrs) => {
-		var f = init
-		init = null
-		if (typeof f === "function") f()
+		init()
 		return m(Comp, attrs)
 	}
 }
