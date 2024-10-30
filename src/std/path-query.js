@@ -102,7 +102,7 @@ var serializeQueryParams = (sep, value, exclude, params) => {
 	return value
 }
 
-var q = (params) => serializeQueryParams("", "", [], params)
+var query = (params) => serializeQueryParams("", "", [], params)
 
 var QUERY = 0
 var ESCAPE = 1
@@ -305,4 +305,4 @@ var match = ({path, params}, pattern) => {
 	return {...exec.groups}
 }
 
-export {p, q, match}
+export {p, query, match}

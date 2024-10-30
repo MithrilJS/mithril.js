@@ -89,18 +89,14 @@ o.spec("render", function() {
 		var removeB = o.spy()
 		var layoutA = o.spy()
 		var layoutB = o.spy()
-		var a = function() {
-			return m.key(1, m("div",
-				m.key(11, m("div", m.layout(layoutA), m.remove(removeA))),
-				m.key(12, m("div"))
-			))
-		}
-		var b = function() {
-			return m.key(2, m("div",
-				m.key(21, m("div", m.layout(layoutB), m.remove(removeB))),
-				m.key(22, m("div"))
-			))
-		}
+		var a = () => m.keyed([[1, m("div", m.keyed([
+			[11, m("div", m.layout(layoutA), m.remove(removeA))],
+			[12, m("div")],
+		]))]])
+		var b = () => m.keyed([[2, m("div", m.keyed([
+			[21, m("div", m.layout(layoutB), m.remove(removeB))],
+			[22, m("div")],
+		]))]])
 		m.render(G.root, a())
 		var first = G.root.firstChild.firstChild
 		m.render(G.root, b())
@@ -122,16 +118,12 @@ o.spec("render", function() {
 		var removeB = o.spy()
 		var layoutA = o.spy()
 		var layoutB = o.spy()
-		var a = function() {
-			return m.key(1, m("div",
-				m("div", m.layout(layoutA), m.remove(removeA))
-			))
-		}
-		var b = function() {
-			return m.key(2, m("div",
-				m("div", m.layout(layoutB), m.remove(removeB))
-			))
-		}
+		var a = () => m.keyed([[1, m("div",
+			m("div", m.layout(layoutA), m.remove(removeA))
+		)]])
+		var b = () => m.keyed([[2, m("div",
+			m("div", m.layout(layoutB), m.remove(removeB))
+		)]])
 		m.render(G.root, a())
 		var first = G.root.firstChild.firstChild
 		m.render(G.root, b())
@@ -154,16 +146,12 @@ o.spec("render", function() {
 		var layoutA = o.spy()
 		var layoutB = o.spy()
 
-		var a = function() {
-			return m.key(1, m("div",
-				m("div", m.layout(layoutA), m.remove(removeA))
-			))
-		}
-		var b = function() {
-			return m.key(2, m("div",
-				m("div", m.layout(layoutB), m.remove(removeB))
-			))
-		}
+		var a = () => m.keyed([[1, m("div",
+			m("div", m.layout(layoutA), m.remove(removeA))
+		)]])
+		var b = () => m.keyed([[2, m("div",
+			m("div", m.layout(layoutB), m.remove(removeB))
+		)]])
 		m.render(G.root, a())
 		m.render(G.root, a())
 		var first = G.root.firstChild.firstChild
@@ -193,21 +181,20 @@ o.spec("render", function() {
 		o(removeA.callCount).equals(1)
 	})
 	o("svg namespace is preserved in keyed diff (#1820)", function(){
-		// note that this only exerciese one branch of the keyed diff algo
-		var svg = m("svg",
-			m.key(0, m("g")),
-			m.key(1, m("g"))
-		)
+		var svg = m("svg", m.keyed([
+			[0, m("g")],
+			[1, m("g")],
+		]))
 		m.render(G.root, svg)
 
 		o(svg.d.namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(svg.d.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(svg.d.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
 
-		svg = m("svg",
-			m.key(1, m("g", {x: 1})),
-			m.key(2, m("g", {x: 2}))
-		)
+		svg = m("svg", m.keyed([
+			[1, m("g", {x: 1})],
+			[2, m("g", {x: 2})],
+		]))
 		m.render(G.root, svg)
 
 		o(svg.d.namespaceURI).equals("http://www.w3.org/2000/svg")

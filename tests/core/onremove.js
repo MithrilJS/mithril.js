@@ -54,9 +54,9 @@ o.spec("layout remove", function() {
 		var temp = m("div", m.remove(remove))
 		var updated = m("div")
 
-		m.render(G.root, m.key(1, vnode))
-		m.render(G.root, m.key(2, temp))
-		m.render(G.root, m.key(1, updated))
+		m.render(G.root, m.keyed([[1, vnode]]))
+		m.render(G.root, m.keyed([[2, temp]]))
+		m.render(G.root, m.keyed([[1, updated]]))
 
 		o(vnode.d).notEquals(updated.d) // this used to be a recycling pool test
 		o(remove.callCount).equals(1)

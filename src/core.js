@@ -51,19 +51,19 @@ Fragments:
 - `c`: virtual DOM children
 - `d`: unused
 
-Keys:
+Keyed:
 - `m` bits 0-2: `1`
-- `t`: `KEY`
-- `s`: identity key (may be any arbitrary object)
-- `a`: unused
+- `t`: unused
+- `s`: unused
+- `a`: key array
 - `c`: virtual DOM children
 - `d`: unused
 
 Text:
 - `m` bits 0-2: `2`
 - `t`: unused
-- `s`: text string
-- `a`: unused
+- `s`: unused
+- `a`: text string
 - `c`: unused
 - `d`: abort controller reference
 
@@ -86,34 +86,34 @@ DOM elements:
 Layout:
 - `m` bits 0-2: `5`
 - `t`: unused
-- `s`: callback to schedule
-- `a`: unused
+- `s`: uncaught
+- `a`: callback to schedule
 - `c`: unused
 - `d`: parent DOM reference, for easier queueing
 
 Remove:
 - `m` bits 0-2: `6`
 - `t`: unused
-- `s`: callback to schedule
-- `a`: unused
+- `s`: unused
+- `a`: callback to schedule
 - `c`: unused
 - `d`: parent DOM reference, for easier queueing
 
 The `m` field is also used for various assertions, that aren't described here.
 */
 
-var TYPE_MASK = 7
+var TYPE_MASK = 15
 var TYPE_RETAIN = -1
 var TYPE_FRAGMENT = 0
-var TYPE_KEY = 1
+var TYPE_KEYED = 1
 var TYPE_TEXT = 2
 var TYPE_ELEMENT = 3
 var TYPE_COMPONENT = 4
 var TYPE_LAYOUT = 5
 var TYPE_REMOVE = 6
 var TYPE_SET_CONTEXT = 7
+var TYPE_USE = 8
 
-var FLAG_KEYED = 1 << 3
 var FLAG_USED = 1 << 4
 var FLAG_IS_REMOVE = 1 << 5
 var FLAG_HTML_ELEMENT = 1 << 6
@@ -124,13 +124,12 @@ var FLAG_OPTION_ELEMENT = 1 << 10
 var FLAG_TEXTAREA_ELEMENT = 1 << 11
 var FLAG_IS_FILE_INPUT = 1 << 12
 
-var Vnode = (mask, tag, state, attrs, children) => ({
+var Vnode = (mask, tag, attrs, children) => ({
 	m: mask,
 	t: tag,
-	s: state,
 	a: attrs,
 	c: children,
-	// Think of this as either "data" or "DOM" - it's used for both.
+	s: null,
 	d: null,
 })
 
@@ -178,12 +177,17 @@ of this optimization process. It doesn't allocate arguments except as needed to 
 doesn't allocate attributes except to replace them for modifications, among other things.
 */
 var m = function (selector, attrs) {
-	if (typeof selector !== "string" && typeof selector !== "function") {
-		throw new Error("The selector must be either a string or a component.");
-	}
-
+	var type = TYPE_ELEMENT
 	var start = 1
 	var children
+
+	if (typeof selector !== "string") {
+		if (typeof selector !== "function") {
+			throw new Error("The selector must be either a string or a component.");
+		}
+		type = selector === m.Fragment ? TYPE_FRAGMENT : TYPE_COMPONENT
+	}
+
 
 	if (attrs == null || typeof attrs === "object" && typeof attrs.m !== "number" && !Array.isArray(attrs)) {
 		start = 2
@@ -207,49 +211,51 @@ var m = function (selector, attrs) {
 	// DOM nodes are about as commonly constructed as vnodes, but fragments are only constructed
 	// from JSX code (and even then, they aren't common).
 
-	if (typeof selector !== "string") {
-		if (selector === m.Fragment) {
-			return createParentVnode(TYPE_FRAGMENT, null, null, null, children)
-		} else {
-			return Vnode(TYPE_COMPONENT, selector, null, {children, ...attrs}, null)
+	if (type === TYPE_ELEMENT) {
+		attrs = attrs || {}
+		var hasClassName = hasOwn.call(attrs, "className")
+		var dynamicClass = hasClassName ? attrs.className : attrs.class
+		var state = selectorCache.get(selector)
+		var original = attrs
+
+		if (state == null) {
+			state = /*@__NOINLINE__*/compileSelector(selector)
+		}
+
+		if (state.a != null) {
+			attrs = {...state.a, ...attrs}
+		}
+
+		if (dynamicClass != null || state.c != null) {
+			if (attrs !== original) attrs = {...attrs}
+			attrs.class = dynamicClass != null
+				? state.c != null ? `${state.c} ${dynamicClass}` : dynamicClass
+				: state.c
+			if (hasClassName) attrs.className = null
 		}
 	}
 
-	attrs = attrs || {}
-	var hasClassName = hasOwn.call(attrs, "className")
-	var dynamicClass = hasClassName ? attrs.className : attrs.class
-	var state = selectorCache.get(selector)
-	var original = attrs
-
-	if (state == null) {
-		state = /*@__NOINLINE__*/compileSelector(selector)
+	if (type === TYPE_COMPONENT) {
+		attrs = {children, ...attrs}
+		children = null
+	} else {
+		for (var i = 0; i < children.length; i++) children[i] = m.normalize(children[i])
 	}
 
-	if (state.a != null) {
-		attrs = {...state.a, ...attrs}
-	}
-
-	if (dynamicClass != null || state.c != null) {
-		if (attrs !== original) attrs = {...attrs}
-		attrs.class = dynamicClass != null
-			? state.c != null ? `${state.c} ${dynamicClass}` : dynamicClass
-			: state.c
-		if (hasClassName) attrs.className = null
-	}
-
-	return createParentVnode(TYPE_ELEMENT, selector, null, attrs, children)
+	return Vnode(type, selector, attrs, children)
 }
 
 m.TYPE_MASK = TYPE_MASK
 m.TYPE_RETAIN = TYPE_RETAIN
 m.TYPE_FRAGMENT = TYPE_FRAGMENT
-m.TYPE_KEY = TYPE_KEY
+m.TYPE_KEYED = TYPE_KEYED
 m.TYPE_TEXT = TYPE_TEXT
 m.TYPE_ELEMENT = TYPE_ELEMENT
 m.TYPE_COMPONENT = TYPE_COMPONENT
 m.TYPE_LAYOUT = TYPE_LAYOUT
 m.TYPE_REMOVE = TYPE_REMOVE
 m.TYPE_SET_CONTEXT = TYPE_SET_CONTEXT
+m.TYPE_USE = TYPE_USE
 
 // Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
 // redrawing.
@@ -259,68 +265,59 @@ m.capture = (ev) => {
 	return false
 }
 
-m.retain = () => Vnode(TYPE_RETAIN, null, null, null, null)
+m.retain = () => Vnode(TYPE_RETAIN, null, null, null)
 
 m.layout = (callback) => {
 	if (typeof callback !== "function") {
 		throw new TypeError("Callback must be a function if provided")
 	}
-	return Vnode(TYPE_LAYOUT, null, callback, null, null)
+	return Vnode(TYPE_LAYOUT, null, callback, null)
 }
 
 m.remove = (callback) => {
 	if (typeof callback !== "function") {
 		throw new TypeError("Callback must be a function if provided")
 	}
-	return Vnode(TYPE_REMOVE, null, callback, null, null)
+	return Vnode(TYPE_REMOVE, null, callback, null)
 }
 
 m.Fragment = (attrs) => attrs.children
 
-m.key = (key, ...children) =>
-	createParentVnode(TYPE_KEY, key, null, null,
-		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
-	)
+m.keyed = (values, view) => {
+	if (view != null && typeof view !== "function") {
+		throw new TypeError("Callback must be a function if provided")
+	}
+	var map = new Map()
+	for (var value of values) {
+		if (typeof view === "function") value = view(value)
+		if (value != null && typeof value !== "boolean") {
+			if (!Array.isArray(value) || value.length < 1) {
+				throw new TypeError("Returned value must be a `[key, value]` array")
+			}
+			if (map.has(value[0])) {
+				// Coerce to string so symbols don't throw
+				throw new TypeError(`Duplicate key detected: ${String(value[0])}`)
+			}
+			map.set(value[0], m.normalize(value[1]))
+		}
+	}
+	return Vnode(TYPE_KEYED, null, map, null)
+}
 
-m.set = (entries, ...children) =>
-	createParentVnode(TYPE_SET_CONTEXT, null, null, entries,
-		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
-	)
+m.set = (entries, ...children) => resolveSpecialFragment(TYPE_SET_CONTEXT, entries, ...children)
+m.use = (deps, ...children) => resolveSpecialFragment(TYPE_USE, [...deps], ...children)
 
 m.normalize = (node) => {
 	if (node == null || typeof node === "boolean") return null
-	if (typeof node !== "object") return Vnode(TYPE_TEXT, null, String(node), null, null)
-	if (Array.isArray(node)) return createParentVnode(TYPE_FRAGMENT, null, null, null, node.slice())
+	if (typeof node !== "object") return Vnode(TYPE_TEXT, null, String(node), null)
+	if (Array.isArray(node)) return Vnode(TYPE_FRAGMENT, null, null, node.map(m.normalize))
 	return node
 }
 
-var createParentVnode = (mask, tag, state, attrs, input) => {
-	if (input.length) {
-		input[0] = m.normalize(input[0])
-		var isKeyed = input[0] != null && (input[0].m & TYPE_MASK) === TYPE_KEY
-		var keys = new Set()
-		mask |= -isKeyed & FLAG_KEYED
-		// Note: this is a *very* perf-sensitive check.
-		// Fun fact: merging the loop like this is somehow faster than splitting
-		// it, noticeably so.
-		for (var i = 1; i < input.length; i++) {
-			input[i] = m.normalize(input[i])
-			if ((input[i] != null && (input[i].m & TYPE_MASK) === TYPE_KEY) !== isKeyed) {
-				throw new TypeError(
-					isKeyed
-						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit empty key vnode, `m.key()`, instead of a hole."
-						: "In fragments, vnodes must either all have keys or none have keys."
-				)
-			}
-			if (isKeyed) {
-				if (keys.has(input[i].t)) {
-					throw new TypeError(`Duplicate key detected: ${input[i].t}`)
-				}
-				keys.add(input[i].t)
-			}
-		}
-	}
-	return Vnode(mask, tag, state, attrs, input)
+var resolveSpecialFragment = (type, attrs, ...children) => {
+	var resolved = children.length === 1 && Array.isArray(children[0]) ? [...children[0]] : [...children]
+	for (var i = 0; i < resolved.length; i++) resolved[i] = m.normalize(resolved[i])
+	return Vnode(type, null, attrs, resolved)
 }
 
 var xlinkNs = "http://www.w3.org/1999/xlink"
@@ -353,85 +350,99 @@ var moveToPosition = (vnode) => {
 	while ((type = vnode.m & TYPE_MASK) === TYPE_COMPONENT) {
 		if (!(vnode = vnode.c)) return
 	}
-	if ((1 << TYPE_FRAGMENT | 1 << TYPE_KEY | 1 << TYPE_SET_CONTEXT) & 1 << type) {
+	if ((1 << TYPE_FRAGMENT | 1 << TYPE_USE | 1 << TYPE_SET_CONTEXT) & 1 << type) {
 		vnode.c.forEach(moveToPosition)
 	} else if ((1 << TYPE_TEXT | 1 << TYPE_ELEMENT) & 1 << type) {
 		insertAfterCurrentRefNode(vnode.d)
+	} else if (type === TYPE_KEYED) {
+		vnode.a.forEach(moveToPosition)
 	}
 }
 
 var updateFragment = (old, vnode) => {
-	// Here's the logic:
-	// - If `old` or `vnode` is `null`, common length is 0 by default, and it falls back to an
-	//   unkeyed empty fragment.
-	// - If `old` and `vnode` differ in their keyedness, their children must be wholly replaced.
-	// - If `old` and `vnode` are both non-keyed, patch their children linearly.
-	// - If `old` and `vnode` are both keyed, patch their children using a map.
-	var mask = vnode != null ? vnode.m : 0
+	// Patch the common prefix, remove the extra in the old, and create the extra in the new.
+	//
+	// Can't just take the max of both, because out-of-bounds accesses both disrupts
+	// optimizations and is just generally slower.
+	//
+	// Note: if either `vnode` or `old` is `null`, the common length and its own length are
+	// both zero, so it can't actually throw.
 	var newLength = vnode != null ? vnode.c.length : 0
-	var oldMask = old != null ? old.m : 0
 	var oldLength = old != null ? old.c.length : 0
 	var commonLength = oldLength < newLength ? oldLength : newLength
-	if ((oldMask ^ mask) & FLAG_KEYED) { // XOR is equivalent to bit inequality
-		// Key state changed. Replace the subtree
-		commonLength = 0
-		mask &= ~FLAG_KEYED
-	}
-	if (!(mask & FLAG_KEYED)) {
-		// Not keyed. Patch the common prefix, remove the extra in the old, and create the
-		// extra in the new.
-		//
-		// Can't just take the max of both, because out-of-bounds accesses both disrupts
-		// optimizations and is just generally slower.
-		//
-		// Note: if either `vnode` or `old` is `null`, the common length and its own length are
-		// both zero, so it can't actually throw.
-		try {
-			for (var i = 0; i < commonLength; i++) updateNode(old.c[i], vnode.c[i])
-			for (var i = commonLength; i < newLength; i++) updateNode(null, vnode.c[i])
-		} catch (e) {
-			commonLength = i
-			for (var i = 0; i < commonLength; i++) updateNode(vnode.c[i], null)
-			for (var i = commonLength; i < oldLength; i++) updateNode(old.c[i], null)
-			throw e
-		}
+	try {
+		for (var i = 0; i < commonLength; i++) updateNode(old.c[i], vnode.c[i])
+		for (var i = commonLength; i < newLength; i++) updateNode(null, vnode.c[i])
+	} catch (e) {
+		commonLength = i
+		for (var i = 0; i < commonLength; i++) updateNode(vnode.c[i], null)
 		for (var i = commonLength; i < oldLength; i++) updateNode(old.c[i], null)
-	} else {
-		// Keyed. I take a pretty straightforward approach here to keep it simple:
-		// 1. Build a map from old map to old vnode.
-		// 2. Walk the new vnodes, adding what's missing and patching what's in the old.
-		// 3. Remove from the old map the keys in the new vnodes, leaving only the keys that
-		//    were removed this run.
-		// 4. Remove the remaining nodes in the old map that aren't in the new map. Since the
-		//    new keys were already deleted, this is just a simple map iteration.
+		throw e
+	}
+	for (var i = commonLength; i < oldLength; i++) updateNode(old.c[i], null)
+}
 
-		// Note: if either `vnode` or `old` is `null`, they won't get here. The default mask is
-		// zero, and that causes keyed state to differ and thus a forced linear diff per above.
+var updateUse = (old, vnode) => {
+	if (
+		old != null && old.length !== 0 &&
+		vnode != null && vnode.length !== 0 &&
+		(
+			vnode.a.length !== old.a.length ||
+			vnode.a.some((b, i) => !Object.is(b, old.a[i]))
+		)
+	) {
+		updateFragment(old, null)
+		old = null
+	}
+	updateFragment(old, vnode)
+}
 
-		var oldMap = new Map()
-		for (var p of old.c) oldMap.set(p.t, p)
+var updateKeyed = (old, vnode) => {
+	// I take a pretty straightforward approach here to keep it simple:
+	// 1. Build a map from old map to old vnode.
+	// 2. Walk the new vnodes, adding what's missing and patching what's in the old.
+	// 3. Remove from the old map the keys in the new vnodes, leaving only the keys that
+	//    were removed this run.
+	// 4. Remove the remaining nodes in the old map that aren't in the new map. Since the
+	//    new keys were already deleted, this is just a simple map iteration.
 
-		try {
-			for (var i = 0; i < newLength; i++) {
-				var n = vnode.c[i]
-				var p = oldMap.get(n.t)
-				if (p == null) {
-					updateFragment(null, n)
-				} else {
-					oldMap.delete(n.t)
-					var prev = currentRefNode
-					moveToPosition(p)
-					currentRefNode = prev
-					updateFragment(p, n)
-				}
+	// Note: if either `vnode` or `old` is `null`, they won't get here. The default mask is
+	// zero, and that causes keyed state to differ and thus a forced linear diff per above.
+
+	var added = 0
+	// It's a value that 1. isn't user-providable and 2. isn't likely to go away in future changes.
+	// Works well enough as a sentinel.
+	var error = selectorCache
+	try {
+		// Iterate the map. I get keys for free that way, and insertion order is guaranteed to be
+		// preserved in any spec-conformant engine.
+		vnode.a.forEach((n, k) => {
+			var p = old != null ? old.a.get(k) : null
+			if (p == null) {
+				updateNode(null, n)
+			} else {
+				var prev = currentRefNode
+				moveToPosition(p)
+				currentRefNode = prev
+				updateNode(p, n)
+				// Delete from the state set, but only after it's been successfully moved. This
+				// avoids needing to specially remove `p` on failure.
+				old.a.delete(k)
 			}
-		} catch (e) {
-			for (var j = 0; j < i; j++) updateNode(vnode.c[j], null)
-			updateNode(old.c[j], null)
-			oldMap.forEach((p) => updateNode(p, null))
-			throw e
+			added++
+		})
+		added = -1
+	} catch (e) {
+		error = e
+	}
+	if (old != null) removeKeyed(old)
+	// Either `added === 0` from the `catch` block or `added === -1` from completing the loop.
+	if (error !== selectorCache) {
+		for (var n of vnode.a.values()) {
+			if (--added) break
+			updateNode(n, null)
 		}
-		oldMap.forEach((p) => updateNode(p, null))
+		throw error
 	}
 }
 
@@ -487,15 +498,13 @@ var updateNode = (old, vnode) => {
 			throw new TypeError("Vnodes must not be reused")
 		}
 
-		var newType = vnode.m & TYPE_MASK
-
-		if (type === newType && vnode.t === old.t) {
-			vnode.m = old.m & ~FLAG_KEYED | vnode.m & FLAG_KEYED
+		if (type === (vnode.m & TYPE_MASK) && vnode.t === old.t) {
+			vnode.m = old.m
 		} else {
 			updateNode(old, null)
-			type = newType
 			old = null
 		}
+		type = vnode.m & TYPE_MASK
 	}
 
 	try {
@@ -534,9 +543,9 @@ var updateSet = (old, vnode) => {
 
 var updateText = (old, vnode) => {
 	if (old == null) {
-		insertAfterCurrentRefNode(vnode.d = currentDocument.createTextNode(vnode.s))
+		insertAfterCurrentRefNode(vnode.d = currentDocument.createTextNode(vnode.a))
 	} else {
-		if (`${old.s}` !== `${vnode.s}`) old.d.nodeValue = vnode.s
+		if (`${old.a}` !== `${vnode.a}`) old.d.nodeValue = vnode.a
 		vnode.d = currentRefNode = old.d
 	}
 }
@@ -698,6 +707,8 @@ var updateComponent = (old, vnode) => {
 
 var removeFragment = (old) => updateFragment(old, null)
 
+var removeKeyed = (old) => old.a.forEach((p) => updateNode(p, null))
+
 var removeNode = (old) => {
 	try {
 		if (!old.d) return
@@ -711,18 +722,19 @@ var removeNode = (old) => {
 // Replaces an otherwise necessary `switch`.
 var updateNodeDispatch = [
 	updateFragment,
-	updateFragment,
+	updateKeyed,
 	updateText,
 	updateElement,
 	updateComponent,
 	updateLayout,
 	updateRemove,
 	updateSet,
+	updateUse,
 ]
 
 var removeNodeDispatch = [
 	removeFragment,
-	removeFragment,
+	removeKeyed,
 	removeNode,
 	(old) => {
 		removeNode(old)
@@ -731,6 +743,7 @@ var removeNodeDispatch = [
 	(old) => updateNode(old.c, null),
 	() => {},
 	(old) => currentHooks.push(old),
+	removeFragment,
 	removeFragment,
 ]
 
@@ -1096,9 +1109,9 @@ m.render = (dom, vnode, {redraw, removeOnThrow} = {}) => {
 		if (active != null && currentDocument.activeElement !== active && typeof active.focus === "function") {
 			active.focus()
 		}
-		for (var {s, d} of hooks) {
+		for (var {a, d} of hooks) {
 			try {
-				s(d)
+				a(d)
 			} catch (e) {
 				console.error(e)
 			}

@@ -44,8 +44,8 @@ o.spec("updateNodes keyed list Fuzzer", () => {
 				const from = randomUnique(fromUsed)
 				const to = randomUnique(toUsed)
 				o(`${i}: ${from} -> ${to}`, () => {
-					m.render(G.root, from.map((x) => m.key(x, view(x))))
-					m.render(G.root, to.map((x) => m.key(x, view(x))))
+					m.render(G.root, m.keyed(from, (x) => [x, view(x)]))
+					m.render(G.root, m.keyed(to, (x) => [x, view(x)]))
 					assert(G.root, to)
 				})
 			}

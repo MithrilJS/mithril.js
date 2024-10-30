@@ -39,8 +39,8 @@ o.spec("layout create", function() {
 			var vnode = m("div", m.layout(createDiv))
 			var updated = m("a", m.layout(createA))
 
-			m.render(G.root, m.key(1, vnode))
-			m.render(G.root, m.key(1, updated))
+			m.render(G.root, m.keyed([[1, vnode]]))
+			m.render(G.root, m.keyed([[1, updated]]))
 
 			o(createDiv.callCount).equals(1)
 			o(createA.callCount).equals(1)
@@ -59,7 +59,7 @@ o.spec("layout create", function() {
 			var vnode = m("div", m.layout(create))
 			var otherVnode = m("a")
 
-			m.render(G.root, [m.key(1, vnode), m.key(2, otherVnode)])
+			m.render(G.root, m.keyed([[1, vnode], [2, otherVnode]]))
 
 			o(create.callCount).equals(1)
 			o(create.args[0]).equals(G.root.firstChild)
@@ -97,8 +97,8 @@ o.spec("layout create", function() {
 		})
 		o("works on unkeyed that falls into reverse list diff code path", function() {
 			var create = o.spy()
-			m.render(G.root, [m.key(1, m("p")), m.key(2, m("div"))])
-			m.render(G.root, [m.key(2, m("div", m.layout(create))), m.key(1, m("p"))])
+			m.render(G.root, m.keyed([[1, m("p")], [2, m("div")]]))
+			m.render(G.root, m.keyed([[2, m("div", m.layout(create))], [1, m("p")]]))
 
 			o(create.callCount).equals(1)
 			o(create.args[0]).equals(G.root.firstChild)
@@ -158,9 +158,9 @@ o.spec("layout create", function() {
 			var vnode = m("div", m.remove(createDiv))
 			var updated = m("a", m.remove(createA))
 
-			m.render(G.root, m.key(1, vnode))
+			m.render(G.root, m.keyed([[1, vnode]]))
 			var dom = vnode.d
-			m.render(G.root, m.key(1, updated))
+			m.render(G.root, m.keyed([[1, updated]]))
 
 			o(createDiv.callCount).equals(1)
 			o(createDiv.args[0]).equals(dom)
@@ -179,7 +179,7 @@ o.spec("layout create", function() {
 			var vnode = m("div", m.remove(create))
 			var otherVnode = m("a")
 
-			m.render(G.root, [m.key(1, vnode), m.key(2, otherVnode)])
+			m.render(G.root, m.keyed([[1, vnode], [2, otherVnode]]))
 
 			o(create.callCount).equals(0)
 		})
@@ -213,8 +213,8 @@ o.spec("layout create", function() {
 		})
 		o("works on unkeyed that falls into reverse list diff code path", function() {
 			var create = o.spy()
-			m.render(G.root, [m.key(1, m("p")), m.key(2, m("div"))])
-			m.render(G.root, [m.key(2, m("div", m.remove(create))), m.key(1, m("p"))])
+			m.render(G.root, m.keyed([[1, m("p")], [2, m("div")]]))
+			m.render(G.root, m.keyed([[2, m("div", m.remove(create))], [1, m("p")]]))
 
 			o(create.callCount).equals(0)
 		})

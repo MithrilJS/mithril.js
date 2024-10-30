@@ -25,14 +25,15 @@ o.spec("api", function() {
 			o(vnode.c[0].t).equals("div")
 		})
 	})
-	o.spec("m.key", function() {
+	o.spec("m.keyed", function() {
 		o("works", function() {
-			var vnode = m.key(123, [m("div")])
+			var vnode = m.keyed([123], (k) => [k, [m("div")]])
 
-			o(vnode.m & m.TYPE_MASK).equals(m.TYPE_KEY)
-			o(vnode.t).equals(123)
-			o(vnode.c.length).equals(1)
-			o(vnode.c[0].t).equals("div")
+			o(vnode.m & m.TYPE_MASK).equals(m.TYPE_KEYED)
+			o(vnode.a.size).equals(1)
+			o([...vnode.a][0][0]).equals(123)
+			o([...vnode.a][0][1].c.length).equals(1)
+			o([...vnode.a][0][1].c[0].t).equals("div")
 		})
 	})
 	o.spec("m.p", function() {

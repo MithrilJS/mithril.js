@@ -18,17 +18,17 @@ Models can do basic CRUD operations on the collection.
 - They can replace the current value, deleting a value that's already there.
 
 In the view, they use handles to abstract over the concept of a key. Duplicates are theoretically
-possible, so they should use the handle itself as the key for `m.key(...)`. It might look something
-like this:
+possible, so they should use the handle itself as the key for `m.keyed(...)`. It might look
+something like this:
 
 ```js
-return t.live().map((handle) => (
-	m.key(handle, m(Entry, {
+return m.keyed(t.live(), (handle) => (
+	[handle.key, m(Entry, {
 		name: handle.key,
 		value: handle.value,
 		removed: handle.signal.aborted,
 		onremovaltransitionended: () => handle.release(),
-	}))
+	})]
 ))
 ```
 

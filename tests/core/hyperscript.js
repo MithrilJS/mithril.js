@@ -408,22 +408,22 @@ o.spec("hyperscript", function() {
 		o("handles string single child", function() {
 			var vnode = m("div", {}, ["a"])
 
-			o(vnode.c[0].s).equals("a")
+			o(vnode.c[0].a).equals("a")
 		})
 		o("handles falsy string single child", function() {
 			var vnode = m("div", {}, [""])
 
-			o(vnode.c[0].s).equals("")
+			o(vnode.c[0].a).equals("")
 		})
 		o("handles number single child", function() {
 			var vnode = m("div", {}, [1])
 
-			o(vnode.c[0].s).equals("1")
+			o(vnode.c[0].a).equals("1")
 		})
 		o("handles falsy number single child", function() {
 			var vnode = m("div", {}, [0])
 
-			o(vnode.c[0].s).equals("0")
+			o(vnode.c[0].a).equals("0")
 		})
 		o("handles boolean single child", function() {
 			var vnode = m("div", {}, [true])
@@ -449,17 +449,17 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {}, ["", "a"])
 
 			o(vnode.c[0].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[0].s).equals("")
+			o(vnode.c[0].a).equals("")
 			o(vnode.c[1].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[1].s).equals("a")
+			o(vnode.c[1].a).equals("a")
 		})
 		o("handles multiple number children", function() {
 			var vnode = m("div", {}, [0, 1])
 
 			o(vnode.c[0].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[0].s).equals("0")
+			o(vnode.c[0].a).equals("0")
 			o(vnode.c[1].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[1].s).equals("1")
+			o(vnode.c[1].a).equals("1")
 		})
 		o("handles multiple boolean children", function() {
 			var vnode = m("div", {}, [false, true])
@@ -474,15 +474,15 @@ o.spec("hyperscript", function() {
 		o("handles falsy number single child without attrs", function() {
 			var vnode = m("div", 0)
 
-			o(vnode.c[0].s).equals("0")
+			o(vnode.c[0].a).equals("0")
 		})
 		o("handles children in attributes", function() {
 			var vnode = m("div", {children: ["", "a"]})
 
 			o(vnode.c[0].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[0].s).equals("")
+			o(vnode.c[0].a).equals("")
 			o(vnode.c[1].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[1].s).equals("a")
+			o(vnode.c[1].a).equals("a")
 		})
 	})
 	o.spec("permutations", function() {
@@ -541,33 +541,33 @@ o.spec("hyperscript", function() {
 
 			o(vnode.a.a).equals("b")
 			o(vnode.c[0].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[0].s).equals("c")
+			o(vnode.c[0].a).equals("c")
 			o(vnode.c[1].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[1].s).equals("d")
+			o(vnode.c[1].a).equals("d")
 		})
 		o("handles attr and single string text child", function() {
 			var vnode = m("div", {a: "b"}, ["c"])
 
 			o(vnode.a.a).equals("b")
-			o(vnode.c[0].s).equals("c")
+			o(vnode.c[0].a).equals("c")
 		})
 		o("handles attr and single falsy string text child", function() {
 			var vnode = m("div", {a: "b"}, [""])
 
 			o(vnode.a.a).equals("b")
-			o(vnode.c[0].s).equals("")
+			o(vnode.c[0].a).equals("")
 		})
 		o("handles attr and single number text child", function() {
 			var vnode = m("div", {a: "b"}, [1])
 
 			o(vnode.a.a).equals("b")
-			o(vnode.c[0].s).equals("1")
+			o(vnode.c[0].a).equals("1")
 		})
 		o("handles attr and single falsy number text child", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.a.a).equals("b")
-			o(vnode.c[0].s).equals("0")
+			o(vnode.c[0].a).equals("0")
 		})
 		o("handles attr and single boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [true])
@@ -579,7 +579,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.a.a).equals("b")
-			o(vnode.c[0].s).equals("0")
+			o(vnode.c[0].a).equals("0")
 		})
 		o("handles attr and single false boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [false])
@@ -591,16 +591,16 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, "c")
 
 			o(vnode.a.a).equals("b")
-			o(vnode.c[0].s).equals("c")
+			o(vnode.c[0].a).equals("c")
 		})
 		o("handles attr and text children unwrapped", function() {
 			var vnode = m("div", {a: "b"}, "c", "d")
 
 			o(vnode.a.a).equals("b")
 			o(vnode.c[0].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[0].s).equals("c")
+			o(vnode.c[0].a).equals("c")
 			o(vnode.c[1].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-			o(vnode.c[1].s).equals("d")
+			o(vnode.c[1].a).equals("d")
 		})
 		o("handles children without attr", function() {
 			var vnode = m("div", [m("i"), m("s")])

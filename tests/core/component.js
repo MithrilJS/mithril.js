@@ -82,9 +82,9 @@ o.spec("component", function() {
 		})
 		o("removes", function() {
 			var component = () => m("div")
-			m.render(G.root, [m.key(1, m(component)), m.key(2, m("div"))])
+			m.render(G.root, m.keyed([[1, m(component)], [2, m("div")]]))
 			var div = m("div")
-			m.render(G.root, [m.key(2, div)])
+			m.render(G.root, m.keyed([[2, div]]))
 
 			o(G.root.childNodes.length).equals(1)
 			o(G.root.firstChild).equals(div.d)
@@ -231,9 +231,9 @@ o.spec("component", function() {
 				m("input"),
 			]
 			var div = m("div")
-			m.render(G.root, [m.key(1, m(component)), m.key(2, div)])
+			m.render(G.root, m.keyed([[1, m(component)], [2, div]]))
 
-			m.render(G.root, [m.key(2, m("div"))])
+			m.render(G.root, m.keyed([[2, m("div")]]))
 
 			o(G.root.childNodes.length).equals(1)
 			o(G.root.firstChild).equals(div.d)
@@ -241,9 +241,9 @@ o.spec("component", function() {
 		o("can remove when returning primitive", function() {
 			var component = () => "a"
 			var div = m("div")
-			m.render(G.root, [m.key(1, m(component)), m.key(2, div)])
+			m.render(G.root, m.keyed([[1, m(component)], [2, div]]))
 
-			m.render(G.root, [m.key(2, m("div"))])
+			m.render(G.root, m.keyed([[2, m("div")]]))
 
 			o(G.root.childNodes.length).equals(1)
 			o(G.root.firstChild).equals(div.d)
@@ -443,10 +443,10 @@ o.spec("component", function() {
 			var createSpy = o.spy()
 			var component = o.spy(() => m("div", m.layout(createSpy)))
 
-			m.render(G.root, [m("div", m.key(1, m(component)))])
+			m.render(G.root, [m("div", m.keyed([[1, m(component)]]))])
 			var child = G.root.firstChild.firstChild
 			m.render(G.root, [])
-			m.render(G.root, [m("div", m.key(1, m(component)))])
+			m.render(G.root, [m("div", m.keyed([[1, m(component)]]))])
 
 			o(child).notEquals(G.root.firstChild.firstChild) // this used to be a recycling pool test
 			o(component.callCount).equals(2)
@@ -455,10 +455,10 @@ o.spec("component", function() {
 			var createSpy = o.spy()
 			var component = o.spy(() => m("div", m.remove(createSpy)))
 
-			m.render(G.root, [m("div", m.key(1, m(component)))])
+			m.render(G.root, [m("div", m.keyed([[1, m(component)]]))])
 			var child = G.root.firstChild.firstChild
 			m.render(G.root, [])
-			m.render(G.root, [m("div", m.key(1, m(component)))])
+			m.render(G.root, [m("div", m.keyed([[1, m(component)]]))])
 			var found = G.root.firstChild.firstChild
 			m.render(G.root, [])
 

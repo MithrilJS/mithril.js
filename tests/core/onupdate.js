@@ -18,8 +18,8 @@ o.spec("layout update", function() {
 	})
 	o("is not updated when replacing keyed element", function() {
 		var update = o.spy()
-		var vnode = m.key(1, m("div", m.layout(update)))
-		var updated = m.key(1, m("a", m.layout(update)))
+		var vnode = m.keyed([[1, m("div", m.layout(update))]])
+		var updated = m.keyed([[1, m("a", m.layout(update))]])
 		m.render(G.root, vnode)
 		m.render(G.root, updated)
 

@@ -21,6 +21,6 @@ o.spec("component children", function () {
 		o(vnode.c.c.length).equals(1)
 		// eslint-disable-next-line no-bitwise
 		o(vnode.c.c[0].m & m.TYPE_MASK).equals(m.TYPE_TEXT)
-		o(vnode.c.c[0].s).equals("a")
+		o(vnode.c.c[0].a).equals("a")
 	})
 })
