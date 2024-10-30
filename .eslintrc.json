@@ -65,6 +65,7 @@
 	"globals": {
 		"ReadableStream": true,
 		"Response": true,
+		"queueMicrotask": true,
 		"URL": true,
 		"URLSearchParams": true,
 		"AbortController": true,

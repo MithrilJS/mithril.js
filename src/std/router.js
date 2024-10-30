@@ -38,10 +38,7 @@ var Route = function ({p: prefix}) {
 	var set = (path, {replace, state} = {}) => {
 		if (mustReplace) replace = true
 		mustReplace = true
-		void (async () => {
-			await 0 // wait for next microtask
-			updateRoute()
-		})()
+		queueMicrotask(updateRoute)
 		redraw()
 		if (typeof window === "object") {
 			window.history[replace ? "replaceState" : "pushState"](state, "", prefix + path)
