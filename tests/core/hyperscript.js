@@ -732,7 +732,7 @@ o.spec("hyperscript", function() {
 			// Only doing this for the sake of initializing the required fields in the mock.
 			G.root.dispatchEvent(e)
 
-			o(m.capture(e)).equals(false)
+			o(m.capture(e)).equals("skip-redraw")
 			o(e.defaultPrevented).equals(true)
 			o(e.cancelBubble).equals(true)
 		})

@@ -17,52 +17,60 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/`
 
 					var App = o.spy()
+					var redraw = o.spy()
 
-					m.render(G.root, m.route(prefix, App))
+					m.render(G.root, m.route(prefix, App), {redraw})
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/")
 					o([...App.this.route.params]).deepEquals([])
 					o(G.rafMock.queueLength()).equals(0)
+					o(redraw.callCount).equals(0)
 				})
 
 				o("returns alternate right route on init", () => {
 					G.window.location.href = `${prefix}/test`
 
 					var App = o.spy()
+					var redraw = o.spy()
 
-					m.render(G.root, m.route(prefix, App))
+					m.render(G.root, m.route(prefix, App), {redraw})
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/test")
 					o([...App.this.route.params]).deepEquals([])
 					o(G.rafMock.queueLength()).equals(0)
+					o(redraw.callCount).equals(0)
 				})
 
 				o("returns right route on init with escaped unicode", () => {
 					G.window.location.href = `${prefix}/%C3%B6?%C3%B6=%C3%B6`
 
 					var App = o.spy()
+					var redraw = o.spy()
 
-					m.render(G.root, m.route(prefix, App))
+					m.render(G.root, m.route(prefix, App), {redraw})
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/ö")
 					o([...App.this.route.params]).deepEquals([["ö", "ö"]])
 					o(G.rafMock.queueLength()).equals(0)
+					o(redraw.callCount).equals(0)
 				})
 
 				o("returns right route on init with unescaped unicode", () => {
 					G.window.location.href = `${prefix}/ö?ö=ö`
 
 					var App = o.spy()
+					var redraw = o.spy()
 
-					m.render(G.root, m.route(prefix, App))
+					m.render(G.root, m.route(prefix, App), {redraw})
 
 					o(App.callCount).equals(1)
 					o(App.this.route.path).equals("/ö")
 					o([...App.this.route.params]).deepEquals([["ö", "ö"]])
 					o(G.rafMock.queueLength()).equals(0)
+					o(redraw.callCount).equals(0)
 				})
 
 				o("sets path asynchronously", async () => {

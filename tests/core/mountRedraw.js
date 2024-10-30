@@ -445,7 +445,7 @@ o.spec("mount/redraw", function() {
 		e.initEvent("click", true, true)
 
 		m.mount(G.root, () => m("div", {
-			onclick: () => false,
+			onclick: () => "skip-redraw",
 		}, m.layout(layout)))
 
 		G.root.firstChild.dispatchEvent(e)

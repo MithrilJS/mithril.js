@@ -85,8 +85,8 @@ o.spec("event", function() {
 		})
 	})
 
-	o("handles onclick returning false", function() {
-		var spyDiv = eventSpy((e) => { m.capture(e); return false })
+	o("handles onclick returning `\"skip-redraw\"`", function() {
+		var spyDiv = eventSpy((e) => { m.capture(e); return "skip-redraw" })
 		var spyParent = eventSpy()
 		var div = m("div", {onclick: spyDiv})
 		var parent = m("div", {onclick: spyParent}, div)
@@ -106,9 +106,9 @@ o.spec("event", function() {
 		o(e.defaultPrevented).equals(true)
 	})
 
-	o("handles onclick asynchronously returning false", function() {
+	o("handles onclick asynchronously returning `\"skip-redraw\"`", function() {
 		var promise
-		var spyDiv = eventSpy((e) => { m.capture(e); return promise = Promise.resolve(false) })
+		var spyDiv = eventSpy((e) => { m.capture(e); return promise = Promise.resolve("skip-redraw") })
 		var spyParent = eventSpy()
 		var div = m("div", {onclick: spyDiv})
 		var parent = m("div", {onclick: spyParent}, div)
@@ -132,8 +132,8 @@ o.spec("event", function() {
 		})
 	})
 
-	o("handles onclick returning false in child then bubbling to parent and not returning false", function() {
-		var spyDiv = eventSpy(() => false)
+	o("handles onclick returning `\"skip-redraw\"` in child then bubbling to parent and not returning `\"skip-redraw\"`", function() {
+		var spyDiv = eventSpy(() => "skip-redraw")
 		var spyParent = eventSpy()
 		var div = m("div", {onclick: spyDiv})
 		var parent = m("div", {onclick: spyParent}, div)

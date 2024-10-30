@@ -20,7 +20,7 @@ o.spec("m.init", () => {
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
-		o(redraw.callCount).equals(0)
+		o(redraw.callCount).equals(1)
 		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
@@ -74,7 +74,7 @@ o.spec("m.init", () => {
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
-		o(redraw.callCount).equals(0)
+		o(redraw.callCount).equals(1)
 		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
@@ -128,7 +128,7 @@ o.spec("m.init", () => {
 		await Promise.resolve()
 		o(initializer.callCount).equals(1)
 		o(onabort.callCount).equals(0)
-		o(redraw.callCount).equals(0)
+		o(redraw.callCount).equals(1)
 		m.render(G.root, m.init(initializer), {redraw})
 
 		await Promise.resolve()
@@ -169,9 +169,9 @@ o.spec("m.init", () => {
 		o(redraw.callCount).equals(1)
 	})
 
-	o("works when returning `false`", async () => {
+	o("works when returning `\"skip-redraw\"`", async () => {
 		var onabort = o.spy()
-		var initializer = o.spy((signal) => { signal.onabort = onabort; return false })
+		var initializer = o.spy((signal) => { signal.onabort = onabort; return "skip-redraw" })
 		var redraw = o.spy()
 
 		m.render(G.root, m.init(initializer), {redraw})
@@ -196,9 +196,9 @@ o.spec("m.init", () => {
 		o(redraw.callCount).equals(0)
 	})
 
-	o("works when resolving to `false`", async () => {
+	o("works when resolving to `\"skip-redraw\"`", async () => {
 		var onabort = o.spy()
-		var initializer = o.spy((signal) => { signal.onabort = onabort; return Promise.resolve(false) })
+		var initializer = o.spy((signal) => { signal.onabort = onabort; return Promise.resolve("skip-redraw") })
 		var redraw = o.spy()
 
 		m.render(G.root, m.init(initializer), {redraw})

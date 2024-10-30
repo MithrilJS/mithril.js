@@ -45,6 +45,8 @@ why that was removed in favor of this:
    work around it, you'd have to do something like this anyways.
 */
 
+import {checkCallback} from "../util.js"
+
 /**
  * @template K, V
  * @typedef TrackedHandle
@@ -75,6 +77,8 @@ why that was removed in favor of this:
  * @returns {Tracked<K, V>}
  */
 var tracked = (redraw, initial) => {
+	checkCallback(redraw, false, "redraw")
+
 	/** @type {Map<K, TrackedHandle<K, V> & {_: AbortController}>} */ var state = new Map()
 	/** @type {Set<TrackedHandle<K, V>>} */ var live = new Set()
 

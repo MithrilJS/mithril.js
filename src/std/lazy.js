@@ -1,11 +1,17 @@
 import m from "../core.js"
 
+import {checkCallback} from "../util.js"
+
 var lazy = (opts) => {
+	checkCallback(opts.fetch, false, "opts.fetch")
+	checkCallback(opts.pending, true, "opts.pending")
+	checkCallback(opts.error, true, "opts.error")
+
 	// Capture the error here so stack traces make more sense
 	var error = new ReferenceError("Component not found")
 	var redraws = new Set()
 	var Comp = function () {
-		redraws.add(this.redraw)
+		redraws.add(checkCallback(this.redraw, false, "context.redraw"))
 		return opts.pending && opts.pending()
 	}
 	var init = async () => {

@@ -1,6 +1,8 @@
 /* global window: false */
 import m from "../core.js"
 
+import {checkCallback} from "../util.js"
+
 var Route = function ({p: prefix}) {
 	var href = this.href
 	var mustReplace, redraw, currentParsedHref
@@ -60,7 +62,7 @@ var Route = function ({p: prefix}) {
 	updateRouteWithHref()
 
 	return function ({v: view}) {
-		redraw = this.redraw
+		redraw = checkCallback(this.redraw, false, "context.redraw")
 
 		return [
 			m.remove(() => window.removeEventListener("popstate", updateRoute)),
@@ -74,11 +76,7 @@ export var route = (prefix, view) => {
 		throw new TypeError("The route prefix must be a string")
 	}
 
-	if (typeof view !== "function") {
-		throw new TypeError("Router view must be a function.")
-	}
-
-	return m(Route, {v: view, p: prefix})
+	return m(Route, {v: checkCallback(view, false, "view"), p: prefix})
 }
 
 // Let's provide a *right* way to manage a route link, rather than letting people screw up

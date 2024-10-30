@@ -1,8 +1,12 @@
+import {checkCallback} from "../util.js"
+
 /**
  * @param {ReadableStream<Uint8Array> | null} source
  * @param {(current: number) => void} notify
  */
 export default (source, notify) => {
+	checkCallback(notify, false, "notify")
+
 	var reader = source && source.getReader()
 	var current = 0
 

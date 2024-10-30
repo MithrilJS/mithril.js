@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import {hasOwn} from "./util.js"
+import {checkCallback, hasOwn, invokeRedrawable} from "./util.js"
 
 export {m as default}
 
@@ -286,43 +286,23 @@ m.TYPE_SET_CONTEXT = TYPE_SET_CONTEXT
 m.TYPE_USE = TYPE_USE
 m.TYPE_INLINE = TYPE_INLINE
 
-// Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
-// redrawing.
+// Simple and sweet. Also useful for idioms like `onfoo: m.capture` to completely drop events while
+// otherwise ignoring them.
 m.capture = (ev) => {
 	ev.preventDefault()
 	ev.stopPropagation()
-	return false
+	return "skip-redraw"
 }
 
 m.retain = () => Vnode(TYPE_RETAIN, null, null, null)
-
-m.inline = (callback) => {
-	if (typeof callback !== "function") {
-		throw new TypeError("Callback must be a function.")
-	}
-	return Vnode(TYPE_INLINE, null, callback, null)
-}
-
-m.layout = (callback) => {
-	if (typeof callback !== "function") {
-		throw new TypeError("Callback must be a function.")
-	}
-	return Vnode(TYPE_LAYOUT, null, callback, null)
-}
-
-m.remove = (callback) => {
-	if (typeof callback !== "function") {
-		throw new TypeError("Callback must be a function.")
-	}
-	return Vnode(TYPE_REMOVE, null, callback, null)
-}
+m.inline = (view) => Vnode(TYPE_INLINE, null, checkCallback(view, false, "view"), null)
+m.layout = (callback) => Vnode(TYPE_LAYOUT, null, checkCallback(callback), null)
+m.remove = (callback) => Vnode(TYPE_REMOVE, null, checkCallback(callback), null)
 
 m.Fragment = (attrs) => attrs.children
 
 m.keyed = (values, view) => {
-	if (view != null && typeof view !== "function") {
-		throw new TypeError("Callback must be a function if provided")
-	}
+	view = checkCallback(view, true, "view")
 	var map = new Map()
 	for (var value of values) {
 		if (typeof view === "function") value = view(value)
@@ -586,8 +566,7 @@ var updateText = (old, vnode) => {
 
 var handleAttributeError = (old, e, force) => {
 	if (currentRemoveOnThrow || force) {
-		removeNode(old)
-		updateFragment(old, null)
+		if (old) removeElement(old)
 		throw e
 	}
 	console.error(e)
@@ -595,10 +574,11 @@ var handleAttributeError = (old, e, force) => {
 
 var updateElement = (old, vnode) => {
 	var prevParent = currentParent
+	var prevRefNode = currentRefNode
 	var prevNamespace = currentNamespace
 	var mask = vnode.m
 	var attrs = vnode.a
-	var element , oldAttrs
+	var element, oldAttrs
 
 	if (old == null) {
 		var entry = selectorCache.get(vnode.t)
@@ -608,11 +588,11 @@ var updateElement = (old, vnode) => {
 		var ns = attrs && attrs.xmlns || nameSpace[tag] || prevNamespace
 		var opts = is ? {is} : null
 
-		insertAfterCurrentRefNode(element = vnode.d = (
+		element = (
 			ns
 				? currentDocument.createElementNS(ns, tag, opts)
 				: currentDocument.createElement(tag, opts)
-		))
+		)
 
 		if (ns == null) {
 			// Doing it this way since it doesn't seem Terser is smart enough to optimize the `if` with
@@ -709,8 +689,17 @@ var updateElement = (old, vnode) => {
 	}
 
 	currentParent = prevParent
-	currentRefNode = element
+	currentRefNode = prevRefNode
 	currentNamespace = prevNamespace
+
+	// Do this as late as possible to reduce how much work browsers have to do to reduce style
+	// recalcs during initial (sub)tree construction. Also will defer `adoptNode` callbacks in
+	// custom elements until the last possible point (which will help accelerate some of them).
+	if (old == null) {
+		insertAfterCurrentRefNode(vnode.d = element)
+	}
+
+	currentRefNode = element
 }
 
 var updateComponent = (old, vnode) => {
@@ -757,6 +746,11 @@ var removeNode = (old) => {
 	}
 }
 
+var removeElement = (old) => {
+	removeNode(old)
+	updateFragment(old, null)
+}
+
 var removeInstance = (old) => updateNode(old.c, null)
 
 // Replaces an otherwise necessary `switch`.
@@ -777,10 +771,7 @@ var removeNodeDispatch = [
 	removeFragment,
 	removeKeyed,
 	removeNode,
-	(old) => {
-		removeNode(old)
-		updateFragment(old, null)
-	},
+	removeElement,
 	removeInstance,
 	() => {},
 	(old) => currentHooks.push(old),
@@ -1096,13 +1087,7 @@ var setAttr = (vnode, element, mask, key, old, attrs) => {
 //    return a promise that resolves to it.
 class EventDict extends Map {
 	async handleEvent(ev) {
-		var handler = this.get(`on${ev.type}`)
-		if (typeof handler === "function") {
-			var result = handler.call(ev.currentTarget, ev)
-			if (result === false) return
-			if (result && typeof result.then === "function" && (await result) === false) return
-			(0, this._)()
-		}
+		invokeRedrawable(this._, this.get(`on${ev.type}`), ev.currentTarget, ev)
 	}
 }
 
@@ -1111,13 +1096,16 @@ class EventDict extends Map {
 var currentlyRendering = []
 
 m.render = (dom, vnode, {redraw, removeOnThrow} = {}) => {
-	if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
-	if (currentlyRendering.some((d) => d === dom || d.contains(dom))) {
-		throw new TypeError("Node is currently being rendered to and thus is locked.")
+	if (!dom) {
+		throw new TypeError("DOM element being rendered to does not exist.")
 	}
 
-	if (redraw != null && typeof redraw !== "function") {
-		throw new TypeError("Redraw must be a function if given.")
+	checkCallback(redraw, true, "redraw")
+
+	for (var root of currentlyRendering) {
+		if (dom.contains(root)) {
+			throw new TypeError("Node is currently being rendered to and thus is locked.")
+		}
 	}
 
 	var active = dom.ownerDocument.activeElement
