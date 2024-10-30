@@ -6,7 +6,6 @@ var m = require("../render/hyperscript")
 var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
-var assign = require("../util/assign")
 var censor = require("../util/censor")
 
 var sentinel = {}
@@ -78,7 +77,7 @@ module.exports = function($window, mountRedraw) {
 			.slice(route.prefix.length)
 		var data = parsePathname(path)
 
-		assign(data.params, $window.history.state)
+		Object.assign(data.params, $window.history.state)
 
 		function reject(e) {
 			console.error(e)

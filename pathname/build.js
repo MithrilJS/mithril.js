@@ -1,7 +1,6 @@
 "use strict"
 
 var buildQueryString = require("../querystring/build")
-var assign = require("../util/assign")
 
 // Returns `path` from `template` + `params`
 module.exports = function(template, params) {
@@ -16,7 +15,7 @@ module.exports = function(template, params) {
 	var path = template.slice(0, pathEnd)
 	var query = {}
 
-	assign(query, params)
+	Object.assign(query, params)
 
 	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m, key, variadic) {
 		delete query[key]
