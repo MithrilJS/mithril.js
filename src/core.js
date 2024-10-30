@@ -1083,15 +1083,13 @@ var setAttr = (vnode, element, mask, key, old, attrs) => {
 // 4. The event name is remapped to the handler before calling it.
 // 5. In function-based event handlers, `ev.currentTarget === this`. We replicate that below.
 // 6. In function-based event handlers, `return false` prevents the default action and stops event
-//    propagation. Instead of that, we hijack it to control implicit redrawing, and let users
-//    return a promise that resolves to it.
+//    propagation. Instead of that, we hijack the return value, so we can have it auto-redraw if
+//    the user returns `"skip-redraw"` or a promise that resolves to it.
 class EventDict extends Map {
 	async handleEvent(ev) {
 		invokeRedrawable(this._, this.get(`on${ev.type}`), ev.currentTarget, ev)
 	}
 }
-
-//event
 
 var currentlyRendering = []
 
@@ -1175,9 +1173,8 @@ m.mount = (root, view) => {
 		}
 	}
 	var redraw = () => { if (!id) id = window.requestAnimationFrame(redraw.sync) }
-	var Mount = function (_, old) {
-		return [m.remove(unschedule), view.call(this, !old)]
-	}
+	// Cheating with context access for a minor bundle size win.
+	var Mount = (_, old) => [m.remove(unschedule), view.call(currentContext, !old)]
 	redraw.sync = () => {
 		unschedule()
 		m.render(root, m(Mount), {redraw})
