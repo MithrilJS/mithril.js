@@ -3,7 +3,6 @@
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
 var hasOwn = require("../util/hasOwn")
-var assign = require("../util/assign")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = Object.create(null)
@@ -40,7 +39,7 @@ function execSelector(state, vnode) {
 	vnode.tag = state.tag
 
 	if (state.attrs != null) {
-		attrs = assign({}, state.attrs, attrs)
+		attrs = Object.assign({}, state.attrs, attrs)
 
 		if (className != null || state.attrs.className != null) attrs.className =
 			className != null
@@ -60,7 +59,7 @@ function execSelector(state, vnode) {
 	// The DOM does things to inputs based on the "type", so it needs set first.
 	// See: https://github.com/MithrilJS/mithril.js/issues/2622
 	if (state.tag === "input" && hasOwn.call(attrs, "type")) {
-		attrs = assign({type: attrs.type}, attrs)
+		attrs = Object.assign({type: attrs.type}, attrs)
 	}
 
 	vnode.attrs = attrs
