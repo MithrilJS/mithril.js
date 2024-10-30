@@ -35,7 +35,7 @@ o.spec("context", () => {
 		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(1)
-		o(allKeys(Comp.args[2])).deepEquals({
+		o(allKeys(Comp.this)).deepEquals({
 			redraw,
 			key: "value",
 			one: "two",
@@ -46,7 +46,7 @@ o.spec("context", () => {
 		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(2)
-		o(allKeys(Comp.args[2])).deepEquals({
+		o(allKeys(Comp.this)).deepEquals({
 			redraw,
 			key: "updated",
 			two: "three",
@@ -67,7 +67,7 @@ o.spec("context", () => {
 		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(1)
-		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({
+		o(allKeys(Comp.this)).deepEquals(symbolsToStrings({
 			redraw,
 			[key]: "value",
 			[one]: "two",
@@ -78,7 +78,7 @@ o.spec("context", () => {
 		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(2)
-		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({
+		o(allKeys(Comp.this)).deepEquals(symbolsToStrings({
 			redraw,
 			[key]: "updated",
 			[two]: "three",
@@ -97,7 +97,7 @@ o.spec("context", () => {
 		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(1)
-		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({
+		o(allKeys(Comp.this)).deepEquals(symbolsToStrings({
 			redraw,
 			[key]: "value",
 			one: "two",
@@ -108,7 +108,7 @@ o.spec("context", () => {
 		m.render(G.root, vnode, {redraw})
 
 		o(Comp.callCount).equals(2)
-		o(allKeys(Comp.args[2])).deepEquals(symbolsToStrings({
+		o(allKeys(Comp.this)).deepEquals(symbolsToStrings({
 			redraw,
 			[key]: "updated",
 			two: "three",

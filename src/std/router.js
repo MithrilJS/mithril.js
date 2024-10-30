@@ -55,8 +55,8 @@ export var WithRouter = ({prefix, initial: href}) => {
 
 	updateRouteWithHref()
 
-	return ({children}, _, context) => {
-		redraw = context.redraw
+	return function ({children}) {
+		redraw = this.redraw
 
 		return [
 			m.remove(() => window.removeEventListener("popstate", updateRoute)),
@@ -108,12 +108,12 @@ export var Link = () => {
 		}
 	}
 
-	return (attrs, old, {route: {prefix, set}}) => {
-		setRoute = set
+	return function (attrs, old) {
+		setRoute = this.route.set
 		opts = attrs
 		return [
 			m.layout((dom) => {
-				dom.href = prefix + opts.href
+				dom.href = this.route.prefix + opts.href
 				if (!old) dom.addEventListener("click", listener)
 			}),
 			m.remove((dom) => {

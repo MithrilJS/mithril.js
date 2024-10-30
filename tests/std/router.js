@@ -21,8 +21,8 @@ o.spec("route", () => {
 					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
 
 					o(App.callCount).equals(1)
-					o(App.args[2].route.path).equals("/")
-					o([...App.args[2].route.params]).deepEquals([])
+					o(App.this.route.path).equals("/")
+					o([...App.this.route.params]).deepEquals([])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
@@ -34,8 +34,8 @@ o.spec("route", () => {
 					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
 
 					o(App.callCount).equals(1)
-					o(App.args[2].route.path).equals("/test")
-					o([...App.args[2].route.params]).deepEquals([])
+					o(App.this.route.path).equals("/test")
+					o([...App.this.route.params]).deepEquals([])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
@@ -47,8 +47,8 @@ o.spec("route", () => {
 					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
 
 					o(App.callCount).equals(1)
-					o(App.args[2].route.path).equals("/ö")
-					o([...App.args[2].route.params]).deepEquals([["ö", "ö"]])
+					o(App.this.route.path).equals("/ö")
+					o([...App.this.route.params]).deepEquals([["ö", "ö"]])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
@@ -60,8 +60,8 @@ o.spec("route", () => {
 					m.render(G.root, m(m.WithRouter, {prefix}, m(App)))
 
 					o(App.callCount).equals(1)
-					o(App.args[2].route.path).equals("/ö")
-					o([...App.args[2].route.params]).deepEquals([["ö", "ö"]])
+					o(App.this.route.path).equals("/ö")
+					o([...App.this.route.params]).deepEquals([["ö", "ö"]])
 					o(G.rafMock.queueLength()).equals(0)
 				})
 
@@ -71,11 +71,11 @@ o.spec("route", () => {
 					var spy2 = o.spy()
 					var route
 
-					var App = (_attrs, _old, context) => {
-						route = context.route
-						if (route.path === "/a") {
+					var App = function () {
+						route = this.route
+						if (this.route.path === "/a") {
 							spy1()
-						} else if (route.path === "/b") {
+						} else if (this.route.path === "/b") {
 							spy2()
 						} else {
 							throw new Error(`Unknown path ${route.path}`)
@@ -102,8 +102,8 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/test`
 
 					var route
-					var App = (_attrs, _old, context) => {
-						route = context.route
+					var App = function () {
+						route = this.route
 					}
 
 					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
@@ -130,8 +130,8 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/test`
 
 					var route
-					var App = (_attrs, _old, context) => {
-						route = context.route
+					var App = function () {
+						route = this.route
 					}
 
 					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
@@ -159,15 +159,15 @@ o.spec("route", () => {
 					e.initEvent("click", true, true)
 					e.button = 0
 
-					var App = (_attrs, _old, {route}) => {
-						if (route.path === "/test") {
+					var App = function () {
+						if (this.route.path === "/test") {
 							return m("a", m(m.Link, {href: "/other", replace: true}))
-						} else if (route.path === "/other") {
+						} else if (this.route.path === "/other") {
 							return m("div")
-						} else if (route.path === "/") {
+						} else if (this.route.path === "/") {
 							return m("span")
 						} else {
-							throw new Error(`Unknown route: ${route.path}`)
+							throw new Error(`Unknown route: ${this.route.path}`)
 						}
 					}
 
@@ -192,8 +192,8 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/test`
 
 					var route
-					var App = (_attrs, _old, context) => {
-						route = context.route
+					var App = function () {
+						route = this.route
 					}
 
 					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
@@ -221,13 +221,13 @@ o.spec("route", () => {
 					e.initEvent("click", true, true)
 					e.button = 0
 
-					var App = (_attrs, _old, {route}) => {
-						if (route.path === "/test") {
+					var App = function () {
+						if (this.route.path === "/test") {
 							return m("a", m(m.Link, {href: "/other", replace: false}))
-						} else if (route.path === "/other") {
+						} else if (this.route.path === "/other") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${route.path}`)
+							throw new Error(`Unknown route: ${this.route.path}`)
 						}
 					}
 
@@ -252,8 +252,8 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/test`
 
 					var route
-					var App = (_attrs, _old, context) => {
-						route = context.route
+					var App = function () {
+						route = this.route
 					}
 
 					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
@@ -271,8 +271,8 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/test`
 
 					var route
-					var App = (_attrs, _old, context) => {
-						route = context.route
+					var App = function () {
+						route = this.route
 					}
 
 					m.mount(G.root, () => m(m.WithRouter, {prefix: `${prefix}/`}, m(App)))
@@ -286,8 +286,8 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/test?a=b&c=d`
 
 					var route
-					var App = (_attrs, _old, context) => {
-						route = context.route
+					var App = function () {
+						route = this.route
 					}
 
 					m.mount(G.root, () => m(m.WithRouter, {prefix}, m(App)))
@@ -320,13 +320,13 @@ o.spec("route", () => {
 
 					G.window.location.href = `${prefix}/`
 
-					var App = (_attrs, _old, {route}) => {
-						if (route.path === "/") {
+					var App = function () {
+						if (this.route.path === "/") {
 							return m("a", m(m.Link, {href: "/test"}))
-						} else if (route.path === "/test") {
+						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${route.path}`)
+							throw new Error(`Unknown route: ${this.route.path}`)
 						}
 					}
 
@@ -350,13 +350,13 @@ o.spec("route", () => {
 					e.button = 0
 					G.window.location.href = `${prefix}/`
 
-					var App = (_attrs, _old, {route}) => {
-						if (route.path === "/") {
+					var App = function () {
+						if (this.route.path === "/") {
 							return m("a", m(m.Link, {href: "/test", state: {a: 1}}))
-						} else if (route.path === "/test") {
+						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${route.path}`)
+							throw new Error(`Unknown route: ${this.route.path}`)
 						}
 					}
 
@@ -379,13 +379,13 @@ o.spec("route", () => {
 
 					G.window.location.href = `${prefix}/`
 
-					var App = (_attrs, _old, {route}) => {
-						if (route.path === "/") {
+					var App = function () {
+						if (this.route.path === "/") {
 							return m("a", m(m.Link, {href: "/test"}))
-						} else if (route.path === "/test") {
+						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${route.path}`)
+							throw new Error(`Unknown route: ${this.route.path}`)
 						}
 					}
 
@@ -410,13 +410,13 @@ o.spec("route", () => {
 
 					G.window.location.href = `${prefix}/`
 
-					var App = (_attrs, _old, {route}) => {
-						if (route.path === "/") {
+					var App = function () {
+						if (this.route.path === "/") {
 							return m("a", {onclick(e) { e.preventDefault() }}, m(m.Link, {href: "/test"}))
-						} else if (route.path === "/test") {
+						} else if (this.route.path === "/test") {
 							return m("div")
 						} else {
-							throw new Error(`Unknown route: ${route.path}`)
+							throw new Error(`Unknown route: ${this.route.path}`)
 						}
 					}
 
@@ -437,8 +437,8 @@ o.spec("route", () => {
 					G.window.location.href = `${prefix}/`
 
 					var route
-					var App = o.spy((_attrs, _old, context) => {
-						route = context.route
+					var App = o.spy(function () {
+						route = this.route
 						return m("div")
 					})
 

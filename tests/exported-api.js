@@ -76,8 +76,8 @@ o.spec("api", function() {
 	o.spec("m.WithRouter, m.Link", function() {
 		o("works", async() => {
 			var route
-			var App = (_attrs, _old, context) => {
-				route = context.route
+			var App = function () {
+				route = this.route
 				if (route.path === "/a") {
 					return m("div")
 				} else if (route.path === "/b") {

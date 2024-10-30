@@ -4,8 +4,8 @@ var lazy = (opts) => {
 	// Capture the error here so stack traces make more sense
 	var error = new ReferenceError("Component not found")
 	var redraws = new Set()
-	var Comp = (_, __, context) => {
-		redraws.add(context.redraw)
+	var Comp = function () {
+		redraws.add(this.redraw)
 		return opts.pending && opts.pending()
 	}
 	var init = async () => {

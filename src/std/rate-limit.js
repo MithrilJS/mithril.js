@@ -100,28 +100,31 @@ var rateLimiterImpl = (delay = 500, isThrottler) => {
  * ```js
  * const throttled = m.throttler()
  * let results, error
- * return (_attrs, _old, {redraw}) => [
- *     m.remove(throttled.dispose),
- *     m("input[type=search]", {
- *         async oninput(ev) {
- *             if (await throttled()) return false // Skip redraw if rate limited - it's pointless
- *             error = results = null
- *             redraw()
- *             try {
- *                 const response = await fetch(m.p("/search", {q: ev.target.value}))
- *                 if (response.ok) {
- *                     results = await response.json()
- *                 } else {
- *                     error = await response.text()
+ * return function () {
+ *     return [
+ *         m.remove(throttled.dispose),
+ *         m("input[type=search]", {
+ *             oninput: async (ev) => {
+ *                 // Skip redraw if rate limited - it's pointless
+ *                 if (await throttled()) return false
+ *                 error = results = null
+ *                 this.redraw()
+ *                 try {
+ *                     const response = await fetch(m.p("/search", {q: ev.target.value}))
+ *                     if (response.ok) {
+ *                         results = await response.json()
+ *                     } else {
+ *                         error = await response.text()
+ *                     }
+ *                 } catch (e) {
+ *                     error = e.message
  *                 }
- *             } catch (e) {
- *                 error = e.message
- *             }
- *         },
- *     }),
- *     results.map((result) => m(SearchResult, {result})),
- *     !error || m(ErrorDisplay, {error})),
- * ]
+ *             },
+ *         }),
+ *         results.map((result) => m(SearchResult, {result})),
+ *         !error || m(ErrorDisplay, {error})),
+ *     ]
+ * }
  * ```
  *
  * Important note: due to the way this is implemented in basically all runtimes, the throttler's
@@ -156,7 +159,7 @@ var throttler = (delay) => rateLimiterImpl(delay, 1)
  * ```js
  * const debounced = m.debouncer()
  * let results, error
- * return (attrs, _, {redraw}) => [
+ * return (attrs) => [
  *     m.remove(debounced.dispose),
  *     m("input[type=text].value", {
  *         async oninput(ev) {

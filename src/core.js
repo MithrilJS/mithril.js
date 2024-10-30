@@ -688,10 +688,10 @@ var updateComponent = (old, vnode) => {
 				tree = old.s
 				oldInstance = old.c
 				oldAttrs = old.a
-			} else if (typeof (tree = (vnode.s = vnode.t)(attrs, oldAttrs, currentContext)) !== "function") {
+			} else if (typeof (tree = (vnode.s = vnode.t).call(currentContext, attrs, oldAttrs)) !== "function") {
 				break rendered
 			}
-			tree = (vnode.s = tree)(attrs, oldAttrs, currentContext)
+			tree = (vnode.s = tree).call(currentContext, attrs, oldAttrs)
 		}
 		if (tree === vnode) {
 			throw new Error("A view cannot return the vnode it received as argument")
