@@ -80,7 +80,7 @@ var hyperscriptVnode = function() {
 // This exists so I'm1 only saving it once.
 var hasOwn = {}.hasOwnProperty
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
-var selectorCache = {}
+var selectorCache = Object.create(null)
 function isEmpty(object) {
 	for (var key in object) if (hasOwn.call(object, key)) return false
 	return true
@@ -100,6 +100,7 @@ function compileSelector(selector) {
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
+	if (isEmpty(attrs)) attrs = null
 	return selectorCache[selector] = {tag: tag, attrs: attrs}
 }
 function execSelector(state, vnode) {
@@ -107,27 +108,26 @@ function execSelector(state, vnode) {
 	var hasClass = hasOwn.call(attrs, "class")
 	var className = hasClass ? attrs.class : attrs.className
 	vnode.tag = state.tag
-	if (!isEmpty(state.attrs)) {
-		var newAttrs = {}
-		for (var key in attrs) {
-			if (hasOwn.call(attrs, key)) newAttrs[key] = attrs[key]
-		}
-		attrs = newAttrs
+	if (state.attrs != null) {
+		attrs = Object.assign({}, state.attrs, attrs)
+		if (className != null || state.attrs.className != null) attrs.className =
+			className != null
+				? state.attrs.className != null
+					? String(state.attrs.className) + " " + String(className)
+					: className
+				: state.attrs.className != null
+					? state.attrs.className
+					: null
+	} else {
+		if (className != null) attrs.className = className
 	}
-	for (var key in state.attrs) {
-		if (hasOwn.call(state.attrs, key) && key !== "className" && !hasOwn.call(attrs, key)){
-			attrs[key] = state.attrs[key]
-		}
-	}
-	if (className != null || state.attrs.className != null) attrs.className =
-		className != null
-			? state.attrs.className != null
-				? String(state.attrs.className) + " " + String(className)
-				: className
-			: state.attrs.className != null
-				? state.attrs.className
-				: null
 	if (hasClass) attrs.class = null
+	// workaround for #2622 (reorder keys in attrs to set "type" first)
+	// The DOM does things to inputs based on the "type", so it needs set first.
+	// See: https://github.com/MithrilJS/mithril.js/issues/2622
+	if (state.tag === "input" && hasOwn.call(attrs, "type")) {
+		attrs = Object.assign({type: attrs.type}, attrs)
+	}
 	vnode.attrs = attrs
 	return vnode
 }
@@ -816,18 +816,12 @@ var _11 = function() {
 	}
 	//attrs2
 	function setAttrs(vnode3, attrs2, ns) {
-		// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.
-		//
-		// Also, the DOM does things to inputs based on the value, so it needs set first.
-		// See: https://github.com/MithrilJS/mithril.js/issues/2622
-		if (vnode3.tag === "input" && attrs2.type != null) vnode3.dom.setAttribute("type", attrs2.type)
-		var isFileInput = attrs2 != null && vnode3.tag === "input" && attrs2.type === "file"
 		for (var key in attrs2) {
-			setAttr(vnode3, key, null, attrs2[key], ns, isFileInput)
+			setAttr(vnode3, key, null, attrs2[key], ns)
 		}
 	}
-	function setAttr(vnode3, key, old, value, ns, isFileInput) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode3, key)) && typeof value !== "object" || key === "type" && vnode3.tag === "input") return
+	function setAttr(vnode3, key, old, value, ns) {
+		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode3, key)) && typeof value !== "object") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode3, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode3.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode3.dom, old, value)
@@ -835,6 +829,7 @@ var _11 = function() {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
+				var isFileInput = vnode3.tag === "input" && vnode3.attrs.type === "file"
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type0=file][value] to same value causes an error to be generated if it's non-empty
 				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value && (isFileInput || vnode3.dom === activeElement(vnode3.dom))) return
@@ -847,7 +842,9 @@ var _11 = function() {
 				if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
 				/* eslint-enable no-implicit-coercion */
 			}
-			vnode3.dom[key] = value
+			// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.
+			if (vnode3.tag === "input" && key === "type") vnode3.dom.setAttribute(key, value)
+			else vnode3.dom[key] = value
 		} else {
 			if (typeof value === "boolean") {
 				if (value) vnode3.dom.setAttribute(key, "")
@@ -895,14 +892,8 @@ var _11 = function() {
 			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
 		}
 		if (attrs2 != null) {
-			// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.
-			//
-			// Also, the DOM does things to inputs based on the value, so it needs set first.
-			// See: https://github.com/MithrilJS/mithril.js/issues/2622
-			if (vnode3.tag === "input" && attrs2.type != null) vnode3.dom.setAttribute("type", attrs2.type)
-			var isFileInput = vnode3.tag === "input" && attrs2.type === "file"
 			for (var key in attrs2) {
-				setAttr(vnode3, key, old && old[key], attrs2[key], ns, isFileInput)
+				setAttr(vnode3, key, old && old[key], attrs2[key], ns)
 			}
 		}
 		var val
@@ -1142,12 +1133,6 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key2) + (value1 != null && value1 !== "" ? "=" + encodeURIComponent(value1) : ""))
 	}
 }
-// This exists so I'm4 only saving it once.
-var assign = Object.assign || function(target1, source) {
-	for (var key3 in source) {
-		if (hasOwn.call(source, key3)) target1[key3] = source[key3]
-	}
-}
 // Returns `path` from `template` + `params`
 var buildPathname = function(template, params) {
 	if ((/:([^\/\.-]+)(\.{3})?:/).test(template)) {
@@ -1160,7 +1145,7 @@ var buildPathname = function(template, params) {
 	var pathEnd = queryIndex < 0 ? queryEnd : queryIndex
 	var path = template.slice(0, pathEnd)
 	var query = {}
-	assign(query, params)
+	Object.assign(query, params)
 	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m3, key1, variadic) {
 		delete query[key1]
 		// If no such parameter exists, don't interpolate it.
@@ -1364,7 +1349,7 @@ m.trust = hyperscript.trust
 m.fragment = hyperscript.fragment
 m.Fragment = "["
 m.mount = mountRedraw.mount
-var m5 = hyperscript
+var m4 = hyperscript
 function decodeURIComponentSave0(str) {
 	try {
 		return decodeURIComponent(str)
@@ -1378,22 +1363,22 @@ var parseQueryString = function(string) {
 	var entries = string.split("&"), counters = {}, data0 = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key5 = decodeURIComponentSave0(entry[0])
+		var key4 = decodeURIComponentSave0(entry[0])
 		var value2 = entry.length === 2 ? decodeURIComponentSave0(entry[1]) : ""
 		if (value2 === "true") value2 = true
 		else if (value2 === "false") value2 = false
-		var levels = key5.split(/\]\[?|\[/)
+		var levels = key4.split(/\]\[?|\[/)
 		var cursor = data0
-		if (key5.indexOf("[") > -1) levels.pop()
+		if (key4.indexOf("[") > -1) levels.pop()
 		for (var j0 = 0; j0 < levels.length; j0++) {
 			var level = levels[j0], nextLevel = levels[j0 + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
 			if (level === "") {
-				var key5 = levels.slice(0, j0).join()
-				if (counters[key5] == null) {
-					counters[key5] = Array.isArray(cursor) ? cursor.length : 0
+				var key4 = levels.slice(0, j0).join()
+				if (counters[key4] == null) {
+					counters[key4] = Array.isArray(cursor) ? cursor.length : 0
 				}
-				level = counters[key5]++
+				level = counters[key4]++
 			}
 			// Disallow direct prototype pollution
 			else if (level === "__proto__") break
@@ -1443,9 +1428,9 @@ var compileTemplate = function(template) {
 		// don't also accidentally escape `-` and make it harder to detect it to
 		// ban it from template parameters.
 		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
-		function(m6, key6, extra) {
-			if (key6 == null) return "\\" + m6
-			keys.push({k: key6, r: extra === "..."})
+		function(m5, key5, extra) {
+			if (key5 == null) return "\\" + m5
+			keys.push({k: key5, r: extra === "..."})
 			if (extra === "...") return "(.*)"
 			if (extra === ".") return "([^/]+)\\."
 			return "([^/]+)" + (extra || "")
@@ -1483,9 +1468,9 @@ var compileTemplate = function(template) {
 //     "onbeforeremove", "onremove",
 // ]
 // var censor = (attrs4, extras) => {
-//     const result2 = Object.assign0(Object.create(null), attrs4)
-//     for (const key7 of magic) delete result2[key7]
-//     if (extras != null) for (const key7 of extras) delete result2[key7]
+//     const result2 = Object.assign(Object.create(null), attrs4)
+//     for (const key6 of magic) delete result2[key6]
+//     if (extras != null) for (const key6 of extras) delete result2[key6]
 //     return result2
 // }
 // ```
@@ -1494,15 +1479,15 @@ var magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbefore
 var censor = function(attrs4, extras) {
 	var result2 = {}
 	if (extras != null) {
-		for (var key7 in attrs4) {
-			if (hasOwn.call(attrs4, key7) && !magic.test(key7) && extras.indexOf(key7) < 0) {
-				result2[key7] = attrs4[key7]
+		for (var key6 in attrs4) {
+			if (hasOwn.call(attrs4, key6) && !magic.test(key6) && extras.indexOf(key6) < 0) {
+				result2[key6] = attrs4[key6]
 			}
 		}
 	} else {
-		for (var key7 in attrs4) {
-			if (hasOwn.call(attrs4, key7) && !magic.test(key7)) {
-				result2[key7] = attrs4[key7]
+		for (var key6 in attrs4) {
+			if (hasOwn.call(attrs4, key6) && !magic.test(key6)) {
+				result2[key6] = attrs4[key6]
 			}
 		}
 	}
@@ -1516,7 +1501,7 @@ function decodeURIComponentSave(component) {
 		return component
 	}
 }
-var _28 = function($window, mountRedraw00) {
+var _26 = function($window, mountRedraw00) {
 	var callAsync = $window == null
 		// In case Mithril.js' loaded globally without the DOM, let's not break
 		? null
@@ -1541,7 +1526,7 @@ var _28 = function($window, mountRedraw00) {
 		},
 		view: function() {
 			if (!state || sentinel0 === currentResolver) return
-			// Wrap in a fragment0 to preserve existing key4 semantics
+			// Wrap in a fragment0 to preserve existing key3 semantics
 			var vnode6 = [Vnode(component, attrs3.key, attrs3)]
 			if (currentResolver) vnode6 = currentResolver.render(vnode6[0])
 			return vnode6
@@ -1567,7 +1552,7 @@ var _28 = function($window, mountRedraw00) {
 			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSave)
 			.slice(route.prefix.length)
 		var data = parsePathname(path0)
-		assign(data.params, $window.history.state)
+		Object.assign(data.params, $window.history.state)
 		function reject(e) {
 			console.error(e)
 			setPath(fallbackRoute, null, {replace: true})
@@ -1615,7 +1600,7 @@ var _28 = function($window, mountRedraw00) {
 			setPath(fallbackRoute, null, {replace: true})
 		}
 	}
-	// Set it unconditionally so `m5.route.set` and `m5.route.Link` both work,
+	// Set it unconditionally so `m4.route.set` and `m4.route.Link` both work,
 	// even if neither `pushState` nor `hashchange` are supported. It's
 	// cleared if `hashchange` is2 used, since that makes it automatically
 	// async.
@@ -1687,7 +1672,7 @@ var _28 = function($window, mountRedraw00) {
 			//
 			// We don't strip the other parameters because for convenience we
 			// let them be specified in the selector as well.
-			var child0 = m5(
+			var child0 = m4(
 				vnode6.attrs.selector || "a",
 				censor(vnode6.attrs, ["options", "params", "selector", "onclick"]),
 				vnode6.children
@@ -1727,13 +1712,13 @@ var _28 = function($window, mountRedraw00) {
 					// would expect. There's a lot more valid ways to click a
 					// link than this, and one might want to not simply click a
 					// link, but right click or command-click it to copy the
-					// link target2, etc. Nope, this isn't just for blind people.
+					// link target1, etc. Nope, this isn't just for blind people.
 					if (
 						// Skip if `onclick` prevented default
 						result1 !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
-						// Let the browser handle `target2=_blank`, etc.
+						// Let the browser handle `target1=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
@@ -1747,12 +1732,12 @@ var _28 = function($window, mountRedraw00) {
 			return child0
 		},
 	}
-	route.param = function(key4) {
-		return attrs3 && key4 != null ? attrs3[key4] : attrs3
+	route.param = function(key3) {
+		return attrs3 && key3 != null ? attrs3[key3] : attrs3
 	}
 	return route
 }
-m.route = _28(typeof window !== "undefined" ? window : null, mountRedraw)
+m.route = _26(typeof window !== "undefined" ? window : null, mountRedraw)
 m.render = render
 m.redraw = mountRedraw.redraw
 m.request = request.request

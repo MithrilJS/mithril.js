@@ -1,4 +1,12 @@
 
+# Release v2.2.9
+
+### Patch Changes
+
+#### [[refactor] Refactoring of hyperscript.js and render.js, including performance improvements (@kfule)](https://github.com/MithrilJS/mithril.js/pull/2983)
+
+Refactor hyperscript.js and render.js.  In particular, the replacement of fix #2622 appears to have significantly improved the performance regression.
+
 # Release v2.2.8
 
 ### Patch Changes
