@@ -64,7 +64,7 @@ export function setupGlobals(env = {}) {
 
 	o.beforeEach(() => {
 		initialize({...env})
-		return env.initialize && env.initialize()
+		return env.initialize && env.initialize(G)
 	})
 
 	o.afterEach(() => {
@@ -87,7 +87,7 @@ export function setupGlobals(env = {}) {
 		o(errors).deepEquals([])
 		errors.length = 0
 		o(mock.queueLength()).equals(0)
-		return env.cleanup && env.cleanup()
+		return env.cleanup && env.cleanup(G)
 	})
 
 	return {

@@ -2,15 +2,14 @@ import o from "ospec"
 
 import m from "../../src/entry/mithril.esm.js"
 
-o.spec("tracked", () => {
-	/** @param {import("../tracked.js").Tracked<number, string>} t */
-	var live = (t) => t.live().map((h) => [h.key, h.value, h.signal.aborted])
+const readState = (list) => list.map((h) => [h.key, h.value, h.signal.aborted])
 
+o.spec("trackedList", () => {
 	o("initializes values correctly", () => {
-		var calls = 0
-		var t = m.tracked(() => calls++, [[1, "one"], [2, "two"]])
+		let calls = 0
+		const t = m.trackedList(() => calls++, [[1, "one"], [2, "two"]])
 
-		o(live(t)).deepEquals([[1, "one", false], [2, "two", false]])
+		o(readState(t.live())).deepEquals([[1, "one", false], [2, "two", false]])
 		o(t.list()).deepEquals([[1, "one"], [2, "two"]])
 
 		o(t.has(1)).equals(true)
@@ -22,31 +21,31 @@ o.spec("tracked", () => {
 	})
 
 	o("tracks values correctly", () => {
-		var calls = 0
-		var t = m.tracked(() => calls++)
+		let calls = 0
+		const t = m.trackedList(() => calls++)
 
 		t.set(1, "one")
 		o(calls).equals(1)
-		o(live(t)).deepEquals([[1, "one", false]])
+		o(readState(t.live())).deepEquals([[1, "one", false]])
 		o(t.list()).deepEquals([[1, "one"]])
 		o(t.has(1)).equals(true)
 		o(t.get(1)).equals("one")
-		var live1 = t.live()[0]
+		const live1 = t.live()[0]
 
 		t.set(2, "two")
 		o(calls).equals(2)
-		o(live(t)).deepEquals([[1, "one", false], [2, "two", false]])
+		o(readState(t.live())).deepEquals([[1, "one", false], [2, "two", false]])
 		o(t.live()[0]).equals(live1)
 		o(t.list()).deepEquals([[1, "one"], [2, "two"]])
 		o(t.has(1)).equals(true)
 		o(t.get(1)).equals("one")
 		o(t.has(2)).equals(true)
 		o(t.get(2)).equals("two")
-		var live2 = t.live()[1]
+		const live2 = t.live()[1]
 
 		t.delete(1)
 		o(calls).equals(3)
-		o(live(t)).deepEquals([[1, "one", true], [2, "two", false]])
+		o(readState(t.live())).deepEquals([[1, "one", true], [2, "two", false]])
 		o(t.live()[0]).equals(live1)
 		o(t.live()[1]).equals(live2)
 		o(t.list()).deepEquals([[2, "two"]])
@@ -57,7 +56,7 @@ o.spec("tracked", () => {
 
 		live1.release()
 		o(calls).equals(4)
-		o(live(t)).deepEquals([[2, "two", false]])
+		o(readState(t.live())).deepEquals([[2, "two", false]])
 		o(t.live()[0]).equals(live2)
 		o(t.list()).deepEquals([[2, "two"]])
 		o(t.has(1)).equals(false)
@@ -67,18 +66,18 @@ o.spec("tracked", () => {
 
 		t.replace(2, "dos")
 		o(calls).equals(5)
-		o(live(t)).deepEquals([[2, "two", true], [2, "dos", false]])
+		o(readState(t.live())).deepEquals([[2, "two", true], [2, "dos", false]])
 		o(t.live()[0]).equals(live2)
 		o(t.list()).deepEquals([[2, "dos"]])
 		o(t.has(1)).equals(false)
 		o(t.get(1)).equals(undefined)
 		o(t.has(2)).equals(true)
 		o(t.get(2)).equals("dos")
-		var live3 = t.live()[1]
+		const live3 = t.live()[1]
 
 		live2.release()
 		o(calls).equals(6)
-		o(live(t)).deepEquals([[2, "dos", false]])
+		o(readState(t.live())).deepEquals([[2, "dos", false]])
 		o(t.live()[0]).equals(live3)
 		o(t.list()).deepEquals([[2, "dos"]])
 		o(t.has(1)).equals(false)
@@ -87,15 +86,15 @@ o.spec("tracked", () => {
 		o(t.get(2)).equals("dos")
 	})
 
-	o("invokes `onUpdate()` after the update is fully completed, including any and all signal aborts", () => {
-		var live1, live2, live3
-		var live1Aborted = false
-		var live2Aborted = false
-		var call = 0
-		var t = m.tracked(() => {
+	o("invokes `redraw()` after the update is fully completed, including any and all signal aborts", () => {
+		let live1, live2, live3
+		let live1Aborted = false
+		let live2Aborted = false
+		let call = 0
+		const t = m.trackedList(() => {
 			switch (++call) {
 				case 1:
-					o(live(t)).deepEquals([[1, "one", false]])
+					o(readState(t.live())).deepEquals([[1, "one", false]])
 					o(t.list()).deepEquals([[1, "one"]])
 					o(t.has(1)).equals(true)
 					o(t.get(1)).equals("one")
@@ -103,7 +102,7 @@ o.spec("tracked", () => {
 					break
 
 				case 2:
-					o(live(t)).deepEquals([[1, "one", false], [2, "two", false]])
+					o(readState(t.live())).deepEquals([[1, "one", false], [2, "two", false]])
 					o(t.live()[0]).equals(live1)
 					o(t.list()).deepEquals([[1, "one"], [2, "two"]])
 					o(t.has(1)).equals(true)
@@ -114,7 +113,7 @@ o.spec("tracked", () => {
 					break
 
 				case 3:
-					o(live(t)).deepEquals([[1, "one", true], [2, "two", false]])
+					o(readState(t.live())).deepEquals([[1, "one", true], [2, "two", false]])
 					o(t.live()[0]).equals(live1)
 					o(t.live()[1]).equals(live2)
 					o(t.list()).deepEquals([[2, "two"]])
@@ -125,7 +124,7 @@ o.spec("tracked", () => {
 					break
 
 				case 4:
-					o(live(t)).deepEquals([[2, "two", false]])
+					o(readState(t.live())).deepEquals([[2, "two", false]])
 					o(t.live()[0]).equals(live2)
 					o(t.list()).deepEquals([[2, "two"]])
 					o(t.has(1)).equals(false)
@@ -135,7 +134,7 @@ o.spec("tracked", () => {
 					break
 
 				case 5:
-					o(live(t)).deepEquals([[2, "two", true], [2, "dos", false]])
+					o(readState(t.live())).deepEquals([[2, "two", true], [2, "dos", false]])
 					o(t.live()[0]).equals(live2)
 					o(t.list()).deepEquals([[2, "dos"]])
 					o(t.has(1)).equals(false)
@@ -146,7 +145,7 @@ o.spec("tracked", () => {
 					break
 
 				case 6:
-					o(live(t)).deepEquals([[2, "dos", false]])
+					o(readState(t.live())).deepEquals([[2, "dos", false]])
 					o(t.live()[0]).equals(live3)
 					o(t.list()).deepEquals([[2, "dos"]])
 					o(t.has(1)).equals(false)
@@ -164,7 +163,7 @@ o.spec("tracked", () => {
 		o(call).equals(1)
 		o(live1Aborted).equals(false)
 		o(live2Aborted).equals(false)
-		var deleteOneStarted = false
+		let deleteOneStarted = false
 		live1.signal.onabort = () => {
 			live1Aborted = true
 			o(call).equals(2)
@@ -175,7 +174,7 @@ o.spec("tracked", () => {
 		o(call).equals(2)
 		o(live1Aborted).equals(false)
 		o(live2Aborted).equals(false)
-		var deleteTwoStarted = false
+		let deleteTwoStarted = false
 		live2.signal.onabort = () => {
 			live2Aborted = true
 			o(call).equals(4)
@@ -206,18 +205,18 @@ o.spec("tracked", () => {
 	})
 
 	o("tracks parallel removes correctly", () => {
-		var calls = 0
-		var t = m.tracked(() => calls++)
+		let calls = 0
+		const t = m.trackedList(() => calls++)
 
 		t.set(1, "one")
-		var live1 = t.live()[0]
+		const live1 = t.live()[0]
 
 		t.set(2, "two")
-		var live2 = t.live()[1]
+		const live2 = t.live()[1]
 
 		t.delete(1)
 		o(calls).equals(3)
-		o(live(t)).deepEquals([[1, "one", true], [2, "two", false]])
+		o(readState(t.live())).deepEquals([[1, "one", true], [2, "two", false]])
 		o(t.live()[0]).equals(live1)
 		o(t.live()[1]).equals(live2)
 		o(t.list()).deepEquals([[2, "two"]])
@@ -228,7 +227,7 @@ o.spec("tracked", () => {
 
 		t.replace(2, "dos")
 		o(calls).equals(4)
-		o(live(t)).deepEquals([[1, "one", true], [2, "two", true], [2, "dos", false]])
+		o(readState(t.live())).deepEquals([[1, "one", true], [2, "two", true], [2, "dos", false]])
 		o(t.live()[0]).equals(live1)
 		o(t.live()[1]).equals(live2)
 		o(t.list()).deepEquals([[2, "dos"]])
@@ -236,11 +235,11 @@ o.spec("tracked", () => {
 		o(t.get(1)).equals(undefined)
 		o(t.has(2)).equals(true)
 		o(t.get(2)).equals("dos")
-		var live3 = t.live()[2]
+		const live3 = t.live()[2]
 
 		live1.release()
 		o(calls).equals(5)
-		o(live(t)).deepEquals([[2, "two", true], [2, "dos", false]])
+		o(readState(t.live())).deepEquals([[2, "two", true], [2, "dos", false]])
 		o(t.live()[0]).equals(live2)
 		o(t.list()).deepEquals([[2, "dos"]])
 		o(t.has(1)).equals(false)
@@ -250,7 +249,7 @@ o.spec("tracked", () => {
 
 		live2.release()
 		o(calls).equals(6)
-		o(live(t)).deepEquals([[2, "dos", false]])
+		o(readState(t.live())).deepEquals([[2, "dos", false]])
 		o(t.live()[0]).equals(live3)
 		o(t.list()).deepEquals([[2, "dos"]])
 		o(t.has(1)).equals(false)
@@ -260,97 +259,137 @@ o.spec("tracked", () => {
 	})
 
 	o("tolerates release before abort", () => {
-		var calls = 0
-		var t = m.tracked(() => calls++)
+		let calls = 0
+		const t = m.trackedList(() => calls++)
 
 		t.set(1, "one")
 		o(calls).equals(1)
-		o(live(t)).deepEquals([[1, "one", false]])
+		o(readState(t.live())).deepEquals([[1, "one", false]])
 		o(t.list()).deepEquals([[1, "one"]])
 		o(t.has(1)).equals(true)
 		o(t.get(1)).equals("one")
-		var live1 = t.live()[0]
+		const live1 = t.live()[0]
 
 		live1.release()
 		o(calls).equals(1)
-		o(live(t)).deepEquals([[1, "one", false]])
+		o(readState(t.live())).deepEquals([[1, "one", false]])
 		o(t.list()).deepEquals([[1, "one"]])
 		o(t.has(1)).equals(true)
 		o(t.get(1)).equals("one")
 
 		t.delete(1)
 		o(calls).equals(2)
-		o(live(t)).deepEquals([])
+		o(readState(t.live())).deepEquals([])
 		o(t.list()).deepEquals([])
 		o(t.has(1)).equals(false)
 		o(t.get(1)).equals(undefined)
 	})
 
 	o("tolerates double release before abort", () => {
-		var calls = 0
-		var t = m.tracked(() => calls++)
+		let calls = 0
+		const t = m.trackedList(() => calls++)
 
 		t.set(1, "one")
-		var live1 = t.live()[0]
+		const live1 = t.live()[0]
 
 		live1.release()
 		live1.release()
 		o(calls).equals(1)
-		o(live(t)).deepEquals([[1, "one", false]])
+		o(readState(t.live())).deepEquals([[1, "one", false]])
 		o(t.list()).deepEquals([[1, "one"]])
 		o(t.has(1)).equals(true)
 		o(t.get(1)).equals("one")
 
 		t.delete(1)
 		o(calls).equals(2)
-		o(live(t)).deepEquals([])
+		o(readState(t.live())).deepEquals([])
 		o(t.list()).deepEquals([])
 		o(t.has(1)).equals(false)
 		o(t.get(1)).equals(undefined)
 	})
 
 	o("tolerates double release spanning delete", () => {
-		var calls = 0
-		var t = m.tracked(() => calls++)
+		let calls = 0
+		const t = m.trackedList(() => calls++)
 
 		t.set(1, "one")
-		var live1 = t.live()[0]
+		const live1 = t.live()[0]
 		live1.release()
 		t.delete(1)
 		live1.release()
 
 		o(calls).equals(2)
-		o(live(t)).deepEquals([])
+		o(readState(t.live())).deepEquals([])
 		o(t.list()).deepEquals([])
 		o(t.has(1)).equals(false)
 		o(t.get(1)).equals(undefined)
 	})
 
 	o("tracks double release after delete", () => {
-		var calls = 0
-		var t = m.tracked(() => calls++)
+		let calls = 0
+		const t = m.trackedList(() => calls++)
 
 		t.set(1, "one")
-		var live1 = t.live()[0]
+		const live1 = t.live()[0]
 		t.delete(1)
 		o(calls).equals(2)
-		o(live(t)).deepEquals([[1, "one", true]])
+		o(readState(t.live())).deepEquals([[1, "one", true]])
 		o(t.list()).deepEquals([])
 		o(t.has(1)).equals(false)
 		o(t.get(1)).equals(undefined)
 
 		live1.release()
 		o(calls).equals(3)
-		o(live(t)).deepEquals([])
+		o(readState(t.live())).deepEquals([])
 		o(t.list()).deepEquals([])
 		o(t.has(1)).equals(false)
 		o(t.get(1)).equals(undefined)
 
 		live1.release()
 		o(calls).equals(3)
-		o(live(t)).deepEquals([])
+		o(readState(t.live())).deepEquals([])
 		o(t.list()).deepEquals([])
 		o(t.has(1)).equals(false)
 		o(t.get(1)).equals(undefined)
+	})
+})
+
+o.spec("tracked", () => {
+	o("tracks values correctly", () => {
+		let calls = 0
+		const trackHit = m.tracked(() => calls++)
+
+		o(readState(trackHit("a"))).deepEquals([[0, "a", false]])
+		o(readState(trackHit("a"))).deepEquals([[0, "a", false]])
+		o(calls).equals(0)
+
+		const list1 = trackHit("b")
+		o(readState(list1)).deepEquals([[0, "a", true], [1, "b", false]])
+		o(calls).equals(0)
+		list1[0].release()
+		o(calls).equals(1)
+
+		o(readState(trackHit("b"))).deepEquals([[1, "b", false]])
+		o(calls).equals(1)
+		o(readState(trackHit("c"))).deepEquals([[1, "b", true], [2, "c", false]])
+		o(calls).equals(1)
+		o(readState(trackHit("d"))).deepEquals([[1, "b", true], [2, "c", true], [3, "d", false]])
+		o(calls).equals(1)
+
+		const list2 = trackHit("d")
+		o(readState(list2)).deepEquals([[1, "b", true], [2, "c", true], [3, "d", false]])
+		o(calls).equals(1)
+		list2[2].remove()
+		o(calls).equals(1)
+
+		o(readState(trackHit("d"))).deepEquals([[1, "b", true], [2, "c", true], [3, "d", true]])
+		o(calls).equals(1)
+
+		list2[0].release()
+		o(calls).equals(2)
+		list2[1].release()
+		o(calls).equals(3)
+		list2[2].release()
+		o(calls).equals(4)
 	})
 })

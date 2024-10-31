@@ -43,9 +43,15 @@ why that was removed in favor of this:
    want to clear some state and not other state. You might want to preserve some elements of a
    sibling's state. Embedding it in the renderer would force an opinion on you, and in order to
    work around it, you'd have to do something like this anyways.
+
+As for the difference between `m.trackedList()` and `m.tracked()`, the first is for tracking lists
+(and is explained above), and `m.tracked()` is for single values (but uses `m.trackedList()`
+internally to avoid a ton of code duplication).
 */
 
-import {checkCallback} from "../util.js"
+import m from "../core.js"
+
+import {checkCallback, noop} from "../util.js"
 
 /**
  * @template K, V
@@ -55,6 +61,7 @@ import {checkCallback} from "../util.js"
  * @property {V} value
  * @property {AbortSignal} signal
  * @property {() => void} release
+ * @property {() => void} remove
  */
 
 /**
@@ -70,47 +77,64 @@ import {checkCallback} from "../util.js"
  * @property {(key: K) => boolean} delete
  */
 
-/**
- * @template K, V
- * @param {Iterable<[K, V]>} [initial]
- * @param {() => void} redraw
- * @returns {Tracked<K, V>}
- */
-var tracked = (redraw, initial) => {
+var trackedState = (redraw) => {
 	checkCallback(redraw, false, "redraw")
-
-	/** @type {Map<K, TrackedHandle<K, V> & {_: AbortController}>} */ var state = new Map()
+	/** @type {Map<K, AbortController & TrackedHandle<K, V>>} */
+	var state = new Map()
+	var removed = new WeakSet()
 	/** @type {Set<TrackedHandle<K, V>>} */ var live = new Set()
 
+	/** @param {null | AbortController & TrackedHandle<K, V>} prev */
 	var abort = (prev) => {
 		try {
 			if (prev) {
-				if (prev._) prev._.abort()
-				else live.delete(prev)
+				if (removed.has(prev)) {
+					live.delete(prev)
+				} else {
+					prev.abort()
+				}
 			}
 		} catch (e) {
 			console.error(e)
 		}
 	}
 
-	// Bit 1 forcibly releases the old handle, and bit 2 causes an update notification to be sent
-	// (something that's unwanted during initialization).
+	/** @param {K} k */
+	var remove = (k, r) => {
+		var prev = state.get(k)
+		var result = state.delete(k)
+		abort(prev)
+		if (r) redraw()
+		return result
+	}
+
+	/**
+	 * @param {K} k
+	 * @param {V} v
+	 * @param {number} bits
+	 * Bit 1 forcibly releases the old handle, and bit 2 causes an update notification to be sent
+	 * (something that's unwanted during initialization).
+	 */
 	var setHandle = (k, v, bits) => {
 		var prev = state.get(k)
-		var ctrl = new AbortController()
-		/** @type {TrackedHandle<K, V>} */
-		var handle = {
-			_: ctrl,
-			key: k,
-			value: v,
-			signal: ctrl.signal,
-			release() {
-				if (state.get(handle.key) === handle) {
-					handle._ = null
-				} else if (live.delete(handle)) {
-					redraw()
-				}
-			},
+		// Note: it extending `AbortController` is an implementation detail. It exposing a `signal`
+		// property is *not*.
+		var handle = /** @type {AbortController & TrackedHandle<K, V>} */ (new AbortController())
+		handle.key = k
+		handle.value = v
+		handle.release = (ev) => {
+			if (ev) m.capture(ev)
+			if (!handle) return
+			if (state.get(handle.key) === handle) {
+				removed.add(handle)
+				handle = null
+			} else if (live.delete(handle)) {
+				redraw()
+			}
+		}
+		handle.remove = (ev) => {
+			if (ev) m.capture(ev)
+			remove(handle.key, 0)
 		}
 		state.set(k, handle)
 		live.add(handle)
@@ -121,6 +145,18 @@ var tracked = (redraw, initial) => {
 		if (bits & 2) redraw()
 	}
 
+	return {s: state, l: live, h: setHandle, r: remove}
+}
+
+/**
+ * @template K, V
+ * @param {Iterable<[K, V]>} [initial]
+ * @param {() => void} redraw
+ * @returns {TrackedList<K, V>}
+ */
+var trackedList = (redraw, initial) => {
+	var {s: state, l: live, h: setHandle, r: remove} = trackedState(redraw)
+
 	for (var [k, v] of initial || []) setHandle(k, v, 1)
 
 	return {
@@ -130,14 +166,22 @@ var tracked = (redraw, initial) => {
 		get: (k) => (k = state.get(k)) && k.value,
 		set: (k, v) => setHandle(k, v, 3),
 		replace: (k, v) => setHandle(k, v, 2),
-		delete(k) {
-			var prev = state.get(k)
-			var result = state.delete(k)
-			abort(prev)
-			redraw()
-			return result
-		},
+		delete: (k) => remove(k, 1),
+		forget: (k) => (k = state.get(k)) && k.release(),
 	}
 }
 
-export {tracked as default}
+var tracked = (redraw) => {
+	var {l: live, h: setHandle, r: remove} = trackedState(redraw)
+	var initial = noop
+	var id = -1
+	return (state) => {
+		if (!Object.is(initial, initial = state)) {
+			remove(id++, 0)
+			setHandle(id, state, 1)
+		}
+		return [...live]
+	}
+}
+
+export {tracked, trackedList}
