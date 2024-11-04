@@ -88,7 +88,16 @@ export function pushSample(count, sum, duration) {
 
 	/* eslint-enable no-bitwise */
 
-	samples.splice(R, 0, {count, sum})
+	// Avoid the overhead of `.splice`, since that creates an array. I don't want to trust the
+	// engine's ability to elide the allocation. The test operation could potentially mess with
+	// that.
+
+	const sample = {count, sum}
+	const prevLen = samples.length
+	// Ensure the engine can only see the sample array as a dense sample object array.
+	samples.push(sample)
+	samples.copyWithin(R + 1, R, prevLen)
+	samples[R] = sample
 
 	ticks += count
 	meanSum += sum * count
