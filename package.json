@@ -42,6 +42,7 @@
     "@rollup/plugin-commonjs": "^28.0.0",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "@types/node": "^22.8.7",
     "chokidar": "^4.0.1",
     "eslint": "^8.9.0",
     "ospec": "4.2.1",
