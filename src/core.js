@@ -783,6 +783,7 @@ var removeNodeDispatch = [
 //attrs
 
 /* eslint-disable no-unused-vars */
+var ASCII_HYPHEN = 0x2D
 var ASCII_COLON = 0x3A
 var ASCII_LOWER_A = 0x61
 var ASCII_LOWER_B = 0x62
@@ -828,25 +829,28 @@ var getStyleKey = (host, key) => {
 	return null
 }
 
-var uppercaseRegex = /[A-Z]/g
-
-var toLowerCase = (capital) => "-" + capital.toLowerCase()
-
-var normalizeKey = (key) => (
-	key.startsWith("--") ? key :
-		key === "cssFloat" ? "float" :
-			key.replace(uppercaseRegex, toLowerCase)
-)
-
 var setStyle = (style, old, value, add) => {
-	for (var propName of Object.keys(value)) {
+	for (var propName in value) {
+		var preferSetter = propName.charCodeAt(0) === ASCII_HYPHEN
 		var propValue = getStyleKey(value, propName)
 		if (propValue !== null) {
 			var oldValue = getStyleKey(old, propName)
 			if (add) {
-				if (propValue !== oldValue) style.setProperty(normalizeKey(propName), propValue)
+				if (propValue !== oldValue) {
+					if (preferSetter) {
+						style[propName] = propValue
+					} else {
+						style.setProperty(propName, propValue)
+					}
+				}
 			} else {
-				if (oldValue === null) style.removeProperty(normalizeKey(propName))
+				if (oldValue === null) {
+					if (preferSetter) {
+						style[propName] = ""
+					} else {
+						style.removeProperty(propName)
+					}
+				}
 			}
 		}
 	}
