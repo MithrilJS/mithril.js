@@ -778,13 +778,6 @@ module.exports = function() {
 	}
 
 	//style
-	var uppercaseRegex = /[A-Z]/g
-	function toLowerCase(capital) { return "-" + capital.toLowerCase() }
-	function normalizeKey(key) {
-		return key[0] === "-" && key[1] === "-" ? key :
-			key === "cssFloat" ? "float" :
-				key.replace(uppercaseRegex, toLowerCase)
-	}
 	function updateStyle(element, old, style) {
 		if (old === style) {
 			// Styles are equivalent, do nothing.
@@ -800,7 +793,10 @@ module.exports = function() {
 			// Add new style properties
 			for (var key in style) {
 				var value = style[key]
-				if (value != null) element.style.setProperty(normalizeKey(key), String(value))
+				if (value != null) {
+					if (key[0] === "-" && key[1] === "-") element.style.setProperty(key, String(value))
+					else element.style[key] = String(value)
+				}
 			}
 		} else {
 			// Both old & new are (different) objects.
@@ -808,13 +804,15 @@ module.exports = function() {
 			for (var key in style) {
 				var value = style[key]
 				if (value != null && (value = String(value)) !== String(old[key])) {
-					element.style.setProperty(normalizeKey(key), value)
+					if (key[0] === "-" && key[1] === "-") element.style.setProperty(key, value)
+					else element.style[key] = value
 				}
 			}
 			// Remove style properties that no longer exist
 			for (var key in old) {
 				if (old[key] != null && style[key] == null) {
-					element.style.removeProperty(normalizeKey(key))
+					if (key[0] === "-" && key[1] === "-") element.style.removeProperty(key)
+					else element.style[key] = ""
 				}
 			}
 		}
