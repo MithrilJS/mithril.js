@@ -1,0 +1,30 @@
+@charset "utf-8";
+
+.root,
+.entry {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+}
+
+.entry:not(:first-child) {
+    margin: 1em;
+}
+
+.entry h2 {
+    text-align: center;
+}
+
+.entry table {
+    margin-top: 1em;
+    border-collapse: collapse;
+}
+
+.entry td {
+    border: 1px solid black;
+    padding: 0.2em 0.5em;
+}
+
+.entry td:first-child {
+    text-align: right;
+}

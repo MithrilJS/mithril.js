@@ -5,3 +5,10 @@
 /.vscode
 /.DS_Store
 /.eslintcache
+
+# Exclude the compiled output. It's available through prerelease publishes anyways, so there's no
+# need to keep a spare copy in the repo.
+/dist
+
+# For an easier time working with console logs from profiles.
+/*.log

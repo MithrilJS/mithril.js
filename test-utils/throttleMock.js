@@ -1,18 +1,27 @@
-"use strict"
-
-module.exports = function() {
-	var queue = []
+export default function throttleMocker() {
+	let queue = new Map()
+	let id = 0
 	return {
-		schedule: function(fn) {
-			queue.push(fn)
+		schedule(fn) {
+			queue.set(++id, fn)
+			return id
 		},
-		fire: function() {
-			var tasks = queue
-			queue = []
-			tasks.forEach(function(fn) {fn()})
+		clear(id) {
+			queue.delete(id)
 		},
-		queueLength: function(){
-			return queue.length
+		fire() {
+			const tasks = queue
+			queue = new Map()
+			for (const fn of tasks.values()) {
+				try {
+					fn()
+				} catch (e) {
+					console.error(e)
+				}
+			}
+		},
+		queueLength() {
+			return queue.size
 		}
 	}
 }

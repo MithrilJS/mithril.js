@@ -1,8 +1,7 @@
-"use strict"
+/* global setTimeout, clearTimeout */
 
 /*
 Known limitations:
-- the innerHTML setter and the DOMParser only support a small subset of the true HTML/XML syntax.
 - `option.selected` can't be set/read when the option doesn't have a `select` parent
 - `element.attributes` is just a map of attribute names => Attr objects stubs
 - ...
@@ -14,10 +13,10 @@ options:
 - spy:(f: Function) => Function
 */
 
-module.exports = function(options) {
+export default function domMock($window, options) {
 	options = options || {}
-	var spy = options.spy || function(f){return f}
-	var spymap = []
+	var spy = options.spy || ((f) => f)
+	var spymap = new Map()
 
 	// This way I'm not also implementing a partial `URL` polyfill. Based on the
 	// regexp at https://urlregex.com/, but adapted to allow relative URLs and
@@ -34,22 +33,24 @@ module.exports = function(options) {
 		"^" + urlHash + "$"
 	)
 
-	var hasOwn = ({}.hasOwnProperty)
+	var hasOwn = {}.hasOwnProperty
+	var registerSpies = () => {}
+	var getSpies
 
-	function registerSpies(element, spies) {
-		if(options.spy) {
-			var i = spymap.indexOf(element)
-			if (i === -1) {
-				spymap.push(element, spies)
+	if (options.spy) {
+		registerSpies = (element, spies) => {
+			var prev = spymap.get(element)
+			if (prev) {
+				Object.assign(prev, spies)
 			} else {
-				var existing = spymap[i + 1]
-				for (var k in spies) existing[k] = spies[k]
+				spymap.set(element, spies)
 			}
 		}
-	}
-	function getSpies(element) {
-		if (element == null || typeof element !== "object") throw new Error("Element expected")
-		if(options.spy) return spymap[spymap.indexOf(element) + 1]
+
+		getSpies = (element) => {
+			if (element == null || typeof element !== "object") throw new Error("Element expected")
+			return spymap.get(element)
+		}
 	}
 
 	function isModernEvent(type) {
@@ -62,13 +63,14 @@ module.exports = function(options) {
 			stopped = true
 		}
 		e.currentTarget = this
-		if (this._events[e.type] != null) {
-			for (var i = 0; i < this._events[e.type].handlers.length; i++) {
-				var useCapture = this._events[e.type].options[i].capture
+		const record = this._events.get(e.type)
+		if (record != null) {
+			for (var i = 0; i < record.handlers.length; i++) {
+				var useCapture = record.options[i].capture
 				if (useCapture && e.eventPhase < 3 || !useCapture && e.eventPhase > 1) {
-					var handler = this._events[e.type].handlers[i]
-					if (typeof handler === "function") try {handler.call(this, e)} catch(e) {setTimeout(function(){throw e})}
-					else try {handler.handleEvent(e)} catch(e) {setTimeout(function(){throw e})}
+					var handler = record.handlers[i]
+					if (typeof handler === "function") try {handler.call(this, e)} catch(e) {console.error(e)}
+					else try {handler.handleEvent(e)} catch(e) {console.error(e)}
 					if (stopped) return
 				}
 			}
@@ -77,101 +79,27 @@ module.exports = function(options) {
 		// this would require getters/setters for each of them though and we haven't gotten around to
 		// adding them since it would be at a high perf cost or would entail some heavy refactoring of
 		// the mocks (prototypes instead of closures).
-		if (e.eventPhase > 1 && typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) try {this["on" + e.type](e)} catch(e) {setTimeout(function(){throw e})}
-	}
-	function appendChild(child) {
-		var ancestor = this
-		while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
-		if (ancestor === child) throw new Error("Node cannot be inserted at the specified point in the hierarchy")
-
-		if (child.nodeType == null) throw new Error("Argument is not a DOM element")
-
-		var index = this.childNodes.indexOf(child)
-		if (index > -1) this.childNodes.splice(index, 1)
-		if (child.nodeType === 11) {
-			while (child.firstChild != null) appendChild.call(this, child.firstChild)
-			child.childNodes = []
-		}
-		else {
-			this.childNodes.push(child)
-			if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
-			child.parentNode = this
-		}
-	}
-	function removeChild(child) {
-		if (child == null || typeof child !== "object" || !("nodeType" in child)) {
-			throw new TypeError("Failed to execute removeChild, parameter is not of type 'Node'")
-		}
-		var index = this.childNodes.indexOf(child)
-		if (index > -1) {
-			this.childNodes.splice(index, 1)
-			child.parentNode = null
-		}
-		else throw new TypeError("Failed to execute 'removeChild', child not found in parent")
-	}
-	function insertBefore(child, reference) {
-		var ancestor = this
-		while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
-		if (ancestor === child) throw new Error("Node cannot be inserted at the specified point in the hierarchy")
-
-		if (child.nodeType == null) throw new Error("Argument is not a DOM element")
-
-		var refIndex = this.childNodes.indexOf(reference)
-		var index = this.childNodes.indexOf(child)
-		if (reference !== null && refIndex < 0) throw new TypeError("Invalid argument")
-		if (index > -1) this.childNodes.splice(index, 1)
-		if (reference === null) appendChild.call(this, child)
-		else {
-			if (index !== -1 && refIndex > index) refIndex--
-			if (child.nodeType === 11) {
-				this.childNodes.splice.apply(this.childNodes, [refIndex, 0].concat(child.childNodes))
-				while (child.firstChild) {
-					var subchild = child.firstChild
-					removeChild.call(child, subchild)
-					subchild.parentNode = this
-				}
-				child.childNodes = []
-			}
-			else {
-				this.childNodes.splice(refIndex, 0, child)
-				if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
-				child.parentNode = this
+		if (e.eventPhase > 1 && typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) {
+			try {
+				this["on" + e.type](e)
+			} catch (e) {
+				console.error(e)
 			}
 		}
 	}
-	function getAttribute(name) {
-		if (this.attributes[name] == null) return null
-		return this.attributes[name].value
-	}
-	function setAttribute(name, value) {
-		/*eslint-disable no-implicit-coercion*/
-		// this is the correct kind of conversion, passing a Symbol throws in browsers too.
-		var nodeValue = "" + value
-		/*eslint-enable no-implicit-coercion*/
-		this.attributes[name] = {
-			namespaceURI: hasOwn.call(this.attributes, name) ? this.attributes[name].namespaceURI : null,
-			get value() {return nodeValue},
-			set value(value) {
-				/*eslint-disable no-implicit-coercion*/
-				nodeValue = "" + value
-				/*eslint-enable no-implicit-coercion*/
-			},
-			get nodeValue() {return nodeValue},
-			set nodeValue(value) {
-				this.value = value
-			}
+
+	class Attr {
+		constructor(namespaceURI, value) {
+			this.namespaceURI = namespaceURI
+			// this is the correct kind of conversion, passing a Symbol throws in browsers too.
+			this._value = `${value}`
 		}
+		get value() { return this._value }
+		set value(value) { this._value = `${value}` }
+		get nodeValue() { return this._value }
+		set nodeValue(value) { this._value = `${value}` }
 	}
-	function setAttributeNS(ns, name, value) {
-		this.setAttribute(name, value)
-		this.attributes[name].namespaceURI = ns
-	}
-	function removeAttribute(name) {
-		delete this.attributes[name]
-	}
-	function hasAttribute(name) {
-		return name in this.attributes
-	}
+
 	var declListTokenizer = /;|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'/g
 	/**
 	 * This will split a semicolon-separated CSS declaration list into an array of
@@ -204,487 +132,732 @@ module.exports = function(options) {
 		res.unshift(declList)
 		return res
 	}
-	function parseMarkup(value, root, voidElements, xmlns) {
-		var depth = 0, stack = [root]
-		value.replace(/<([a-z0-9\-]+?)((?:\s+?[^=]+?=(?:"[^"]*?"|'[^']*?'|[^\s>]*))*?)(\s*\/)?>|<\/([a-z0-9\-]+?)>|([^<]+)/g, function(match, startTag, attrs, selfClosed, endTag, text) {
-			if (startTag) {
-				var element = xmlns == null ? $window.document.createElement(startTag) : $window.document.createElementNS(xmlns, startTag)
-				attrs.replace(/\s+?([^=]+?)=(?:"([^"]*?)"|'([^']*?)'|([^\s>]*))/g, function(match, key, doubleQuoted, singleQuoted, unquoted) {
-					var keyParts = key.split(":")
-					var name = keyParts.pop()
-					var ns = keyParts[0]
-					var value = doubleQuoted || singleQuoted || unquoted || ""
-					if (ns != null) element.setAttributeNS(ns, name, value)
-					else element.setAttribute(name, value)
-				})
-				appendChild.call(stack[depth], element)
-				if (!selfClosed && voidElements.indexOf(startTag.toLowerCase()) < 0) stack[++depth] = element
-			}
-			else if (endTag) {
-				depth--
-			}
-			else if (text) {
-				appendChild.call(stack[depth], $window.document.createTextNode(text)) // FIXME handle html entities
-			}
-		})
-	}
-	function DOMParser() {}
-	DOMParser.prototype.parseFromString = function(src, mime) {
-		if (mime !== "image/svg+xml") throw new Error("The DOMParser mock only supports the \"image/svg+xml\" MIME type")
-		var match = src.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">(.*)<\/svg>$/)
-		if (!match) throw new Error("Please provide a bare SVG tag with the xmlns as only attribute")
-		var value = match[1]
-		var root = $window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
-		parseMarkup(value, root, [], "http://www.w3.org/2000/svg")
-		return {documentElement: root}
-	}
 	function camelCase(string) {
-		return string.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
+		return string.replace(/-[a-z]/g, (match) => match[1].toUpperCase())
 	}
-	var activeElement
+
+	class CSSStyleDeclarationHandler {
+		constructor(element) {
+			this.element = element
+			this.style = new Map()
+			this.raws = new Set()
+			this.cssText = undefined
+		}
+
+		preventExtensions() {
+			return false
+		}
+
+		_setCSSText(value) {
+			var buf = []
+			if (typeof value === "string") {
+				for (var key of this.style.keys()) this.style.set(key, "")
+				const rules = splitDeclList(value)
+				for (let i = 0; i < rules.length; i++) {
+					const rule = rules[i]
+					const colonIndex = rule.indexOf(":")
+					if (colonIndex > -1) {
+						const rawKey = rule.slice(0, colonIndex).trim()
+						const key = camelCase(rawKey)
+						const value = rule.slice(colonIndex + 1).trim()
+						if (key !== "cssText") {
+							this.style.set(rawKey, value)
+							this.style.set(key, value)
+							this.raws.add(rawKey)
+							buf.push(rawKey + ": " + value + ";")
+						}
+					}
+				}
+				this.element.setAttribute("style", this.cssText = buf.join(" "))
+			}
+		}
+
+		_getCSSText() {
+			if (this.cssText != null) return this.cssText
+			const result = []
+			for (const key of this.raws) {
+				result.push(`${key}: ${this.style.get(key)};`)
+			}
+			return this.cssText = result.join(" ")
+		}
+
+		get(target, key) {
+			if (typeof key !== "string") return Reflect.get(target, key)
+			if (Reflect.has(target, key)) return Reflect.get(target, key)
+			const value = this.style.get(key)
+			if (value !== undefined) return value
+			switch (key) {
+				case "cssText": return this._getCSSText()
+				case "cssFloat": return this.style.get("float")
+				default: return ""
+			}
+		}
+
+		set(target, key, value) {
+			if (typeof key !== "string") return Reflect.set(target, key)
+			if (Reflect.has(target, key)) return Reflect.set(target, key)
+			if (value == null) value = ""
+			switch (key) {
+				case "cssText": this._setCSSText(value); return true
+				case "cssFloat": key = "float"; break
+			}
+			if (value === "") {
+				this.style.delete(key)
+				this.style.delete(camelCase(key))
+				this.raws.add(key)
+			} else {
+				this.style.set(key, value)
+				this.style.set(camelCase(key), value)
+				this.raws.add(key)
+			}
+			this.cssText = undefined
+			return true
+		}
+	}
+
+	class CSSStyleDeclaration {
+		constructor(element) {
+			return new Proxy(this, new CSSStyleDeclarationHandler(element))
+		}
+
+		getPropertyValue(key) {
+			return this[key]
+		}
+
+		removeProperty(key) {
+			this[key] = this[camelCase(key)] = ""
+		}
+
+		setProperty(key, value) {
+			this[key] = this[camelCase(key)] = value
+		}
+	}
+
+	class ChildNode {
+		constructor(nodeType, nodeName) {
+			this.nodeType = nodeType
+			this.nodeName = nodeName
+			this.parentNode = null
+		}
+
+		remove() {
+			if (this == null || typeof this !== "object" || !("nodeType" in this)) {
+				throw new TypeError("Failed to execute 'remove', this is not of type 'ChildNode'")
+			}
+			var parent = this.parentNode
+			if (parent == null) return
+			var index = parent.childNodes.indexOf(this)
+			if (index < 0) {
+				throw new TypeError("BUG: child linked to parent, parent doesn't contain child")
+			}
+			parent.childNodes.splice(index, 1)
+			this.parentNode = null
+		}
+
+		after(child) {
+			if (this == null || typeof this !== "object" || !("nodeType" in this)) {
+				throw new TypeError("Failed to execute 'remove', this is not of type 'ChildNode'")
+			}
+			if (child == null || typeof child !== "object" || !("nodeType" in child)) {
+				throw new TypeError("Failed to execute 'remove', parameter is not of type 'ChildNode'")
+			}
+			var parent = this.parentNode
+			if (parent == null) return
+			var index = parent.childNodes.indexOf(this)
+			if (index < 0) {
+				throw new TypeError("BUG: child linked to parent, parent doesn't contain child")
+			}
+			child.remove()
+			parent.childNodes.splice(index + 1, 0, child)
+			child.parentNode = parent
+		}
+
+		get nextSibling() {
+			if (this.parentNode == null) return null
+			var index = this.parentNode.childNodes.indexOf(this)
+			if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
+			return this.parentNode.childNodes[index + 1] || null
+		}
+	}
+
+	class Text extends ChildNode {
+		constructor(value) {
+			super(3, "#text")
+			this._value = `${value}`
+		}
+
+		get childNodes() {
+			return []
+		}
+
+		get firstChild() {
+			return null
+		}
+
+		get nodeValue() {
+			return this._value
+		}
+
+		set nodeValue(value) {
+			this._value = `${value}`
+		}
+	}
+
+	class Element extends ChildNode {
+		constructor(nodeName, ns) {
+			if (ns == null) ns = "http://www.w3.org/1999/xhtml"
+			super(1, nodeName)
+			this._style = new CSSStyleDeclaration(this)
+			this.namespaceURI = ns
+			this.parentNode = null
+			this.childNodes = []
+			this.attributes = {}
+			this.ownerDocument = $window.document
+			this.onclick = null
+			this._events = new Map()
+		}
+
+		appendChild(child) {
+			var ancestor = this
+			while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
+			if (ancestor === child) throw new Error("Node cannot be inserted at the specified point in the hierarchy")
+
+			if (child.nodeType == null) throw new Error("Argument is not a DOM element")
+
+			var index = this.childNodes.indexOf(child)
+			if (index > -1) this.childNodes.splice(index, 1)
+			this.childNodes.push(child)
+			if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+			child.parentNode = this
+		}
+
+		removeChild(child) {
+			if (child == null || typeof child !== "object" || !("nodeType" in child)) {
+				throw new TypeError("Failed to execute removeChild, parameter is not of type 'Node'")
+			}
+			var index = this.childNodes.indexOf(child)
+			if (index > -1) {
+				this.childNodes.splice(index, 1)
+				child.parentNode = null
+			}
+			else throw new TypeError("Failed to execute 'removeChild', child not found in parent")
+		}
+
+		insertBefore(child, refNode) {
+			var ancestor = this
+			while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
+			if (ancestor === child) throw new Error("Node cannot be inserted at the specified point in the hierarchy")
+
+			if (child.nodeType == null) throw new Error("Argument is not a DOM element")
+
+			var refIndex = this.childNodes.indexOf(refNode)
+			var index = this.childNodes.indexOf(child)
+			if (refNode !== null && refIndex < 0) throw new TypeError("Invalid argument")
+			if (index > -1) {
+				this.childNodes.splice(index, 1)
+				child.parentNode = null
+			}
+			if (refNode === null) this.appendChild(child)
+			else {
+				if (index !== -1 && refIndex > index) refIndex--
+				this.childNodes.splice(refIndex, 0, child)
+				if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+				child.parentNode = this
+			}
+		}
+
+		prepend(child) {
+			this.insertBefore(child, this.firstChild)
+		}
+
+		hasAttribute(name) {
+			return name in this.attributes
+		}
+
+		getAttribute(name) {
+			if (this.attributes[name] == null) return null
+			return this.attributes[name].value
+		}
+
+		setAttribute(name, value) {
+			value = `${value}`
+			if (hasOwn.call(this.attributes, name)) {
+				this.attributes[name].value = value
+			} else {
+				this.attributes[name] = new Attr(null, value)
+			}
+		}
+
+		setAttributeNS(ns, name, value) {
+			if (hasOwn.call(this.attributes, name)) {
+				this.attributes[name].namespaceURI = ns
+				this.attributes[name].value = value
+			} else {
+				this.attributes[name] = new Attr(ns, value)
+			}
+		}
+
+		removeAttribute(name) {
+			delete this.attributes[name]
+		}
+
+		removeAttributeNS(ns, name) {
+			// Namespace is ignored for now
+			delete this.attributes[name]
+		}
+
+		contains(child) {
+			while (child != null) {
+				if (child === this) return true
+				child = child.parentNode
+			}
+			return false
+		}
+
+		get firstChild() {
+			return this.childNodes[0] || null
+		}
+
+		get nextSibling() {
+			if (this.parentNode == null) return null
+			var index = this.parentNode.childNodes.indexOf(this)
+			if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
+			return this.parentNode.childNodes[index + 1] || null
+		}
+
+		// eslint-disable-next-line accessor-pairs
+		set textContent(value) {
+			this.childNodes = []
+			if (value !== "") this.appendChild($window.document.createTextNode(value))
+		}
+
+		get style() {
+			return this._style
+		}
+
+		set style(value) {
+			this.style.cssText = value
+		}
+
+		get className() {
+			if (this.namespaceURI === "http://www.w3.org/2000/svg") throw new Error("Cannot get property className of SVGElement")
+			else return this.getAttribute("class")
+		}
+
+		set className(value) {
+			if (this.namespaceURI === "http://www.w3.org/2000/svg") throw new Error("Cannot set property className of SVGElement")
+			else this.setAttribute("class", value)
+		}
+
+		focus() {
+			activeElement = this
+		}
+
+		blur() {
+			if (activeElement === this) activeElement = null
+		}
+
+		addEventListener(type, handler, options) {
+			if (arguments.length > 2) {
+				if (typeof options === "object" && options != null) throw new TypeError("NYI: addEventListener options")
+				else if (typeof options !== "boolean") throw new TypeError("boolean expected for useCapture")
+				else options = {capture: options}
+			} else {
+				options = {capture: false}
+			}
+			const record = this._events.get(type)
+			if (record == null) {
+				this._events.set(type, {handlers: [handler], options: [options]})
+			} else {
+				for (var i = 0; i < record.handlers.length; i++) {
+					if (record.handlers[i] === handler && record.options[i].capture === options.capture) {
+						return
+					}
+				}
+				record.handlers.push(handler)
+				record.options.push(options)
+			}
+		}
+
+		removeEventListener(type, handler, options) {
+			if (arguments.length > 2) {
+				if (typeof options === "object" && options != null) throw new TypeError("NYI: addEventListener options")
+				else if (typeof options !== "boolean") throw new TypeError("boolean expected for useCapture")
+				else options = {capture: options}
+			} else {
+				options = {capture: false}
+			}
+			const record = this._events.get(type)
+			if (record != null) {
+				for (var i = 0; i < record.handlers.length; i++) {
+					if (record.handlers[i] === handler && record.options[i].capture === options.capture) {
+						record.handlers.splice(i, 1)
+						record.options.splice(i, 1)
+						break
+					}
+				}
+			}
+		}
+
+		dispatchEvent(e) {
+			var parents = []
+			if (this.parentNode != null) {
+				var parent = this.parentNode
+				do {
+					parents.push(parent)
+					parent = parent.parentNode
+				} while (parent != null)
+			}
+			e.target = this
+			var prevented = false
+			e.preventDefault = function() {
+				prevented = true
+			}
+			Object.defineProperty(e, "defaultPrevented", {
+				configurable: true,
+				get: function () { return prevented }
+			})
+			var stopped = false
+			e.stopPropagation = function() {
+				stopped = true
+			}
+			Object.defineProperty(e, "cancelBubble", {
+				configurable: true,
+				get: function () { return stopped }
+			})
+			e.eventPhase = 1
+			try {
+				for (var i = parents.length - 1; 0 <= i; i--) {
+					dispatchEvent.call(parents[i], e)
+					if (stopped) {
+						return
+					}
+				}
+				e.eventPhase = 2
+				dispatchEvent.call(this, e)
+				if (stopped) {
+					return
+				}
+				e.eventPhase = 3
+				for (var i = 0; i < parents.length; i++) {
+					dispatchEvent.call(parents[i], e)
+					if (stopped) {
+						return
+					}
+				}
+			} finally {
+				e.eventPhase = 0
+				if (!prevented) {
+					if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].value === "checkbox" && e.type === "click") {
+						this.checked = !this.checked
+					}
+				}
+			}
+		}
+	}
+
+	class HTMLAnchorElement extends Element {
+		constructor() {
+			super("A", null)
+		}
+
+		get href() {
+			if (this.namespaceURI === "http://www.w3.org/2000/svg") {
+				var val = this.hasAttribute("href") ? this.attributes.href.value : ""
+				return {baseVal: val, animVal: val}
+			} else if (this.namespaceURI === "http://www.w3.org/1999/xhtml") {
+				if (!this.hasAttribute("href")) return ""
+				// HACK: if it's valid already, there's nothing to implement.
+				var value = this.attributes.href.value
+				if (validURLRegex.test(encodeURI(value))) return value
+			}
+			return "[FIXME implement]"
+		}
+
+		set href(value) {
+			// This is a readonly attribute for SVG, todo investigate MathML which may have yet another IDL
+			if (this.namespaceURI !== "http://www.w3.org/2000/svg") this.setAttribute("href", value)
+		}
+	}
+
+	class HTMLInputElement extends Element {
+		constructor() {
+			super("INPUT", null)
+			this._checked = undefined
+			this._value = ""
+
+			registerSpies(this, {
+				valueSetter: this._valueSetter = spy(this._setValue),
+			})
+		}
+
+		_setValue(v) {
+			this._value = v === null ? "" : `${v}`
+		}
+
+		get checked() {
+			return this._checked === undefined ? this.hasAttribute("checked") : this._checked
+		}
+
+		set checked(value) {
+			this._checked = Boolean(value)
+		}
+
+		get value() {
+			return this._value
+		}
+
+		set value(value) {
+			this._valueSetter(value)
+		}
+
+		get valueAsDate() {
+			if (this.getAttribute("type") !== "date") return null
+			return new Date(this._value).getTime()
+		}
+
+		set valueAsDate(v) {
+			if (this.getAttribute("type") !== "date") throw new Error("invalid state")
+			var time = new Date(v).getTime()
+			this._valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
+		}
+
+		get valueAsNumber() {
+			switch (this.getAttribute("type")) {
+				case "date": return new Date(this._value).getTime()
+				case "number": return new Date(this._value).getTime()
+				default: return NaN
+			}
+		}
+
+		set valueAsNumber(v) {
+			v = Number(v)
+			if (!isNaN(v) && !isFinite(v)) throw new TypeError("infinite value")
+			switch (this.getAttribute("type")) {
+				case "date": this._valueSetter(isNaN(v) ? "" : new Date(v).toUTCString()); break;
+				case "number": this._valueSetter(`${v}`); break;
+				default: throw new Error("invalid state")
+			}
+		}
+
+		get type() {
+			var type = this.getAttribute("type")
+			if (type != null && (/^(?:radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image)$/).test(type)) {
+				return type
+			} else {
+				return "text"
+			}
+		}
+
+		set type(value) {
+			this.setAttribute("type", value)
+		}
+	}
+
+	class HTMLTextAreaElement extends Element {
+		constructor() {
+			super("TEXTAREA", null)
+			this._value = undefined
+
+			registerSpies(this, {
+				valueSetter: this._valueSetter = spy(this._setValue),
+			})
+		}
+
+		_setValue(v) {
+			this._value = v === null ? "" : `${v}`
+		}
+
+		get value() {
+			if (this._value === undefined && this.firstChild) {
+				return this.firstChild.nodeValue
+			} else {
+				return this._value
+			}
+		}
+
+		set value(value) {
+			this._valueSetter(value)
+		}
+	}
+
+	class HTMLCanvasElement extends Element {
+		constructor() {
+			super("CANVAS", null)
+		}
+
+		get width() {
+			const value = this.getAttribute("width")
+			// eslint-disable-next-line radix
+			return value != null ? Math.floor(parseInt(value) || 0) : 300
+		}
+
+		set width(value) {
+			this.setAttribute("width", Math.floor(Number(value) || 0).toString())
+		}
+
+		get height() {
+			const value = this.getAttribute("height")
+			// eslint-disable-next-line radix
+			return value != null ? Math.floor(parseInt(value) || 0) : 300
+		}
+
+		set height(value) {
+			this.setAttribute("height", Math.floor(Number(value) || 0).toString())
+		}
+	}
+
+	function pushOptions(options, element) {
+		for (const child of element.childNodes) {
+			if (child.nodeName === "OPTION") {
+				options.push(child)
+			} else if (child.nodeName === "OPTGROUP") {
+				pushOptions(options, child)
+			}
+		}
+	}
+
+	function getOptions(element) {
+		const options = []
+		pushOptions(options, element)
+		return options
+	}
+
+	function getOptionValue(element) {
+		const value = element.getAttribute("value")
+		if (value != null) return value
+		const child = element.firstChild
+		if (child != null) return child.nodeValue
+		return ""
+	}
+
+	class HTMLSelectElement extends Element {
+		constructor() {
+			super("SELECT", null)
+			// this._selectedValue = undefined
+			this._selectedIndex = 0
+
+			registerSpies(this, {
+				valueSetter: this._valueSetter = spy(this._setValue)
+			})
+		}
+
+		_setValue(value) {
+			if (value === null) {
+				this._selectedIndex = -1
+			} else {
+				var options = getOptions(this)
+				var stringValue = `${value}`
+				for (var i = 0; i < options.length; i++) {
+					if (getOptionValue(options[i]) === stringValue) {
+						// this._selectedValue = stringValue
+						this._selectedIndex = i
+						return
+					}
+				}
+				// this._selectedValue = stringValue
+				this._selectedIndex = -1
+			}
+		}
+
+		get selectedIndex() {
+			if (getOptions(this).length) {
+				return this._selectedIndex
+			} else {
+				return -1
+			}
+		}
+
+		set selectedIndex(value) {
+			var options = getOptions(this)
+			if (value >= 0 && value < options.length) {
+				// this._selectedValue = getOptionValue(options[selectedIndex])
+				this._selectedIndex = value
+			} else {
+				// this._selectedValue = ""
+				this._selectedIndex = -1
+			}
+		}
+
+		get value() {
+			if (this.selectedIndex > -1) {
+				return getOptionValue(getOptions(this)[this.selectedIndex])
+			}
+			return ""
+		}
+
+		set value(value) {
+			this._valueSetter(value)
+		}
+	}
+
+	class HTMLOptionElement extends Element {
+		constructor() {
+			super("OPTION", null)
+			registerSpies(this, {
+				valueSetter: this._valueSetter = spy(this._setValue)
+			})
+		}
+
+		_setValue(value) {
+			this.setAttribute("value", value)
+		}
+
+		get value() {
+			return getOptionValue(this)
+		}
+
+		set value(value) {
+			this._valueSetter(value)
+		}
+
+		// TODO? handle `selected` without a parent (works in browsers)
+		get selected() {
+			var index = getOptions(this.parentNode).indexOf(this)
+			return index === this.parentNode.selectedIndex
+		}
+
+		set selected(value) {
+			if (value) {
+				var index = getOptions(this.parentNode).indexOf(this)
+				if (index > -1) this.parentNode.selectedIndex = index
+			} else {
+				this.parentNode.selectedIndex = 0
+			}
+		}
+	}
+
+	var activeElement = null
 	var delay = 16, last = 0
-	var $window = {
-		DOMParser: DOMParser,
-		requestAnimationFrame: function(callback) {
-			var elapsed = Date.now() - last
-			return setTimeout(function() {
-				callback()
-				last = Date.now()
+	Object.assign($window, {
+		window: $window,
+		requestAnimationFrame(callback) {
+			var elapsed = performance.now() - last
+			return setTimeout(() => {
+				last = performance.now()
+				try {
+					callback()
+				} catch (e) {
+					console.error(e)
+				}
 			}, delay - elapsed)
 		},
+		cancelAnimationFrame: clearTimeout,
 		document: {
+			defaultView: $window,
 			createElement: function(tag) {
-				var cssText = ""
-				var style = {}
-				Object.defineProperties(style, {
-					cssText: {
-						get: function() {return cssText},
-						set: function (value) {
-							var buf = []
-							if (typeof value === "string") {
-								for (var key in style) style[key] = ""
-								var rules = splitDeclList(value)
-								for (var i = 0; i < rules.length; i++) {
-									var rule = rules[i]
-									var colonIndex = rule.indexOf(":")
-									if (colonIndex > -1) {
-										var rawKey = rule.slice(0, colonIndex).trim()
-										var key = camelCase(rawKey)
-										var value = rule.slice(colonIndex + 1).trim()
-										if (key !== "cssText") {
-											style[key] = style[rawKey] = value
-											buf.push(rawKey + ": " + value + ";")
-										}
-									}
-								}
-								element.setAttribute("style", cssText = buf.join(" "))
-							}
-						}
-					},
-					getPropertyValue: {value: function(key){
-						return style[key]
-					}},
-					removeProperty: {value: function(key){
-						style[key] = style[camelCase(key)] = ""
-					}},
-					setProperty: {value: function(key, value){
-						style[key] = style[camelCase(key)] = value
-					}}
-				})
-				var events = {}
-				var element = {
-					nodeType: 1,
-					nodeName: tag.toUpperCase(),
-					namespaceURI: "http://www.w3.org/1999/xhtml",
-					appendChild: appendChild,
-					removeChild: removeChild,
-					insertBefore: insertBefore,
-					hasAttribute: hasAttribute,
-					getAttribute: getAttribute,
-					setAttribute: setAttribute,
-					setAttributeNS: setAttributeNS,
-					removeAttribute: removeAttribute,
-					parentNode: null,
-					childNodes: [],
-					attributes: {},
-					ownerDocument: $window.document,
-					contains: function(child) {
-						while (child != null) {
-							if (child === this) return true
-							child = child.parentNode
-						}
-						return false
-					},
-					get firstChild() {
-						return this.childNodes[0] || null
-					},
-					get nextSibling() {
-						if (this.parentNode == null) return null
-						var index = this.parentNode.childNodes.indexOf(this)
-						if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
-						return this.parentNode.childNodes[index + 1] || null
-					},
-					// eslint-disable-next-line accessor-pairs
-					set textContent(value) {
-						this.childNodes = []
-						if (value !== "") appendChild.call(this, $window.document.createTextNode(value))
-					},
-					// eslint-disable-next-line accessor-pairs
-					set innerHTML(value) {
-						var voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-						while (this.firstChild) removeChild.call(this, this.firstChild)
-						var match = value.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">(.*)<\/svg>$/), root, ns
-						if (match) {
-							var value = match[1]
-							root = $window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
-							ns = "http://www.w3.org/2000/svg"
-							appendChild.call(this, root)
-						} else {
-							root = this
-						}
-						parseMarkup(value, root, voidElements, ns)
-					},
-					get style() {
-						return style
-					},
-					set style(value){
-						this.style.cssText = value
-					},
-					get className() {
-						return this.attributes["class"] ? this.attributes["class"].value : ""
-					},
-					set className(value) {
-						if (this.namespaceURI === "http://www.w3.org/2000/svg") throw new Error("Cannot set property className of SVGElement")
-						else this.setAttribute("class", value)
-					},
-					focus: function() {activeElement = this},
-					addEventListener: function(type, handler, options) {
-						if (arguments.length > 2) {
-							if (typeof options === "object" && options != null) throw new TypeError("NYI: addEventListener options")
-							else if (typeof options !== "boolean") throw new TypeError("boolean expected for useCapture")
-							else options = {capture: options}
-						} else {
-							options = {capture: false}
-						}
-						if (events[type] == null) events[type] = {handlers: [handler], options: [options]}
-						else {
-							var found = false
-							for (var i = 0; i < events[type].handlers.length; i++) {
-								if (events[type].handlers[i] === handler && events[type].options[i].capture === options.capture) {
-									found = true
-									break
-								}
-							}
-							if (!found) {
-								events[type].handlers.push(handler)
-								events[type].options.push(options)
-							}
-						}
-					},
-					removeEventListener: function(type, handler, options) {
-						if (arguments.length > 2) {
-							if (typeof options === "object" && options != null) throw new TypeError("NYI: addEventListener options")
-							else if (typeof options !== "boolean") throw new TypeError("boolean expected for useCapture")
-							else options = {capture: options}
-						} else {
-							options = {capture: false}
-						}
-						if (events[type] != null) {
-							for (var i = 0; i < events[type].handlers.length; i++) {
-								if (events[type].handlers[i] === handler && events[type].options[i].capture === options.capture) {
-									events[type].handlers.splice(i, 1)
-									events[type].options.splice(i, 1)
-									break;
-								}
-							}
-						}
-					},
-					dispatchEvent: function(e) {
-						var parents = []
-						if (this.parentNode != null) {
-							var parent = this.parentNode
-							do {
-								parents.push(parent)
-								parent = parent.parentNode
-							} while (parent != null)
-						}
-						e.target = this
-						var prevented = false
-						e.preventDefault = function() {
-							prevented = true
-						}
-						Object.defineProperty(e, "defaultPrevented", {
-							configurable: true,
-							get: function () { return prevented }
-						})
-						var stopped = false
-						e.stopPropagation = function() {
-							stopped = true
-						}
-						e.eventPhase = 1
-						try {
-							for (var i = parents.length - 1; 0 <= i; i--) {
-								dispatchEvent.call(parents[i], e)
-								if (stopped) {
-									return
-								}
-							}
-							e.eventPhase = 2
-							dispatchEvent.call(this, e)
-							if (stopped) {
-								return
-							}
-							e.eventPhase = 3
-							for (var i = 0; i < parents.length; i++) {
-								dispatchEvent.call(parents[i], e)
-								if (stopped) {
-									return
-								}
-							}
-						} finally {
-							e.eventPhase = 0
-							if (!prevented) {
-								if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].value === "checkbox" && e.type === "click") {
-									this.checked = !this.checked
-								}
-							}
-						}
+				if (!tag) throw new Error("Tag must be provided")
+				tag = `${tag}`.toUpperCase()
 
-					},
-					onclick: null,
-					_events: events
+				switch (tag) {
+					case "A": return new HTMLAnchorElement()
+					case "INPUT": return new HTMLInputElement()
+					case "TEXTAREA": return new HTMLTextAreaElement()
+					case "CANVAS": return new HTMLCanvasElement()
+					case "SELECT": return new HTMLSelectElement()
+					case "OPTION": return new HTMLOptionElement()
+					default: return new Element(tag, null)
 				}
-
-				if (element.nodeName === "A") {
-					Object.defineProperty(element, "href", {
-						get: function() {
-							if (this.namespaceURI === "http://www.w3.org/2000/svg") {
-								var val = this.hasAttribute("href") ? this.attributes.href.value : ""
-								return {baseVal: val, animVal: val}
-							} else if (this.namespaceURI === "http://www.w3.org/1999/xhtml") {
-								if (!this.hasAttribute("href")) return ""
-								// HACK: if it's valid already, there's nothing to implement.
-								var value = this.attributes.href.value
-								if (validURLRegex.test(encodeURI(value))) return value
-							}
-							return "[FIXME implement]"
-						},
-						set: function(value) {
-							// This is a readonly attribute for SVG, todo investigate MathML which may have yet another IDL
-							if (this.namespaceURI !== "http://www.w3.org/2000/svg") this.setAttribute("href", value)
-						},
-						enumerable: true,
-					})
-				}
-
-				if (element.nodeName === "INPUT") {
-					var checked
-					Object.defineProperty(element, "checked", {
-						get: function() {return checked === undefined ? this.attributes["checked"] !== undefined : checked},
-						set: function(value) {checked = Boolean(value)},
-						enumerable: true,
-					})
-
-					var value = ""
-					var valueSetter = spy(function(v) {
-						/*eslint-disable no-implicit-coercion*/
-						value = v === null ? "" : "" + v
-						/*eslint-enable no-implicit-coercion*/
-					})
-					Object.defineProperty(element, "value", {
-						get: function() {
-							return value
-						},
-						set: valueSetter,
-						enumerable: true,
-					})
-					Object.defineProperty(element, "valueAsDate", {
-						get: function() {
-							if (this.getAttribute("type") !== "date") return null
-							return new Date(value).getTime()
-						},
-						set: function(v) {
-							if (this.getAttribute("type") !== "date") throw new Error("invalid state")
-							var time = new Date(v).getTime()
-							valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
-						},
-						enumerable: true,
-					})
-					Object.defineProperty(element, "valueAsNumber", {
-						get: function() {
-							switch (this.getAttribute("type")) {
-								case "date": return new Date(value).getTime()
-								case "number": return new Date(value).getTime()
-								default: return NaN
-							}
-						},
-						set: function(v) {
-							v = Number(v)
-							if (!isNaN(v) && !isFinite(v)) throw new TypeError("infinite value")
-							switch (this.getAttribute("type")) {
-								case "date": valueSetter(isNaN(v) ? "" : new Date(v).toUTCString()); break;
-								case "number": valueSetter(String(value)); break;
-								default: throw new Error("invalid state")
-							}
-						},
-						enumerable: true,
-					})
-
-					// we currently emulate the non-ie behavior, but emulating ie may be more useful (throw when an invalid type is set)
-					var typeSetter = spy(function(v) {
-						this.setAttribute("type", v)
-					})
-					Object.defineProperty(element, "type", {
-						get: function() {
-							if (!this.hasAttribute("type")) return "text"
-							var type = this.getAttribute("type")
-							return (/^(?:radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image)$/)
-								.test(type)
-								? type
-								: "text"
-						},
-						set: typeSetter,
-						enumerable: true,
-					})
-					registerSpies(element, {
-						valueSetter: valueSetter,
-						typeSetter: typeSetter
-					})
-				}
-
-
-				if (element.nodeName === "TEXTAREA") {
-					var wasNeverSet = true
-					var value = ""
-					var valueSetter = spy(function(v) {
-						wasNeverSet = false
-						/*eslint-disable no-implicit-coercion*/
-						value = v === null ? "" : "" + v
-						/*eslint-enable no-implicit-coercion*/
-					})
-					Object.defineProperty(element, "value", {
-						get: function() {
-							return wasNeverSet && this.firstChild ? this.firstChild.nodeValue : value
-						},
-						set: valueSetter,
-						enumerable: true,
-					})
-					registerSpies(element, {
-						valueSetter: valueSetter
-					})
-				}
-
-				/* eslint-disable radix */
-
-				if (element.nodeName === "CANVAS") {
-					Object.defineProperty(element, "width", {
-						get: function() {return this.attributes["width"] ? Math.floor(parseInt(this.attributes["width"].value) || 0) : 300},
-						set: function(value) {this.setAttribute("width", Math.floor(Number(value) || 0).toString())},
-					})
-					Object.defineProperty(element, "height", {
-						get: function() {return this.attributes["height"] ? Math.floor(parseInt(this.attributes["height"].value) || 0) : 300},
-						set: function(value) {this.setAttribute("height", Math.floor(Number(value) || 0).toString())},
-					})
-				}
-
-				/* eslint-enable radix */
-
-				function getOptions(element) {
-					var options = []
-					for (var i = 0; i < element.childNodes.length; i++) {
-						if (element.childNodes[i].nodeName === "OPTION") options.push(element.childNodes[i])
-						else if (element.childNodes[i].nodeName === "OPTGROUP") options = options.concat(getOptions(element.childNodes[i]))
-					}
-					return options
-				}
-				function getOptionValue(element) {
-					return element.attributes["value"] != null ?
-						element.attributes["value"].value :
-						element.firstChild != null ? element.firstChild.nodeValue : ""
-				}
-				if (element.nodeName === "SELECT") {
-					// var selectedValue
-					var selectedIndex = 0
-					Object.defineProperty(element, "selectedIndex", {
-						get: function() {return getOptions(this).length > 0 ? selectedIndex : -1},
-						set: function(value) {
-							var options = getOptions(this)
-							if (value >= 0 && value < options.length) {
-								// selectedValue = getOptionValue(options[selectedIndex])
-								selectedIndex = value
-							}
-							else {
-								// selectedValue = ""
-								selectedIndex = -1
-							}
-						},
-						enumerable: true,
-					})
-					var valueSetter = spy(function(value) {
-						if (value === null) {
-							selectedIndex = -1
-						} else {
-							var options = getOptions(this)
-							/*eslint-disable no-implicit-coercion*/
-							var stringValue = "" + value
-							/*eslint-enable no-implicit-coercion*/
-							for (var i = 0; i < options.length; i++) {
-								if (getOptionValue(options[i]) === stringValue) {
-									// selectedValue = stringValue
-									selectedIndex = i
-									return
-								}
-							}
-							// selectedValue = stringValue
-							selectedIndex = -1
-						}
-					})
-					Object.defineProperty(element, "value", {
-						get: function() {
-							if (this.selectedIndex > -1) return getOptionValue(getOptions(this)[this.selectedIndex])
-							return ""
-						},
-						set: valueSetter,
-						enumerable: true,
-					})
-					registerSpies(element, {
-						valueSetter: valueSetter
-					})
-				}
-				if (element.nodeName === "OPTION") {
-					var valueSetter = spy(function(value) {
-						/*eslint-disable no-implicit-coercion*/
-						this.setAttribute("value", "" + value)
-						/*eslint-enable no-implicit-coercion*/
-					})
-					Object.defineProperty(element, "value", {
-						get: function() {return getOptionValue(this)},
-						set: valueSetter,
-						enumerable: true,
-					})
-					registerSpies(element, {
-						valueSetter: valueSetter
-					})
-
-					Object.defineProperty(element, "selected", {
-						// TODO? handle `selected` without a parent (works in browsers)
-						get: function() {
-							var options = getOptions(this.parentNode)
-							var index = options.indexOf(this)
-							return index === this.parentNode.selectedIndex
-						},
-						set: function(value) {
-							if (value) {
-								var options = getOptions(this.parentNode)
-								var index = options.indexOf(this)
-								if (index > -1) this.parentNode.selectedIndex = index
-							}
-							else this.parentNode.selectedIndex = 0
-						},
-						enumerable: true,
-					})
-				}
-				return element
 			},
 			createElementNS: function(ns, tag, is) {
 				var element = this.createElement(tag, is)
@@ -693,43 +866,7 @@ module.exports = function(options) {
 				return element
 			},
 			createTextNode: function(text) {
-				/*eslint-disable no-implicit-coercion*/
-				var nodeValue = "" + text
-				/*eslint-enable no-implicit-coercion*/
-				return {
-					nodeType: 3,
-					nodeName: "#text",
-					parentNode: null,
-					get childNodes() { return [] },
-					get firstChild() { return null },
-					get nodeValue() {return nodeValue},
-					set nodeValue(value) {
-						/*eslint-disable no-implicit-coercion*/
-						nodeValue = "" + value
-						/*eslint-enable no-implicit-coercion*/
-					},
-					get nextSibling() {
-						if (this.parentNode == null) return null
-						var index = this.parentNode.childNodes.indexOf(this)
-						if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
-						return this.parentNode.childNodes[index + 1] || null
-					},
-				}
-			},
-			createDocumentFragment: function() {
-				return {
-					ownerDocument: $window.document,
-					nodeType: 11,
-					nodeName: "#document-fragment",
-					appendChild: appendChild,
-					insertBefore: insertBefore,
-					removeChild: removeChild,
-					parentNode: null,
-					childNodes: [],
-					get firstChild() {
-						return this.childNodes[0] || null
-					},
-				}
+				return new Text(text)
 			},
 			createEvent: function() {
 				return {
@@ -737,17 +874,15 @@ module.exports = function(options) {
 					initEvent: function(type) {this.type = type}
 				}
 			},
-			get activeElement() {return activeElement},
+			get activeElement() {
+				return activeElement
+			},
 		},
-	}
-	$window.document.defaultView = $window
-	$window.document.documentElement = $window.document.createElement("html")
-	appendChild.call($window.document.documentElement, $window.document.createElement("head"))
-	$window.document.body = $window.document.createElement("body")
-	appendChild.call($window.document.documentElement, $window.document.body)
-	activeElement = $window.document.body
+	})
+
+	$window.document.documentElement = new Element("HTML", null)
+	$window.document.documentElement.appendChild($window.document.head = new Element("HEAD", null))
+	$window.document.documentElement.appendChild($window.document.body = new Element("BODY", null))
 
 	if (options.spy) $window.__getSpies = getSpies
-
-	return $window
 }
