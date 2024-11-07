@@ -223,7 +223,7 @@ setupBenchmarks(setup, cycleRoot, {
 		},
 	},
 
-	"mount simpleTree": {
+	"mount `simpleTree`": {
 		tick() {
 			cycleRoot()
 			// For consistency across the interval
@@ -234,7 +234,7 @@ setupBenchmarks(setup, cycleRoot, {
 		},
 	},
 
-	"redraw simpleTree": {
+	"redraw `simpleTree`": {
 		tick() {
 			cycleRoot()
 			redraw = m.mount(rootElem, simpleTree)
