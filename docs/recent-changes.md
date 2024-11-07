@@ -1,4 +1,12 @@
 
+# Release v2.2.10
+
+### Patch Changes
+
+#### [[refactor] Performance improvement of updateStyle() (@kfule)](https://github.com/MithrilJS/mithril.js/pull/2985)
+
+This is a refactoring to improve the performance of `updateStyle()`.
+
 # Release v2.2.9
 
 ### Patch Changes
