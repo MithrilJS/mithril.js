@@ -7,5 +7,7 @@ permissions:
   issues: write
 jobs:
   comment:
+    # Don't auto-close actual release PRs
+    if: ${{github.actor != 'JAForbes' || !contains(github.event.issue.title, "Release - v")}}
     uses: MithrilJS/infra/.github/workflows/reject-pr.yml@main
     secrets: inherit
