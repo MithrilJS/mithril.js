@@ -13,6 +13,9 @@ contact_links:
   - name: 🚀 Feature Request or Enhancement
     url: https://github.com/MithrilJS/mithril.js/discussions/new?category=ideas
     about: Got a feature request? Let us know here! We do those in our discussion forum.
+  - name: 📄 Documentation issue
+    url: https://github.com/MithrilJS/docs
+    about: Found an issue with our documentation? File that in our docs repo instead.
   - name: 💻 Zulip Chat
     url: https://mithril.zulipchat.com/
     about: Not sure about something? Just want to hang out? Come over to our Zulip chat!
