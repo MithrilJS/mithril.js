@@ -257,6 +257,79 @@ o.spec("updateElement", function() {
 
 		}
 	})
+	o("use style property setter only when cameCase keys", function() {
+		var spySetProperty = o.spy()
+		var spyRemoveProperty = o.spy()
+		var spyDashed1 = o.spy()
+		var spyDashed2 = o.spy()
+		var spyDashed3 = o.spy()
+		var spyCamelCase1 = o.spy()
+		var spyCamelCase2 = o.spy()
+
+		var f = $window.document.createElement
+		$window.document.createElement = function(tag, is){
+			var el = f(tag, is)
+
+			var style = {}
+			Object.defineProperties(style, {
+				setProperty: {value: spySetProperty},
+				removeProperty: {value: spyRemoveProperty},
+				/* eslint-disable accessor-pairs */
+				"background-color": {set: spyDashed1},
+				"-webkit-border-radius": {set: spyDashed2},
+				"--foo": {set: spyDashed3},
+				backgroundColor: {set: spyCamelCase1},
+				color: {set: spyCamelCase2}
+				/* eslint-enable accessor-pairs */
+			})
+
+			Object.defineProperty(el, "style", {value: style})
+			return el
+		}
+
+		// sets dashed properties
+		render(root, m("a", {
+			style: {
+				"background-color": "red",
+				"-webkit-border-radius": "10px",
+				"--foo": "bar"
+			}
+		}))
+
+		// sets camelCase properties and removes dashed properties
+		render(root, m("a", {
+			style: {
+				backgroundColor: "green",
+				color: "red",
+			}
+		}))
+
+		// updates "color" and removes "backgroundColor"
+		render(root, m("a", {style: {color: "blue"}}))
+
+		// setProperty (for dashed properties)
+		o(spySetProperty.callCount).equals(3)
+		o(spySetProperty.calls[0].args).deepEquals(["background-color", "red"])
+		o(spySetProperty.calls[1].args).deepEquals(["-webkit-border-radius", "10px"])
+		o(spySetProperty.calls[2].args).deepEquals(["--foo", "bar"])
+
+		// removeProperty (for dashed properties)
+		o(spyRemoveProperty.callCount).equals(3)
+		o(spyRemoveProperty.calls[0].args).deepEquals(["background-color"])
+		o(spyRemoveProperty.calls[1].args).deepEquals(["-webkit-border-radius"])
+		o(spyRemoveProperty.calls[2].args).deepEquals(["--foo"])
+
+		// property setter (for camelCase properties)
+		o(spyDashed1.callCount).equals(0)
+		o(spyDashed2.callCount).equals(0)
+		o(spyDashed3.callCount).equals(0)
+		o(spyCamelCase1.callCount).equals(2) // set and remove
+		o(spyCamelCase2.callCount).equals(2) // set and update
+		o(spyCamelCase1.calls[0].args).deepEquals(["green"])
+		o(spyCamelCase1.calls[1].args).deepEquals([""])
+		o(spyCamelCase2.calls[0].args).deepEquals(["red"])
+		o(spyCamelCase2.calls[1].args).deepEquals(["blue"])
+	})
 	o("replaces el", function() {
 		var vnode = m("a")
 		var updated = m("b")
