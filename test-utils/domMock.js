@@ -284,12 +284,18 @@ module.exports = function(options) {
 					getPropertyValue: {value: function(key){
 						return style[key]
 					}},
-					removeProperty: {value: function(key){
-						style[key] = style[camelCase(key)] = ""
-					}},
-					setProperty: {value: function(key, value){
-						style[key] = style[camelCase(key)] = value
-					}}
+					removeProperty: {
+						writable: true,
+						value: function(key){
+							style[key] = style[camelCase(key)] = ""
+						}
+					},
+					setProperty: {
+						writable: true,
+						value: function(key, value){
+							style[key] = style[camelCase(key)] = value
+						}
+					}
 				})
 				var events = {}
 				var element = {
