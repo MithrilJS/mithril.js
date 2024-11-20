@@ -20,14 +20,11 @@ jobs:
         node-version: 20
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release merge --target release --source main --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-    - run: bash scripts/set-versioned-branch.sh release
-    # The following will publish the release to npm
     - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npm publish
-      name: Publish
+    - run: npx pr-release merge --target release --source main --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change --prerelease="npm publish"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    - run: bash scripts/set-versioned-branch.sh release
