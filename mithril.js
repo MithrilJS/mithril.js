@@ -938,7 +938,7 @@ var _11 = function() {
 			for (var key in style) {
 				var value = style[key]
 				if (value != null) {
-					if (key[0] === "-" && key[1] === "-") element.style.setProperty(key, String(value))
+					if (key.includes("-")) element.style.setProperty(key, String(value))
 					else element.style[key] = String(value)
 				}
 			}
@@ -948,14 +948,14 @@ var _11 = function() {
 			for (var key in style) {
 				var value = style[key]
 				if (value != null && (value = String(value)) !== String(old[key])) {
-					if (key[0] === "-" && key[1] === "-") element.style.setProperty(key, value)
+					if (key.includes("-")) element.style.setProperty(key, value)
 					else element.style[key] = value
 				}
 			}
 			// Remove style properties that no longer exist
 			for (var key in old) {
 				if (old[key] != null && style[key] == null) {
-					if (key[0] === "-" && key[1] === "-") element.style.removeProperty(key)
+					if (key.includes("-")) element.style.removeProperty(key)
 					else element.style[key] = ""
 				}
 			}

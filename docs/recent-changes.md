@@ -1,4 +1,18 @@
 
+# Release v2.2.11
+
+### Patch Changes
+
+#### [Use new pr-release prerelease hook (Fixes #2987) (@JAForbes)](https://github.com/MithrilJS/mithril.js/pull/2996)
+
+Per @dead-claudia's suggestion, pr-release now allows you to invoke a custom command before creating the github release.
+#### [updateStyle(): use setProperty() when css vars and dashed-properties, fixes #2989 (@kfule)](https://github.com/MithrilJS/mithril.js/pull/2991)
+
+This PR changes updateStyle() to use setProperty() for dashed-properties.  This PR maybe fixes #2989.
+#### [Delete .github/ISSUE_TEMPLATE/0-docs.yml (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2993)
+
+Do a much better job discouraging filing docs bugs here.
+
 # Release v2.2.10
 
 ### Patch Changes
