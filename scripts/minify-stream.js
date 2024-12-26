@@ -35,7 +35,7 @@ async function minify() {
 	const input = path.resolve(__dirname, "../stream/stream.js")
 	const output = path.resolve(__dirname, "../stream/stream.min.js")
 	const original = await fs.readFile(input, "utf-8")
-	const minified = Terser.minify(original)
+	const minified = await Terser.minify(original)
 	if (minified.error) throw new Error(minified.error)
 	await fs.writeFile(output, minified.code, "utf-8")
 	const originalSize = Buffer.byteLength(original, "utf-8")
