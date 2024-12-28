@@ -1,4 +1,15 @@
 
+# Release v2.2.12
+
+### Patch Changes
+
+#### [disable Terser's "reduce_funcs" option for performance (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3000)
+
+Terser's  “reduce_funcs” option seems to degrade performance.  So, disable it.
+#### [Bump chokidar from 4.0.1 to 4.0.3 in the normal group across 1 directory (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2998)
+
+Bumps the normal group with 1 update in the / directory: [chokidar](https://github.com/paulmillr/chokidar).  Updates `chokidar` from 4.0.1 to 4.0.3.  Release notes.
+
 # Release v2.2.11
 
 ### Patch Changes
