@@ -684,7 +684,6 @@ module.exports = function() {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
-				var isFileInput = vnode.tag === "input" && vnode.attrs.type === "file"
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
 				//setting input[value] to same value sometimes causes checkValidity() to return true when form fields are invalid(#2256)
@@ -695,7 +694,7 @@ module.exports = function() {
 				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
 				//setting input[type=file][value] to different value is an error if it's non-empty
 				// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
-				if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
+				if (vnode.tag === "input" && vnode.attrs.type === "file" && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
 				/* eslint-enable no-implicit-coercion */
 			}
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
