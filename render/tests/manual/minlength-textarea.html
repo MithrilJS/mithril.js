@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        This is minlength validity test (#2256).
+        Open your browser's Developer Console and follow these steps:
+        <ol>
+            <li>Type any (1 or 2) characters in the textarea field.</li>
+            <li>Click “submit.”</li>
+            <li>Click “submit” again.</li>
+            <li>Check the logs displayed in the console.</li>
+        </ol>
+
+        <div id="root"></div>
+        <script src="../../../mithril.js"></script>
+        <script>
+            let input, value;
+
+            m.mount(document.getElementById("root"), {
+                view: () => [
+                    input = m("textarea", {
+                        value,
+                        minLength: 4,
+                        required: true,
+                        oninput(e) {
+                            value = e.target.value;
+                            check();
+                        }
+                    }),
+                    m("button", {
+                        onclick(e) {
+                            console.log("click");
+                            check();
+                        }
+                    }, "submit")
+                ],
+            });
+
+            function check() {
+                console.log(`tooShort: ${input.dom.validity.tooShort}`,
+                    `valueMissing: ${input.dom.validity.valueMissing}`,
+                    `checkValidity: ${input.dom.checkValidity()}`
+                );
+            }
+        </script>
+    </body>
+</html>
