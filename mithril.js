@@ -829,17 +829,17 @@ var _11 = function() {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
-				var isFileInput = vnode3.tag === "input" && vnode3.attrs.type === "file"
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type0=file][value] to same value causes an error to be generated if it's non-empty
-				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value && (isFileInput || vnode3.dom === activeElement(vnode3.dom))) return
+				//minlength/maxlength validation isn't performed on script-set values(#2256)
+				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode3.tag === "select" && old !== null && vnode3.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode3.tag === "option" && old !== null && vnode3.dom.value === "" + value) return
 				//setting input[type0=file][value] to different value is an error if it's non-empty
 				// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
-				if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
+				if (vnode3.tag === "input" && vnode3.attrs.type === "file" && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
 				/* eslint-enable no-implicit-coercion */
 			}
 			// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.

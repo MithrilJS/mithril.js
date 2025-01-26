@@ -1,4 +1,15 @@
 
+# Release v2.2.13
+
+### Patch Changes
+
+#### [Fix form checkValidity(), remove vnode.dom === .activeElement from setAttr() (Continued from #2257) (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3002)
+
+Remove vnode.dom === activeElement(vnode.dom) from setAttribute() to fix validityCheck(), to fix https://github.com/MithrilJS/mithril.js/issues/2256.
+#### [Bump glob from 11.0.0 to 11.0.1 in the normal group (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/3001)
+
+Bumps the normal group with 1 update: [glob](https://github.com/isaacs/node-glob).  Updates `glob` from 11.0.0 to 11.0.1.  Commits.  148ef61 11.0.1.
+
 # Release v2.2.12
 
 ### Patch Changes
