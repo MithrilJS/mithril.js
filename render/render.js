@@ -686,7 +686,7 @@ module.exports = function() {
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
-				//resetting user-edited values by script bypasses minlength/maxlength validation(#2256)
+				//minlength/maxlength validation isn't performed on script-set values(#2256)
 				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
