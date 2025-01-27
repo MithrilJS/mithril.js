@@ -122,6 +122,23 @@ o.spec("onbeforeremove", function() {
 			done()
 		})
 	})
+	o("handles thenable objecs (#2592)", function(done) {
+		var remove = function() {return {then: function(resolve) {resolve()}}}
+		var vnodes = m("div", {key: 1, onbeforeremove: remove}, "a")
+		var updated = []
+
+		render(root, vnodes)
+		render(root, updated)
+
+		o(root.childNodes.length).equals(1)
+		o(root.firstChild.firstChild.nodeValue).equals("a")
+
+		callAsync(function() {
+			o(root.childNodes.length).equals(0)
+
+			done()
+		})
+	})
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
