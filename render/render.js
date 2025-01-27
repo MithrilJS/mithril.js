@@ -614,7 +614,7 @@ module.exports = function() {
 			generation = currentRender
 			for (var dom of domFor(vnode)) delayedRemoval.set(dom, generation)
 			if (stateResult != null) {
-				stateResult.finally(function () {
+				Promise.resolve(stateResult).finally(function () {
 					// eslint-disable-next-line no-bitwise
 					if (mask & 1) {
 						// eslint-disable-next-line no-bitwise
@@ -628,7 +628,7 @@ module.exports = function() {
 				})
 			}
 			if (attrsResult != null) {
-				attrsResult.finally(function () {
+				Promise.resolve(attrsResult).finally(function () {
 					// eslint-disable-next-line no-bitwise
 					if (mask & 2) {
 						// eslint-disable-next-line no-bitwise
