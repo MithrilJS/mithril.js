@@ -585,63 +585,32 @@ module.exports = function() {
 			if (vnode != null) removeNode(parent, vnode)
 		}
 	}
-	function removeNode(parent, vnode) {
-		var mask = 0
+	function tryBlockRemove(parent, vnode, source, counter) {
 		var original = vnode.state
-		var stateResult, attrsResult
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode.state.onbeforeremove, vnode)
-			if (result != null && typeof result.then === "function") {
-				mask = 1
-				stateResult = result
-			}
+		var result = callHook.call(source.onbeforeremove, vnode)
+		if (result == null) return
+
+		var generation = currentRender
+		if (counter.v++ === 1) {
+			for (var dom of domFor(vnode)) delayedRemoval.set(dom, generation)
 		}
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
-			if (result != null && typeof result.then === "function") {
-				// eslint-disable-next-line no-bitwise
-				mask |= 2
-				attrsResult = result
-			}
-		}
-		checkState(vnode, original)
-		var generation
-		// If we can, try to fast-path it and avoid all the overhead of awaiting
-		if (!mask) {
+
+		Promise.resolve(result).finally(function () {
+			checkState(vnode, original)
+			tryResumeRemove(parent, vnode, generation, counter)
+		})
+	}
+	function tryResumeRemove(parent, vnode, generation, counter) {
+		if (--counter.v === 0) {
 			onremove(vnode)
 			removeDOM(parent, vnode, generation)
-		} else {
-			generation = currentRender
-			for (var dom of domFor(vnode)) delayedRemoval.set(dom, generation)
-			if (stateResult != null) {
-				Promise.resolve(stateResult).finally(function () {
-					// eslint-disable-next-line no-bitwise
-					if (mask & 1) {
-						// eslint-disable-next-line no-bitwise
-						mask &= 2
-						if (!mask) {
-							checkState(vnode, original)
-							onremove(vnode)
-							removeDOM(parent, vnode, generation)
-						}
-					}
-				})
-			}
-			if (attrsResult != null) {
-				Promise.resolve(attrsResult).finally(function () {
-					// eslint-disable-next-line no-bitwise
-					if (mask & 2) {
-						// eslint-disable-next-line no-bitwise
-						mask &= 1
-						if (!mask) {
-							checkState(vnode, original)
-							onremove(vnode)
-							removeDOM(parent, vnode, generation)
-						}
-					}
-				})
-			}
 		}
+	}
+	function removeNode(parent, vnode) {
+		var counter = {v: 1}
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") tryBlockRemove(parent, vnode, vnode.state, counter)
+		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") tryBlockRemove(parent, vnode, vnode.attrs, counter)
+		tryResumeRemove(parent, vnode, undefined, counter)
 	}
 	function removeDOM(parent, vnode, generation) {
 		if (vnode.dom == null) return
