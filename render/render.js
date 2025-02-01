@@ -591,34 +591,32 @@ module.exports = function() {
 		if (result == null) return
 
 		var generation = currentRender
-		if (counter.v++ === 1) {
-			for (var dom of domFor(vnode)) delayedRemoval.set(dom, generation)
-		}
+		for (var dom of domFor(vnode)) delayedRemoval.set(dom, generation)
+		counter.v++
 
 		Promise.resolve(result).finally(function () {
 			checkState(vnode, original)
-			tryResumeRemove(parent, vnode, generation, counter)
+			tryResumeRemove(parent, vnode, counter)
 		})
 	}
-	function tryResumeRemove(parent, vnode, generation, counter) {
+	function tryResumeRemove(parent, vnode, counter) {
 		if (--counter.v === 0) {
 			onremove(vnode)
-			removeDOM(parent, vnode, generation)
+			removeDOM(parent, vnode)
 		}
 	}
 	function removeNode(parent, vnode) {
 		var counter = {v: 1}
 		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") tryBlockRemove(parent, vnode, vnode.state, counter)
 		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") tryBlockRemove(parent, vnode, vnode.attrs, counter)
-		tryResumeRemove(parent, vnode, undefined, counter)
+		tryResumeRemove(parent, vnode, counter)
 	}
-	function removeDOM(parent, vnode, generation) {
+	function removeDOM(parent, vnode) {
 		if (vnode.dom == null) return
 		if (vnode.domSize == null) {
-			// don't allocate for the common case
-			if (delayedRemoval.get(vnode.dom) === generation) parent.removeChild(vnode.dom)
+			parent.removeChild(vnode.dom)
 		} else {
-			for (var dom of domFor(vnode, {generation})) parent.removeChild(dom)
+			for (var dom of domFor(vnode)) parent.removeChild(dom)
 		}
 	}
 
