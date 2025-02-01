@@ -114,6 +114,384 @@ o.spec("domFor(vnode)", function() {
 			done()
 		})
 	})
+	o("works multiple vnodes with onbeforeremove (1/3)", function (done) {
+		let thenCBA, thenCBB, thenCBC
+		const onbeforeremoveA = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBA = resolve}}
+		})
+		const onbeforeremoveB = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBB = resolve}}
+		})
+		const onbeforeremoveC = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBC = resolve}}
+		})
+		// to avoid updating internal nodes only, vnodes have key attributes
+		const A = fragment({key: 1, onbeforeremove: onbeforeremoveA}, [m("a1"), m("a2")])
+		const B = fragment({key: 2, onbeforeremove: onbeforeremoveB}, [m("b1"), m("b2")])
+		const C = fragment({key: 3, onbeforeremove: onbeforeremoveC}, [m("c1"), m("c2")])
+
+		render(root, [A])
+		o(onbeforeremoveA.callCount).equals(0)
+		o(onbeforeremoveB.callCount).equals(0)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [B])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(0)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [C])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(1)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(1)
+		o(onbeforeremoveC.callCount).equals(1)
+
+		// not resolved
+		o(root.childNodes.length).equals(6)
+		o(root.childNodes[0].nodeName).equals("A1")
+		o(root.childNodes[1].nodeName).equals("A2")
+		o(root.childNodes[2].nodeName).equals("B1")
+		o(root.childNodes[3].nodeName).equals("B2")
+		o(root.childNodes[4].nodeName).equals("C1")
+		o(root.childNodes[5].nodeName).equals("C2")
+
+		const iterA = domFor(A)
+		o(iterA.next().value.nodeName).equals("A1")
+		o(iterA.next().value.nodeName).equals("A2")
+		o(iterA.next().done).deepEquals(true)
+
+		const iterB = domFor(B)
+		o(iterB.next().value.nodeName).equals("B1")
+		o(iterB.next().value.nodeName).equals("B2")
+		o(iterB.next().done).deepEquals(true)
+
+		const iterC = domFor(C)
+		o(iterC.next().value.nodeName).equals("C1")
+		o(iterC.next().value.nodeName).equals("C2")
+		o(iterC.next().done).deepEquals(true)
+
+		callAsync(function(){
+			// not resolved yet
+			o(root.childNodes.length).equals(6)
+			o(root.childNodes[0].nodeName).equals("A1")
+			o(root.childNodes[1].nodeName).equals("A2")
+			o(root.childNodes[2].nodeName).equals("B1")
+			o(root.childNodes[3].nodeName).equals("B2")
+			o(root.childNodes[4].nodeName).equals("C1")
+			o(root.childNodes[5].nodeName).equals("C2")
+	
+			const iterA = domFor(A)
+			o(iterA.next().value.nodeName).equals("A1")
+			o(iterA.next().value.nodeName).equals("A2")
+			o(iterA.next().done).deepEquals(true)
+	
+			const iterB = domFor(B)
+			o(iterB.next().value.nodeName).equals("B1")
+			o(iterB.next().value.nodeName).equals("B2")
+			o(iterB.next().done).deepEquals(true)
+	
+			const iterC = domFor(C)
+			o(iterC.next().value.nodeName).equals("C1")
+			o(iterC.next().value.nodeName).equals("C2")
+			o(iterC.next().done).deepEquals(true)
+
+			// resolve B
+			thenCBB()
+			callAsync(function(){
+				o(root.childNodes.length).equals(4)
+				o(root.childNodes[0].nodeName).equals("A1")
+				o(root.childNodes[1].nodeName).equals("A2")
+				o(root.childNodes[2].nodeName).equals("C1")
+				o(root.childNodes[3].nodeName).equals("C2")
+
+				const iterA = domFor(A)
+				o(iterA.next().value.nodeName).equals("A1")
+				o(iterA.next().value.nodeName).equals("A2")
+				o(iterA.next().done).deepEquals(true)
+
+				const iterC = domFor(C)
+				o(iterC.next().value.nodeName).equals("C1")
+				o(iterC.next().value.nodeName).equals("C2")
+				o(iterC.next().done).deepEquals(true)
+
+				// resolve C
+				thenCBC()
+				callAsync(function(){
+					o(root.childNodes.length).equals(2)
+					o(root.childNodes[0].nodeName).equals("A1")
+					o(root.childNodes[1].nodeName).equals("A2")
+
+					const iterA = domFor(A)
+					o(iterA.next().value.nodeName).equals("A1")
+					o(iterA.next().value.nodeName).equals("A2")
+					o(iterA.next().done).deepEquals(true)
+
+					// resolve A
+					thenCBA()
+					callAsync(function(){
+						o(root.childNodes.length).equals(0)
+						done()
+					})
+				})
+			})
+		})
+	})
+	o("works multiple vnodes with onbeforeremove (2/3)", function (done) {
+		let thenCBA, thenCBB, thenCBC
+		const onbeforeremoveA = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBA = resolve}}
+		})
+		const onbeforeremoveB = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBB = resolve}}
+		})
+		const onbeforeremoveC = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBC = resolve}}
+		})
+		// to avoid updating internal nodes only, vnodes have key attributes
+		const A = fragment({key: 1, onbeforeremove: onbeforeremoveA}, [m("a1"), m("a2")])
+		const B = fragment({key: 2, onbeforeremove: onbeforeremoveB}, [m("b1"), m("b2")])
+		const C = fragment({key: 3, onbeforeremove: onbeforeremoveC}, [m("c1"), m("c2")])
+
+		render(root, [A])
+		o(onbeforeremoveA.callCount).equals(0)
+		o(onbeforeremoveB.callCount).equals(0)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [B])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(0)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [C])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(1)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(1)
+		o(onbeforeremoveC.callCount).equals(1)
+
+		// not resolved
+		o(root.childNodes.length).equals(6)
+		o(root.childNodes[0].nodeName).equals("A1")
+		o(root.childNodes[1].nodeName).equals("A2")
+		o(root.childNodes[2].nodeName).equals("B1")
+		o(root.childNodes[3].nodeName).equals("B2")
+		o(root.childNodes[4].nodeName).equals("C1")
+		o(root.childNodes[5].nodeName).equals("C2")
+
+		const iterA = domFor(A)
+		o(iterA.next().value.nodeName).equals("A1")
+		o(iterA.next().value.nodeName).equals("A2")
+		o(iterA.next().done).deepEquals(true)
+
+		const iterB = domFor(B)
+		o(iterB.next().value.nodeName).equals("B1")
+		o(iterB.next().value.nodeName).equals("B2")
+		o(iterB.next().done).deepEquals(true)
+
+		const iterC = domFor(C)
+		o(iterC.next().value.nodeName).equals("C1")
+		o(iterC.next().value.nodeName).equals("C2")
+		o(iterC.next().done).deepEquals(true)
+
+		callAsync(function(){
+			// not resolved yet
+			o(root.childNodes.length).equals(6)
+			o(root.childNodes[0].nodeName).equals("A1")
+			o(root.childNodes[1].nodeName).equals("A2")
+			o(root.childNodes[2].nodeName).equals("B1")
+			o(root.childNodes[3].nodeName).equals("B2")
+			o(root.childNodes[4].nodeName).equals("C1")
+			o(root.childNodes[5].nodeName).equals("C2")
+	
+			const iterA = domFor(A)
+			o(iterA.next().value.nodeName).equals("A1")
+			o(iterA.next().value.nodeName).equals("A2")
+			o(iterA.next().done).deepEquals(true)
+	
+			const iterB = domFor(B)
+			o(iterB.next().value.nodeName).equals("B1")
+			o(iterB.next().value.nodeName).equals("B2")
+			o(iterB.next().done).deepEquals(true)
+	
+			const iterC = domFor(C)
+			o(iterC.next().value.nodeName).equals("C1")
+			o(iterC.next().value.nodeName).equals("C2")
+			o(iterC.next().done).deepEquals(true)
+
+			// resolve C
+			thenCBC()
+			callAsync(function(){
+				o(root.childNodes.length).equals(4)
+				o(root.childNodes[0].nodeName).equals("A1")
+				o(root.childNodes[1].nodeName).equals("A2")
+				o(root.childNodes[2].nodeName).equals("B1")
+				o(root.childNodes[3].nodeName).equals("B2")
+
+				const iterB = domFor(B)
+				o(iterB.next().value.nodeName).equals("B1")
+				o(iterB.next().value.nodeName).equals("B2")
+				o(iterB.next().done).deepEquals(true)
+
+				const iterA = domFor(A)
+				o(iterA.next().value.nodeName).equals("A1")
+				o(iterA.next().value.nodeName).equals("A2")
+				o(iterA.next().done).deepEquals(true)
+
+				// resolve A
+				thenCBA()
+				callAsync(function(){
+					o(root.childNodes.length).equals(2)
+					o(root.childNodes[0].nodeName).equals("B1")
+					o(root.childNodes[1].nodeName).equals("B2")
+
+					const iterB = domFor(B)
+					o(iterB.next().value.nodeName).equals("B1")
+					o(iterB.next().value.nodeName).equals("B2")
+					o(iterB.next().done).deepEquals(true)
+
+					// resolve B
+					thenCBB()
+					callAsync(function(){
+						o(root.childNodes.length).equals(0)
+						done()
+					})
+				})
+			})
+		})
+	})
+	o("works multiple vnodes with onbeforeremove (3/3)", function (done) {
+		let thenCBA, thenCBB, thenCBC
+		const onbeforeremoveA = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBA = resolve}}
+		})
+		const onbeforeremoveB = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBB = resolve}}
+		})
+		const onbeforeremoveC = o.spy(function onbeforeremove(){
+			return {then(resolve){thenCBC = resolve}}
+		})
+		// to avoid updating internal nodes only, vnodes have key attributes
+		const A = fragment({key: 1, onbeforeremove: onbeforeremoveA}, [m("a1"), m("a2")])
+		const B = fragment({key: 2, onbeforeremove: onbeforeremoveB}, [m("b1"), m("b2")])
+		const C = fragment({key: 3, onbeforeremove: onbeforeremoveC}, [m("c1"), m("c2")])
+
+		render(root, [A])
+		o(onbeforeremoveA.callCount).equals(0)
+		o(onbeforeremoveB.callCount).equals(0)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [B])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(0)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [C])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(1)
+		o(onbeforeremoveC.callCount).equals(0)
+
+		render(root, [])
+		o(onbeforeremoveA.callCount).equals(1)
+		o(onbeforeremoveB.callCount).equals(1)
+		o(onbeforeremoveC.callCount).equals(1)
+
+		// not resolved
+		o(root.childNodes.length).equals(6)
+		o(root.childNodes[0].nodeName).equals("A1")
+		o(root.childNodes[1].nodeName).equals("A2")
+		o(root.childNodes[2].nodeName).equals("B1")
+		o(root.childNodes[3].nodeName).equals("B2")
+		o(root.childNodes[4].nodeName).equals("C1")
+		o(root.childNodes[5].nodeName).equals("C2")
+
+		const iterA = domFor(A)
+		o(iterA.next().value.nodeName).equals("A1")
+		o(iterA.next().value.nodeName).equals("A2")
+		o(iterA.next().done).deepEquals(true)
+
+		const iterB = domFor(B)
+		o(iterB.next().value.nodeName).equals("B1")
+		o(iterB.next().value.nodeName).equals("B2")
+		o(iterB.next().done).deepEquals(true)
+
+		const iterC = domFor(C)
+		o(iterC.next().value.nodeName).equals("C1")
+		o(iterC.next().value.nodeName).equals("C2")
+		o(iterC.next().done).deepEquals(true)
+
+		callAsync(function(){
+			// not resolved yet
+			o(root.childNodes.length).equals(6)
+			o(root.childNodes[0].nodeName).equals("A1")
+			o(root.childNodes[1].nodeName).equals("A2")
+			o(root.childNodes[2].nodeName).equals("B1")
+			o(root.childNodes[3].nodeName).equals("B2")
+			o(root.childNodes[4].nodeName).equals("C1")
+			o(root.childNodes[5].nodeName).equals("C2")
+	
+			const iterA = domFor(A)
+			o(iterA.next().value.nodeName).equals("A1")
+			o(iterA.next().value.nodeName).equals("A2")
+			o(iterA.next().done).deepEquals(true)
+	
+			const iterB = domFor(B)
+			o(iterB.next().value.nodeName).equals("B1")
+			o(iterB.next().value.nodeName).equals("B2")
+			o(iterB.next().done).deepEquals(true)
+	
+			const iterC = domFor(C)
+			o(iterC.next().value.nodeName).equals("C1")
+			o(iterC.next().value.nodeName).equals("C2")
+			o(iterC.next().done).deepEquals(true)
+
+			// resolve A
+			thenCBA()
+			callAsync(function(){
+				o(root.childNodes.length).equals(4)
+				o(root.childNodes[0].nodeName).equals("B1")
+				o(root.childNodes[1].nodeName).equals("B2")
+				o(root.childNodes[2].nodeName).equals("C1")
+				o(root.childNodes[3].nodeName).equals("C2")
+
+				const iterB = domFor(B)
+				o(iterB.next().value.nodeName).equals("B1")
+				o(iterB.next().value.nodeName).equals("B2")
+				o(iterB.next().done).deepEquals(true)
+
+				const iterC = domFor(C)
+				o(iterC.next().value.nodeName).equals("C1")
+				o(iterC.next().value.nodeName).equals("C2")
+				o(iterC.next().done).deepEquals(true)
+
+				// resolve B
+				thenCBB()
+				callAsync(function(){
+					o(root.childNodes.length).equals(2)
+					o(root.childNodes[0].nodeName).equals("C1")
+					o(root.childNodes[1].nodeName).equals("C2")
+					
+					const iterC = domFor(C)
+					o(iterC.next().value.nodeName).equals("C1")
+					o(iterC.next().value.nodeName).equals("C2")
+					o(iterC.next().done).deepEquals(true)
+
+					// resolve C
+					thenCBC()
+					callAsync(function(){
+						o(root.childNodes.length).equals(0)
+						done()
+					})
+				})
+			})
+		})
+	})
 	components.forEach(function(cmp){
 		const {kind, create: createComponent} = cmp
 		o.spec(kind, function(){
