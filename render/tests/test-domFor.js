@@ -1,6 +1,7 @@
 "use strict"
 
 const o = require("ospec")
+const callAsync = require("../../test-utils/callAsync")
 const components = require("../../test-utils/components")
 const domMock = require("../../test-utils/domMock")
 const vdom = require("../render")
@@ -84,6 +85,34 @@ o.spec("domFor(vnode)", function() {
 			]
 		))
 
+	})
+	o("works in onbeforeremove and onremove", function (done) {
+		const onbeforeremove = o.spy(function onbeforeremove(vnode){
+			o(root.childNodes.length).equals(1)
+			o(root.childNodes[0].nodeName).equals("A")
+			const iter = domFor(vnode)
+			o(iter.next()).deepEquals({done:false, value: root.childNodes[0]})
+			o(iter.next().done).deepEquals(true)
+			o(root.childNodes.length).equals(1)
+			return {then(resolve){resolve()}}
+		})
+		const onremove = o.spy(function onremove(vnode){
+			o(root.childNodes.length).equals(1)
+			o(root.childNodes[0].nodeName).equals("A")
+			const iter = domFor(vnode)
+			o(iter.next()).deepEquals({done:false, value: root.childNodes[0]})
+			o(iter.next().done).deepEquals(true)
+			o(root.childNodes.length).equals(1)
+		})
+		render(root, [m("a", {onbeforeremove, onremove})])
+		render(root, [])
+
+		o(onbeforeremove.callCount).equals(1)
+		o(onremove.callCount).equals(0)
+		callAsync(function(){
+			o(onremove.callCount).equals(1)
+			done()
+		})
 	})
 	components.forEach(function(cmp){
 		const {kind, create: createComponent} = cmp
@@ -172,6 +201,33 @@ o.spec("domFor(vnode)", function() {
 				o(oncreate.callCount).equals(1)
 				o(onupdate.callCount).equals(1)
 				o(onbeforeremove.callCount).equals(1)
+			})
+			o("works in state.onbeforeremove and attrs.onbeforeremove", function () {
+				const onbeforeremove = o.spy(function onbeforeremove(vnode){
+					o(root.childNodes.length).equals(3)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[1].nodeName).equals("B")
+					o(root.childNodes[2].nodeName).equals("C")
+					const iter = domFor(vnode)
+					o(iter.next()).deepEquals({done:false, value: root.childNodes[0]})
+					o(iter.next()).deepEquals({done:false, value: root.childNodes[1]})
+					o(iter.next()).deepEquals({done:false, value: root.childNodes[2]})
+					o(iter.next().done).deepEquals(true)
+					o(root.childNodes.length).equals(3)
+					return {then(){}, finally(){}}
+				})
+				const C = createComponent({
+					view({children}){return children},
+					onbeforeremove
+				})
+				render(root, m(C, {onbeforeremove}, [
+					m("a"),
+					m("b"),
+					m("c")
+				]))
+				render(root, [])
+
+				o(onbeforeremove.callCount).equals(2)
 			})
 		})
 	})
