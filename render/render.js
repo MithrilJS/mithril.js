@@ -426,7 +426,7 @@ module.exports = function() {
 	}
 	function updateHTML(parent, old, vnode, ns, nextSibling) {
 		if (old.children !== vnode.children) {
-			removeDOM(parent, old, undefined)
+			removeDOM(parent, old)
 			createHTML(parent, vnode, ns, nextSibling)
 		}
 		else {
