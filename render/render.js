@@ -710,20 +710,22 @@ module.exports = function() {
 		if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode, old, attrs, ns) {
-		if (old && old === attrs) {
-			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
-		}
-		if (attrs != null) {
-			for (var key in attrs) {
-				setAttr(vnode, key, old && old[key], attrs[key], ns)
-			}
-		}
+		// Some attributes may NOT be case-sensitive (e.g. data-***),
+		// so removal should be done first to prevent accidental removal for newly setting values.
 		var val
 		if (old != null) {
+			if (old === attrs) {
+				console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
+			}
 			for (var key in old) {
 				if (((val = old[key]) != null) && (attrs == null || attrs[key] == null)) {
 					removeAttr(vnode, key, val, ns)
 				}
+			}
+		}
+		if (attrs != null) {
+			for (var key in attrs) {
+				setAttr(vnode, key, old && old[key], attrs[key], ns)
 			}
 		}
 	}
@@ -767,19 +769,21 @@ module.exports = function() {
 			}
 		} else {
 			// Both old & new are (different) objects.
+			// Remove style properties that no longer exist
+			// Style properties may have two cases(dash-case and camelCase),
+			// so removal should be done first to prevent accidental removal for newly setting values.
+			for (var key in old) {
+				if (old[key] != null && style[key] == null) {
+					if (key.includes("-")) element.style.removeProperty(key)
+					else element.style[key] = ""
+				}
+			}
 			// Update style properties that have changed
 			for (var key in style) {
 				var value = style[key]
 				if (value != null && (value = String(value)) !== String(old[key])) {
 					if (key.includes("-")) element.style.setProperty(key, value)
 					else element.style[key] = value
-				}
-			}
-			// Remove style properties that no longer exist
-			for (var key in old) {
-				if (old[key] != null && style[key] == null) {
-					if (key.includes("-")) element.style.removeProperty(key)
-					else element.style[key] = ""
 				}
 			}
 		}
