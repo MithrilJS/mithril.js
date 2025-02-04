@@ -758,7 +758,7 @@ module.exports = function() {
 			element.style = style
 		} else if (old == null || typeof old !== "object") {
 			// `old` is missing or a string, `style` is an object.
-			element.style.cssText = ""
+			element.style = ""
 			// Add new style properties
 			for (var key in style) {
 				var value = style[key]
