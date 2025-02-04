@@ -643,7 +643,7 @@ module.exports = function() {
 		}
 	}
 	function setAttr(vnode, key, old, value, ns) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
+		if (key === "key" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
@@ -676,7 +676,7 @@ module.exports = function() {
 		}
 	}
 	function removeAttr(vnode, key, old, ns) {
-		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
+		if (key === "key" || old == null || isLifecycleMethod(key)) return
 		if (key[0] === "o" && key[1] === "n") updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
