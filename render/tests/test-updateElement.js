@@ -388,4 +388,178 @@ o.spec("updateElement", function() {
 		o(root.childNodes.length).equals(3)
 		o(x).notEquals(y) // this used to be a recycling pool test
 	})
+	o.spec("element node with `is` attribute", function() {
+		o("recreate element node with `is` attribute (set `is`)", function() {
+			var vnode = m("a")
+			var updated = m("a", {is: "bar"})
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("bar")
+		})
+		o("recreate element node without `is` attribute (remove `is`)", function() {
+			var vnode = m("a", {is: "foo"})
+			var updated = m("a")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals(null)
+		})
+		o("recreate element node with `is` attribute (same tag, different `is`)", function() {
+			var vnode = m("a", {is: "foo"})
+			var updated = m("a", {is: "bar"})
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("bar")
+		})
+		o("recreate element node with `is` attribute (different tag, same `is`)", function() {
+			var vnode = m("a", {is: "foo"})
+			var updated = m("b", {is: "foo"})
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("B")
+			o(updated.dom.getAttribute("is")).equals("foo")
+		})
+		o("recreate element node with `is` attribute (different tag, different `is`)", function() {
+			var vnode = m("a", {is: "foo"})
+			var updated = m("b", {is: "bar"})
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("B")
+			o(updated.dom.getAttribute("is")).equals("bar")
+		})
+		o("keep element node with `is` attribute (same tag, same `is`)", function() {
+			var vnode = m("a", {is: "foo"})
+			var updated = m("a", {is: "foo"}, "x")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).equals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("foo")
+			o(updated.dom.firstChild.nodeValue).equals("x")
+		})
+		o("recreate element node with `is` attribute (set `is`, CSS selector)", function() {
+			var vnode = m("a")
+			var updated = m("a[is=bar]")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("bar")
+		})
+		o("recreate element node without `is` attribute (remove `is`, CSS selector)", function() {
+			var vnode = m("a[is=foo]")
+			var updated = m("a")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals(null)
+		})
+		o("recreate element node with `is` attribute (same tag, different `is`, CSS selector)", function() {
+			var vnode = m("a[is=foo]")
+			var updated = m("a[is=bar]")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("bar")
+		})
+		o("recreate element node with `is` attribute (different tag, same `is`, CSS selector)", function() {
+			var vnode = m("a[is=foo]")
+			var updated = m("b[is=foo]")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("B")
+			o(updated.dom.getAttribute("is")).equals("foo")
+		})
+		o("recreate element node with `is` attribute (different tag, different `is`, CSS selector)", function() {
+			var vnode = m("a[is=foo]")
+			var updated = m("b[is=bar]")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).notEquals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("B")
+			o(updated.dom.getAttribute("is")).equals("bar")
+		})
+		o("keep element node with `is` attribute (same tag, same `is`, CSS selector)", function() {
+			var vnode = m("a[is=foo]")
+			var updated = m("a[is=foo]", "x")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).equals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("foo")
+			o(updated.dom.firstChild.nodeValue).equals("x")
+		})
+		o("keep element node with `is` attribute (same tag, same `is`, from attrs to CSS selector)", function() {
+			var vnode = m("a", {is: "foo"})
+			var updated = m("a[is=foo]", "x")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).equals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("foo")
+			o(updated.dom.firstChild.nodeValue).equals("x")
+		})
+		o("keep element node with `is` attribute (same tag, same `is`, from CSS selector to attrs)", function() {
+			var vnode = m("a[is=foo]")
+			var updated = m("a", {is: "foo"}, "x")
+
+			render(root, vnode)
+			render(root, updated)
+			
+			o(vnode.dom).equals(root.firstChild)
+			o(updated.dom).equals(root.firstChild)
+			o(updated.dom.nodeName).equals("A")
+			o(updated.dom.getAttribute("is")).equals("foo")
+			o(updated.dom.firstChild.nodeValue).equals("x")
+		})
+	})
 })

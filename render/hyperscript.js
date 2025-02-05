@@ -62,6 +62,9 @@ function execSelector(state, vnode) {
 		attrs = Object.assign({type: attrs.type}, attrs)
 	}
 
+	// This reduces the complexity of the evaluation of "is" within the render function.
+	if (hasOwn.call(attrs, "is")) vnode.is = attrs.is
+
 	vnode.attrs = attrs
 
 	return vnode

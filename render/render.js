@@ -114,7 +114,7 @@ module.exports = function() {
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		var attrs = vnode.attrs
-		var is = attrs && attrs.is
+		var is = vnode.is
 
 		ns = getNameSpace(vnode) || ns
 
@@ -408,7 +408,15 @@ module.exports = function() {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, ns, nextSibling); break
 					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
-					default: updateElement(old, vnode, hooks, ns)
+					default: {
+						if (old.is === vnode.is) {
+							updateElement(old, vnode, hooks, ns)
+						} else {
+							// createElement() does not call initial lifecycles, so createNode() is called here
+							removeNode(parent, old)
+							createNode(parent, vnode, hooks, ns, nextSibling)
+						}
+					}
 				}
 			}
 			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
