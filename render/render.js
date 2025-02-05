@@ -396,7 +396,7 @@ module.exports = function() {
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
-		if (oldTag === tag) {
+		if (oldTag === tag && old.is === vnode.is) {
 			vnode.state = old.state
 			vnode.events = old.events
 			if (shouldNotUpdate(vnode, old)) return
@@ -408,15 +408,7 @@ module.exports = function() {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, ns, nextSibling); break
 					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
-					default: {
-						if (old.is === vnode.is) {
-							updateElement(old, vnode, hooks, ns)
-						} else {
-							// createElement() does not call initial lifecycles, so createNode() is called here
-							removeNode(parent, old)
-							createNode(parent, vnode, hooks, ns, nextSibling)
-						}
-					}
+					default: updateElement(old, vnode, hooks, ns)
 				}
 			}
 			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
