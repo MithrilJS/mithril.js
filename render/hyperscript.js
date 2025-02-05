@@ -8,8 +8,7 @@ var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["
 var selectorCache = Object.create(null)
 
 function isEmpty(object) {
-	for (var key in object) if (hasOwn.call(object, key)) return false
-	return true
+	return Object.keys(object).length === 0
 }
 
 function compileSelector(selector) {
