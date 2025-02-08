@@ -63,7 +63,7 @@ function execSelector(state, vnode) {
 	}
 
 	// This reduces the complexity of the evaluation of "is" within the render function.
-	if (hasOwn.call(attrs, "is")) vnode.is = attrs.is
+	if (attrs.is != null) vnode.is = attrs.is
 
 	vnode.attrs = attrs
 
