@@ -6,6 +6,7 @@ var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
 var fragment = require("../../render/fragment")
+var callAsync = require("../../test-utils/callAsync")
 
 o.spec("onremove", function() {
 	var $window, root, render
@@ -194,7 +195,7 @@ o.spec("onremove", function() {
 				o(onremove.callCount).equals(1)
 			})
 			// Warning: this test is complicated because it's replicating a race condition.
-			o("removes correct nodes in fragment when child delays removal, parent removes, then child resolves", function () {
+			o("removes correct nodes in fragment when child delays removal, parent removes, then child resolves", function (done) {
 				// Custom assertion - we need to test the entire tree for consistency.
 
 				const template = (tpl) => (root) => {
@@ -233,12 +234,12 @@ o.spec("onremove", function() {
 ${actual}`
 					}
 				}
-				var finallyCB1
-				var finallyCB2
+				var thenCB1
+				var thenCB2
 				var C = createComponent({
 					view({children}){return children},
 					onbeforeremove(){
-						return {then(){}, finally: function (fcb) { finallyCB1 = fcb }}
+						return {then(resolve){thenCB1=resolve}}
 					}
 				})
 				function update(id, showParent, showChild) {
@@ -253,7 +254,7 @@ ${actual}`
 								m("a", {onremove: removeSyncChild}, "sync child"),
 								showChild && m(C, {
 									onbeforeremove: function () {
-										return {then(){}, finally: function (fcb) { finallyCB2 = fcb }}
+										return {then(resolve){thenCB2=resolve}}
 									},
 									onremove: removeAsyncChild
 								}, m("div", id))
@@ -268,8 +269,8 @@ ${actual}`
 					["A", "sync child"],
 					["DIV", "1"],
 				]))
-				o(finallyCB1).equals(undefined)
-				o(finallyCB2).equals(undefined)
+				o(thenCB1).equals(undefined)
+				o(thenCB2).equals(undefined)
 
 				const hooks2 = update("2", true, false)
 
@@ -277,102 +278,114 @@ ${actual}`
 					["A", "sync child"],
 					["DIV", "1"],
 				]))
+				o(thenCB1).equals(undefined)
+				o(thenCB2).equals(undefined)
 
-				o(typeof finallyCB1).equals("function")
-				o(typeof finallyCB2).equals("function")
+				// Promises (micro-tasks) are processed before the callAsync callback.
+				callAsync(() => {
+					o(typeof thenCB1).equals("function")
+					o(typeof thenCB2).equals("function")
 
-				var original1 = finallyCB1
-				var original2 = finallyCB2
+					var original1 = thenCB1
+					var original2 = thenCB2
 
-				const hooks3 = update("3", true, true)
+					const hooks3 = update("3", true, true)
 
-				o(root).satisfies(template([
-					["A", "sync child"],
-					["DIV", "1"],
-					["DIV", "3"],
-				]))
+					o(root).satisfies(template([
+						["A", "sync child"],
+						["DIV", "1"],
+						["DIV", "3"],
+					]))
 
-				o(hooks3.removeParent.callCount).equals(0)
-				o(hooks3.removeSyncChild.callCount).equals(0)
-				o(hooks3.removeAsyncChild.callCount).equals(0)
-				o(finallyCB1).equals(original1)
-				o(finallyCB2).equals(original2)
+					o(hooks3.removeParent.callCount).equals(0)
+					o(hooks3.removeSyncChild.callCount).equals(0)
+					o(hooks3.removeAsyncChild.callCount).equals(0)
+					o(thenCB1).equals(original1)
+					o(thenCB2).equals(original2)
 
-				const hooks4 = update("4", false, true)
+					const hooks4 = update("4", false, true)
 
-				o(root).satisfies(template([
-					["DIV", "1"],
-				]))
+					o(root).satisfies(template([
+						["DIV", "1"],
+					]))
 
-				o(hooks3.removeParent.callCount).equals(1)
-				o(hooks3.removeSyncChild.callCount).equals(1)
-				o(hooks3.removeAsyncChild.callCount).equals(1)
-				o(hooks3.removeParent.args[0].tag).equals("[")
-				o(finallyCB1).equals(original1)
-				o(finallyCB2).equals(original2)
+					o(hooks3.removeParent.callCount).equals(1)
+					o(hooks3.removeSyncChild.callCount).equals(1)
+					o(hooks3.removeAsyncChild.callCount).equals(1)
+					o(hooks3.removeParent.args[0].tag).equals("[")
+					o(thenCB1).equals(original1)
+					o(thenCB2).equals(original2)
 
-				const hooks5 = update("5", true, true)
+					const hooks5 = update("5", true, true)
 
 
-				o(root).satisfies(template([
-					["DIV", "1"],
-					["A", "sync child"],
-					["DIV", "5"],
-				]))
-				o(finallyCB1).equals(original1)
-				o(finallyCB2).equals(original2)
+					o(root).satisfies(template([
+						["DIV", "1"],
+						["A", "sync child"],
+						["DIV", "5"],
+					]))
+					o(thenCB1).equals(original1)
+					o(thenCB2).equals(original2)
 
-				o(hooks1.removeAsyncChild.callCount).equals(0)
+					o(hooks1.removeAsyncChild.callCount).equals(0)
 
-				finallyCB1()
+					thenCB1()
 
-				o(hooks1.removeAsyncChild.callCount).equals(0)
+					o(hooks1.removeAsyncChild.callCount).equals(0)
+					callAsync(() => {
+						o(hooks1.removeAsyncChild.callCount).equals(0)
 
-				finallyCB2()
+						thenCB2()
 
-				o(hooks1.removeAsyncChild.callCount).equals(1)
+						o(hooks1.removeAsyncChild.callCount).equals(0)
+						callAsync(() => {
+							o(hooks1.removeAsyncChild.callCount).equals(1)
 
-				o(root).satisfies(template([
-					["A", "sync child"],
-					["DIV", "5"],
-				]))
-				o(finallyCB1).equals(original1)
-				o(finallyCB2).equals(original2)
+							o(root).satisfies(template([
+								["A", "sync child"],
+								["DIV", "5"],
+							]))
+							o(thenCB1).equals(original1)
+							o(thenCB2).equals(original2)
 
-				const hooks6 = update("6", true, true)
+							const hooks6 = update("6", true, true)
 
-				o(root).satisfies(template([
-					["A", "sync child"],
-					["DIV", "6"],
-				]))
-				o(finallyCB1).equals(original1)
-				o(finallyCB2).equals(original2)
+							o(root).satisfies(template([
+								["A", "sync child"],
+								["DIV", "6"],
+							]))
+							o(thenCB1).equals(original1)
+							o(thenCB2).equals(original2)
 
-				// final tally
-				o(hooks1.removeParent.callCount).equals(0)
-				o(hooks1.removeSyncChild.callCount).equals(0)
-				o(hooks1.removeAsyncChild.callCount).equals(1)
+							// final tally
+							o(hooks1.removeParent.callCount).equals(0)
+							o(hooks1.removeSyncChild.callCount).equals(0)
+							o(hooks1.removeAsyncChild.callCount).equals(1)
 
-				o(hooks2.removeParent.callCount).equals(0)
-				o(hooks2.removeSyncChild.callCount).equals(0)
-				o(hooks2.removeAsyncChild.callCount).equals(0)
+							o(hooks2.removeParent.callCount).equals(0)
+							o(hooks2.removeSyncChild.callCount).equals(0)
+							o(hooks2.removeAsyncChild.callCount).equals(0)
 
-				o(hooks3.removeParent.callCount).equals(1)
-				o(hooks3.removeSyncChild.callCount).equals(1)
-				o(hooks3.removeAsyncChild.callCount).equals(1)
+							o(hooks3.removeParent.callCount).equals(1)
+							o(hooks3.removeSyncChild.callCount).equals(1)
+							o(hooks3.removeAsyncChild.callCount).equals(1)
 
-				o(hooks4.removeParent.callCount).equals(0)
-				o(hooks4.removeSyncChild.callCount).equals(0)
-				o(hooks4.removeAsyncChild.callCount).equals(0)
+							o(hooks4.removeParent.callCount).equals(0)
+							o(hooks4.removeSyncChild.callCount).equals(0)
+							o(hooks4.removeAsyncChild.callCount).equals(0)
 
-				o(hooks5.removeParent.callCount).equals(0)
-				o(hooks5.removeSyncChild.callCount).equals(0)
-				o(hooks5.removeAsyncChild.callCount).equals(0)
+							o(hooks5.removeParent.callCount).equals(0)
+							o(hooks5.removeSyncChild.callCount).equals(0)
+							o(hooks5.removeAsyncChild.callCount).equals(0)
 
-				o(hooks6.removeParent.callCount).equals(0)
-				o(hooks6.removeSyncChild.callCount).equals(0)
-				o(hooks6.removeAsyncChild.callCount).equals(0)
+							o(hooks6.removeParent.callCount).equals(0)
+							o(hooks6.removeSyncChild.callCount).equals(0)
+							o(hooks6.removeAsyncChild.callCount).equals(0)
 
+							done()
+						})
+					})
+				})
 			})
 		})
 	})

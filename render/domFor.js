@@ -2,12 +2,12 @@
 
 var delayedRemoval = new WeakMap
 
-function *domFor(vnode, object = {}) {
+function *domFor(vnode) {
 	// To avoid unintended mangling of the internal bundler,
 	// parameter destructuring is not used here.
 	var dom = vnode.dom
 	var domSize = vnode.domSize
-	var generation = object.generation
+	var generation = delayedRemoval.get(dom)
 	if (dom != null) do {
 		var nextSibling = dom.nextSibling
 
