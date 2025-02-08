@@ -1,4 +1,18 @@
 
+# Release v2.2.14
+
+### Patch Changes
+
+#### [Improve handling of is-elements and Fix tiny bugs of setAttr()/updateStyle() (@kfule)](https://github.com/MithrilJS/mithril.js/pull/2988)
+
+Fixes a few tiny bugs in attributes and style properties updates, and improves handling of is-elements in updateNode().
+#### [domFor: always get generation from delayedRemoval instead of parameter (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3007)
+
+The `generation` of domFor is no longer passed as a parameter.  This allows domFor to work well in onbeforeremove and onremove and reduces the amount of code.
+#### [render: wrap stateResult and attrsResult in Promise.resolve(), fix #2592 (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3005)
+
+This PR wraps the return value of onbeforeremove in Promise.resolve().  This ensures that thenable objects are also always processed asynchronously.  fix #2592.
+
 # Release v2.2.13
 
 ### Patch Changes

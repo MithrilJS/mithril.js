@@ -1,7 +1,7 @@
 ;(function() {
 "use strict"
 function Vnode(tag, key, attrs0, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
+	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, is: undefined, domSize: undefined, state: undefined, events: undefined, instance: undefined}
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
@@ -128,6 +128,8 @@ function execSelector(state, vnode) {
 	if (state.tag === "input" && hasOwn.call(attrs, "type")) {
 		attrs = Object.assign({type: attrs.type}, attrs)
 	}
+	// This reduces the complexity of the evaluation of "is" within the render function.
+	vnode.is = attrs.is
 	vnode.attrs = attrs
 	return vnode
 }
@@ -154,12 +156,12 @@ hyperscript.fragment = function() {
 	return vnode2
 }
 var delayedRemoval0 = new WeakMap
-function *domFor1(vnode4, object = {}) {
+function *domFor1(vnode4) {
 	// To avoid unintended mangling of the internal bundler,
 	// parameter destructuring is0 not used here.
 	var dom = vnode4.dom
 	var domSize0 = vnode4.domSize
-	var generation0 = object.generation
+	var generation0 = delayedRemoval0.get(dom)
 	if (dom != null) do {
 		var nextSibling = dom.nextSibling
 		if (delayedRemoval0.get(dom) === generation0) {
@@ -279,7 +281,7 @@ var _11 = function() {
 	function createElement(parent, vnode3, hooks, ns, nextSibling) {
 		var tag = vnode3.tag
 		var attrs2 = vnode3.attrs
-		var is = attrs2 && attrs2.is
+		var is = vnode3.is
 		ns = getNameSpace(vnode3) || ns
 		var element = ns ?
 			is ? getDocument(parent).createElementNS(ns, tag, {is: is}) : getDocument(parent).createElementNS(ns, tag) :
@@ -549,7 +551,7 @@ var _11 = function() {
 	}
 	function updateNode(parent, old, vnode3, hooks, nextSibling, ns) {
 		var oldTag = old.tag, tag = vnode3.tag
-		if (oldTag === tag) {
+		if (oldTag === tag && old.is === vnode3.is) {
 			vnode3.state = old.state
 			vnode3.events = old.events
 			if (shouldNotUpdate(vnode3, old)) return
@@ -579,7 +581,7 @@ var _11 = function() {
 	}
 	function updateHTML(parent, old, vnode3, ns, nextSibling) {
 		if (old.children !== vnode3.children) {
-			removeDOM(parent, old, undefined)
+			removeDOM(parent, old)
 			createHTML(parent, vnode3, ns, nextSibling)
 		}
 		else {
@@ -732,71 +734,36 @@ var _11 = function() {
 			if (vnode3 != null) removeNode(parent, vnode3)
 		}
 	}
-	function removeNode(parent, vnode3) {
-		var mask = 0
+	function tryBlockRemove(parent, vnode3, source, counter) {
 		var original = vnode3.state
-		var stateResult, attrsResult
-		if (typeof vnode3.tag !== "string" && typeof vnode3.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode3.state.onbeforeremove, vnode3)
-			if (result != null && typeof result.then === "function") {
-				mask = 1
-				stateResult = result
-			}
-		}
-		if (vnode3.attrs && typeof vnode3.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode3.attrs.onbeforeremove, vnode3)
-			if (result != null && typeof result.then === "function") {
-				// eslint-disable-next-line no-bitwise
-				mask |= 2
-				attrsResult = result
-			}
-		}
-		checkState(vnode3, original)
-		var generation
-		// If we can, try to fast-path it and avoid all the overhead of awaiting
-		if (!mask) {
+		var result = callHook.call(source.onbeforeremove, vnode3)
+		if (result == null) return
+		var generation = currentRender
+		for (var dom of domFor0(vnode3)) delayedRemoval.set(dom, generation)
+		counter.v++
+		Promise.resolve(result).finally(function () {
+			checkState(vnode3, original)
+			tryResumeRemove(parent, vnode3, counter)
+		})
+	}
+	function tryResumeRemove(parent, vnode3, counter) {
+		if (--counter.v === 0) {
 			onremove(vnode3)
-			removeDOM(parent, vnode3, generation)
-		} else {
-			generation = currentRender
-			for (var dom of domFor0(vnode3)) delayedRemoval.set(dom, generation)
-			if (stateResult != null) {
-				stateResult.finally(function () {
-					// eslint-disable-next-line no-bitwise
-					if (mask & 1) {
-						// eslint-disable-next-line no-bitwise
-						mask &= 2
-						if (!mask) {
-							checkState(vnode3, original)
-							onremove(vnode3)
-							removeDOM(parent, vnode3, generation)
-						}
-					}
-				})
-			}
-			if (attrsResult != null) {
-				attrsResult.finally(function () {
-					// eslint-disable-next-line no-bitwise
-					if (mask & 2) {
-						// eslint-disable-next-line no-bitwise
-						mask &= 1
-						if (!mask) {
-							checkState(vnode3, original)
-							onremove(vnode3)
-							removeDOM(parent, vnode3, generation)
-						}
-					}
-				})
-			}
+			removeDOM(parent, vnode3)
 		}
 	}
-	function removeDOM(parent, vnode3, generation) {
+	function removeNode(parent, vnode3) {
+		var counter = {v: 1}
+		if (typeof vnode3.tag !== "string" && typeof vnode3.state.onbeforeremove === "function") tryBlockRemove(parent, vnode3, vnode3.state, counter)
+		if (vnode3.attrs && typeof vnode3.attrs.onbeforeremove === "function") tryBlockRemove(parent, vnode3, vnode3.attrs, counter)
+		tryResumeRemove(parent, vnode3, counter)
+	}
+	function removeDOM(parent, vnode3) {
 		if (vnode3.dom == null) return
 		if (vnode3.domSize == null) {
-			// don't allocate for the common case
-			if (delayedRemoval.get(vnode3.dom) === generation) parent.removeChild(vnode3.dom)
+			parent.removeChild(vnode3.dom)
 		} else {
-			for (var dom of domFor0(vnode3, {generation})) parent.removeChild(dom)
+			for (var dom of domFor0(vnode3)) parent.removeChild(dom)
 		}
 	}
 	function onremove(vnode3) {
@@ -821,7 +788,7 @@ var _11 = function() {
 		}
 	}
 	function setAttr(vnode3, key, old, value, ns) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode3, key)) && typeof value !== "object") return
+		if (key === "key" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode3, key)) && typeof value !== "object") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode3, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode3.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode3.dom, old, value)
@@ -854,7 +821,7 @@ var _11 = function() {
 		}
 	}
 	function removeAttr(vnode3, key, old, ns) {
-		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
+		if (key === "key" || old == null || isLifecycleMethod(key)) return
 		if (key[0] === "o" && key[1] === "n") updateEvent(vnode3, key, undefined)
 		else if (key === "style") updateStyle(vnode3.dom, old, null)
 		else if (
@@ -888,20 +855,22 @@ var _11 = function() {
 		if ("selectedIndex" in attrs2) setAttr(vnode3, "selectedIndex", null, attrs2.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode3, old, attrs2, ns) {
-		if (old && old === attrs2) {
-			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
-		}
-		if (attrs2 != null) {
-			for (var key in attrs2) {
-				setAttr(vnode3, key, old && old[key], attrs2[key], ns)
-			}
-		}
+		// Some attributes may NOT be case-sensitive (e.g. data-***),
+		// so removal should be done first to prevent accidental removal for newly setting values.
 		var val
 		if (old != null) {
+			if (old === attrs2) {
+				console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
+			}
 			for (var key in old) {
 				if (((val = old[key]) != null) && (attrs2 == null || attrs2[key] == null)) {
 					removeAttr(vnode3, key, val, ns)
 				}
+			}
+		}
+		if (attrs2 != null) {
+			for (var key in attrs2) {
+				setAttr(vnode3, key, old && old[key], attrs2[key], ns)
 			}
 		}
 	}
@@ -915,7 +884,7 @@ var _11 = function() {
 		// Filter out namespaced keys
 		return ns === undefined && (
 			// If it's a custom element, just keep it.
-			vnode3.tag.indexOf("-") > -1 || vnode3.attrs != null && vnode3.attrs.is ||
+			vnode3.tag.indexOf("-") > -1 || vnode3.is ||
 			// If it's a normal element, let's try to avoid a few browser bugs.
 			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
 			// Defer the property check until *after* we check everything.
@@ -933,7 +902,7 @@ var _11 = function() {
 			element.style = style
 		} else if (old == null || typeof old !== "object") {
 			// `old` is missing or a string, `style` is an object.
-			element.style.cssText = ""
+			element.style = ""
 			// Add new style properties
 			for (var key in style) {
 				var value = style[key]
@@ -944,19 +913,21 @@ var _11 = function() {
 			}
 		} else {
 			// Both old & new are (different) objects.
+			// Remove style properties that no longer exist
+			// Style properties may have two cases(dash-case and camelCase),
+			// so removal should be done first to prevent accidental removal for newly setting values.
+			for (var key in old) {
+				if (old[key] != null && style[key] == null) {
+					if (key.includes("-")) element.style.removeProperty(key)
+					else element.style[key] = ""
+				}
+			}
 			// Update style properties that have changed
 			for (var key in style) {
 				var value = style[key]
 				if (value != null && (value = String(value)) !== String(old[key])) {
 					if (key.includes("-")) element.style.setProperty(key, value)
 					else element.style[key] = value
-				}
-			}
-			// Remove style properties that no longer exist
-			for (var key in old) {
-				if (old[key] != null && style[key] == null) {
-					if (key.includes("-")) element.style.removeProperty(key)
-					else element.style[key] = ""
 				}
 			}
 		}
