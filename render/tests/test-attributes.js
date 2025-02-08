@@ -80,8 +80,8 @@ o.spec("attributes", function() {
 			o(spies[0].callCount).equals(0)
 			o(spies[2].callCount).equals(0)
 			o(spies[3].calls).deepEquals([{this: spies[3].elem, args: ["custom", "x"]}])
-			o(spies[4].calls).deepEquals([{this: spies[4].elem, args: ["custom", "x"]}])
-			o(spies[5].calls).deepEquals([{this: spies[5].elem, args: ["custom", "x"]}])
+			o(spies[4].calls).deepEquals([{this: spies[4].elem, args: ["is", "something-special"]}, {this: spies[4].elem, args: ["custom", "x"]}])
+			o(spies[5].calls).deepEquals([{this: spies[5].elem, args: ["is", "something-special"]}, {this: spies[5].elem, args: ["custom", "x"]}])
 		})
 
 		o("when vnode is customElement with property, custom setAttribute not called", function(){
@@ -124,8 +124,8 @@ o.spec("attributes", function() {
 			o(spies[1].callCount).equals(0)
 			o(spies[2].callCount).equals(0)
 			o(spies[3].callCount).equals(0)
-			o(spies[4].callCount).equals(0)
-			o(spies[5].callCount).equals(0)
+			o(spies[4].callCount).equals(1) // setAttribute("is", "something-special") is called
+			o(spies[5].callCount).equals(1) // setAttribute("is", "something-special") is called
 			o(getters[0].callCount).equals(0)
 			o(getters[1].callCount).equals(0)
 			o(getters[2].callCount).equals(0)

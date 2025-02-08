@@ -114,7 +114,7 @@ module.exports = function() {
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		var attrs = vnode.attrs
-		var is = attrs && attrs.is
+		var is = vnode.is
 
 		ns = getNameSpace(vnode) || ns
 
@@ -396,7 +396,7 @@ module.exports = function() {
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
-		if (oldTag === tag) {
+		if (oldTag === tag && old.is === vnode.is) {
 			vnode.state = old.state
 			vnode.events = old.events
 			if (shouldNotUpdate(vnode, old)) return
@@ -643,7 +643,7 @@ module.exports = function() {
 		}
 	}
 	function setAttr(vnode, key, old, value, ns) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
+		if (key === "key" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
@@ -676,7 +676,7 @@ module.exports = function() {
 		}
 	}
 	function removeAttr(vnode, key, old, ns) {
-		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
+		if (key === "key" || old == null || isLifecycleMethod(key)) return
 		if (key[0] === "o" && key[1] === "n") updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
@@ -710,20 +710,22 @@ module.exports = function() {
 		if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode, old, attrs, ns) {
-		if (old && old === attrs) {
-			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
-		}
-		if (attrs != null) {
-			for (var key in attrs) {
-				setAttr(vnode, key, old && old[key], attrs[key], ns)
-			}
-		}
+		// Some attributes may NOT be case-sensitive (e.g. data-***),
+		// so removal should be done first to prevent accidental removal for newly setting values.
 		var val
 		if (old != null) {
+			if (old === attrs) {
+				console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
+			}
 			for (var key in old) {
 				if (((val = old[key]) != null) && (attrs == null || attrs[key] == null)) {
 					removeAttr(vnode, key, val, ns)
 				}
+			}
+		}
+		if (attrs != null) {
+			for (var key in attrs) {
+				setAttr(vnode, key, old && old[key], attrs[key], ns)
 			}
 		}
 	}
@@ -737,7 +739,7 @@ module.exports = function() {
 		// Filter out namespaced keys
 		return ns === undefined && (
 			// If it's a custom element, just keep it.
-			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
+			vnode.tag.indexOf("-") > -1 || vnode.is ||
 			// If it's a normal element, let's try to avoid a few browser bugs.
 			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
 			// Defer the property check until *after* we check everything.
@@ -756,7 +758,7 @@ module.exports = function() {
 			element.style = style
 		} else if (old == null || typeof old !== "object") {
 			// `old` is missing or a string, `style` is an object.
-			element.style.cssText = ""
+			element.style = ""
 			// Add new style properties
 			for (var key in style) {
 				var value = style[key]
@@ -767,19 +769,21 @@ module.exports = function() {
 			}
 		} else {
 			// Both old & new are (different) objects.
+			// Remove style properties that no longer exist
+			// Style properties may have two cases(dash-case and camelCase),
+			// so removal should be done first to prevent accidental removal for newly setting values.
+			for (var key in old) {
+				if (old[key] != null && style[key] == null) {
+					if (key.includes("-")) element.style.removeProperty(key)
+					else element.style[key] = ""
+				}
+			}
 			// Update style properties that have changed
 			for (var key in style) {
 				var value = style[key]
 				if (value != null && (value = String(value)) !== String(old[key])) {
 					if (key.includes("-")) element.style.setProperty(key, value)
 					else element.style[key] = value
-				}
-			}
-			// Remove style properties that no longer exist
-			for (var key in old) {
-				if (old[key] != null && style[key] == null) {
-					if (key.includes("-")) element.style.removeProperty(key)
-					else element.style[key] = ""
 				}
 			}
 		}
