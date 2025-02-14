@@ -43,6 +43,7 @@ if (isDOM) {
 	window.rootElem = null
 } else {
 	/* eslint-disable global-require */
+	Benchmark = require("benchmark")
 	global.window = require("../test-utils/browserMock")()
 	global.document = window.document
 	// We're benchmarking renders, not our throttling.
@@ -51,7 +52,6 @@ if (isDOM) {
 	}
 	global.m = require("../index.js")
 	global.rootElem = null
-	Benchmark = require("benchmark")
 	/* eslint-enable global-require */
 }
 
