@@ -527,19 +527,65 @@ o.spec("attributes", function() {
 				m("option", {value: ""})
 			)
 		}
-		/* FIXME
-		   This incomplete test is meant for testing #1916.
-		   However it cannot be completed until #1978 is addressed
-		   which is a lack a working select.selected / option.selected
-		   attribute. Ask @dead-claudia.
+		o("render select options with `selected` (#1916)", function() {
+			var select1 = m("select", [m("option"), m("option")])
+			var select2 = m("select", [m("option", {selected: false}), m("option", {selected: true})])
+			var select3 = m("select", [m("option", {selected: false}), m("option", {selected: true})])
+			var select4 = m("select", [m("option", {selected: false}), m("option", {selected: true})])
+			var select5 = m("select", [m("option", {selected: true}), m("option", {selected: false})])
+			var select6 = m("select", [m("option", {selected: true}), m("option", {selected: false})])
+			var select7 = m("select", [m("option", {selected: true}), m("option", {selected: false})])
 
-		o("render select options", function() {
-			var select = m("select", {selectedIndex: 0},
-				m("option", {value: "1", selected: ""})
-			)
-			render(root, select)
+			// selected: [undefined,undefined]
+			// DomMock can't set/read `option.selected` when the option doesn't have a `select` parent,
+			// so call render() without `option.selected` first.
+			render(root, select1)
+			var el = root.firstChild
+			o(el.selectedIndex).equals(0)
+			o(el.childNodes[0].selected).equals(true)
+			o(el.childNodes[1].selected).equals(false)
+
+			// selected: [undefined,undefined] -> [false,true] (changed -> update by render)
+			render(root, select2)
+			o(el.selectedIndex).equals(1)
+			o(el.childNodes[0].selected).equals(false)
+			o(el.childNodes[1].selected).equals(true)
+
+			// selected: [false,true] -> [false,true] (unchanged, not focused -> not update by render)
+			el.selectedIndex = 0 // set 0 without render
+			render(root, select3)
+			o(el.selectedIndex).equals(0) // unchanged
+			o(el.childNodes[0].selected).equals(true)
+			o(el.childNodes[1].selected).equals(false)
+
+			// selected: [false,true] -> [false,true] (unchanged, focused -> update by render)
+			el.focus()
+			render(root, select4)
+			o(el.selectedIndex).equals(1)
+			o(el.childNodes[0].selected).equals(false)
+			o(el.childNodes[1].selected).equals(true)
+
+			// selected: [false,true] -> [true,false] (changed -> update by render)
+			render(root, select5)
+			o(el.selectedIndex).equals(0)
+			o(el.childNodes[0].selected).equals(true)
+			o(el.childNodes[1].selected).equals(false)
+			
+			// selected: [true,false] -> [true,false] (unchanged, not focused -> not update by render)
+			el.selectedIndex = 1 // set 1 without render
+			root.focus()
+			render(root, select6)
+			o(el.selectedIndex).equals(1) // unchanged
+			o(el.childNodes[0].selected).equals(false)
+			o(el.childNodes[1].selected).equals(true)
+
+			// selected: [true,false] -> [true,false] (unchanged, focused -> update by render)
+			el.focus()
+			render(root, select7)
+			o(el.selectedIndex).equals(0)
+			o(el.childNodes[0].selected).equals(true)
+			o(el.childNodes[1].selected).equals(false)
 		})
-		*/
 		o("can be set as text", function() {
 			var a = makeSelect()
 			var b = makeSelect("2")
