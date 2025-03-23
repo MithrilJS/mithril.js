@@ -1,4 +1,15 @@
 
+# Release v2.2.15
+
+### Patch Changes
+
+#### [[refactor] Limit the condition of the option tag to `selected` attribute in isFormAttribute() (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3011)
+
+This PR limits the evaluation of whether a tag is `option` to only when setting the `selected` attribute.
+#### [test-perf: Load Benckmark.js first in Node.js (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3008)
+
+Since Node21, global.navigator has been implemented, and together with browserMock, Benchmark.js incorrectly identifies the execution environment as a browser.
+
 # Release v2.2.14
 
 ### Patch Changes

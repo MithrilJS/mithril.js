@@ -875,7 +875,7 @@ var _11 = function() {
 		}
 	}
 	function isFormAttribute(vnode3, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode3.dom === activeElement(vnode3.dom) || vnode3.tag === "option" && vnode3.dom.parentNode === activeElement(vnode3.dom)
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && (vnode3.dom === activeElement(vnode3.dom) || vnode3.tag === "option" && vnode3.dom.parentNode === activeElement(vnode3.dom))
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
