@@ -289,6 +289,12 @@ m.TYPE_INLINE = TYPE_INLINE
 // Simple and sweet. Also useful for idioms like `onfoo: m.capture` to completely drop events while
 // otherwise ignoring them.
 m.capture = (ev) => {
+	if (typeof ev === "function") {
+		return (...args) => {
+			m.capture(...args)
+			return ev(...args)
+		}
+	}
 	ev.preventDefault()
 	ev.stopPropagation()
 	return "skip-redraw"
