@@ -65,7 +65,7 @@ Text:
 - `s`: unused
 - `a`: text string
 - `c`: unused
-- `d`: abort controller reference
+- `d`: unused
 
 Components:
 - `m` bits 0-3: `3`
