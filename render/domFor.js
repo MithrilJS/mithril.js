@@ -18,7 +18,7 @@ function *domFor(vnode) {
 
 		dom = nextSibling
 	}
-	while (domSize)
+	while (domSize && dom != null)
 }
 
 module.exports = {
