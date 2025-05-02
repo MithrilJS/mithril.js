@@ -810,7 +810,15 @@ module.exports = function() {
 		var result
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (this._ && ev.redraw !== false) (0, this._)()
+		var eventRedraw = this._
+		if (eventRedraw && ev.redraw !== false) {
+			eventRedraw()
+			if (result != null && typeof result.then === "function") {
+				Promise.resolve(result).finally(function () {
+					if (ev.redraw !== false) eventRedraw()
+				})
+			}
+		}
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
