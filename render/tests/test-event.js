@@ -1,6 +1,7 @@
 "use strict"
 
 var o = require("ospec")
+var callAsync = require("../../test-utils/callAsync")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
@@ -383,5 +384,504 @@ o.spec("event", function() {
 		o(replacementRedraw.callCount).equals(1)
 		o(replacementRedraw.this).equals(undefined)
 		o(replacementRedraw.args.length).equals(0)
+	})
+	o("async function", function(done) {
+		var div = m("div", {onclick: async function () {}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			o(redraw.callCount).equals(2)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+
+			done()
+		})
+	})
+	o("async function (await Promise)", function(done) {
+		var thenCB
+		var div = m("div", {onclick: async function () {
+			await new Promise(function(resolve){thenCB = resolve})
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(1)
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(2)
+				o(redraw.this).equals(undefined)
+				o(redraw.args.length).equals(0)
+
+				done()
+			})
+		})
+	})
+	o("async function (await thenable)", function(done) {
+		var thenCB
+		var div = m("div", {onclick: async function () {
+			await {then(resolve){thenCB = resolve}}
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(1)
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(2)
+				o(redraw.this).equals(undefined)
+				o(redraw.args.length).equals(0)
+
+				done()
+			})
+		})
+	})
+	o("return Promise", function(done) {
+		var thenCB
+		var div = m("div", {onclick: function () {
+			return new Promise(function(resolve){thenCB = resolve})
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(1)
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(2)
+				o(redraw.this).equals(undefined)
+				o(redraw.args.length).equals(0)
+
+				done()
+			})
+		})
+	})
+	o("return thenable", function(done) {
+		var thenCB
+		var div = m("div", {onclick: function () {
+			return {then(resolve){thenCB = resolve}}
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(1)
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(2)
+				o(redraw.this).equals(undefined)
+				o(redraw.args.length).equals(0)
+
+				done()
+			})
+		})
+	})
+	o.spec("reject", function() {
+		var error
+		o.beforeEach(function(){
+			error = console.error
+		})
+		o.afterEach(function(){
+			console.error = error
+		})
+		o("async function (throw Error)", function(done) {
+			var consoleSpy = o.spy()
+			console.error = consoleSpy
+
+			var div = m("div", {onclick: async function () {throw Error("error")}})
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+	
+			render(root, div)
+			div.dom.dispatchEvent(e)
+	
+			o(redraw.callCount).equals(1)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+	
+			callAsync(function() {
+				o(redraw.callCount).equals(2)
+				o(redraw.this).equals(undefined)
+				o(redraw.args.length).equals(0)
+
+				// called console.error
+				o(consoleSpy.callCount).equals(1)
+				done()
+			})
+		})
+		o("async function (await Promise, reject)", function(done) {
+			var consoleSpy = o.spy()
+			console.error = consoleSpy
+
+			var rejectCB
+			var div = m("div", {onclick: async function () {
+				await new Promise(function(_, reject){rejectCB = reject})
+			}})
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+
+			render(root, div)
+			div.dom.dispatchEvent(e)
+
+			o(redraw.callCount).equals(1)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+
+			callAsync(function() {
+				// not resolved yet
+				o(redraw.callCount).equals(1)
+
+				// reject
+				rejectCB("error")
+				callAsync(function() {
+					o(redraw.callCount).equals(2)
+					o(redraw.this).equals(undefined)
+					o(redraw.args.length).equals(0)
+
+					// called console.error
+					o(consoleSpy.callCount).equals(1)
+					done()
+				})
+			})
+		})
+		o("async function (await thenable, reject)", function(done) {
+			var consoleSpy = o.spy()
+			console.error = consoleSpy
+
+			var rejectCB
+			var div = m("div", {onclick: async function () {
+				await {then(_, reject){rejectCB = reject}}
+			}})
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+
+			render(root, div)
+			div.dom.dispatchEvent(e)
+
+			o(redraw.callCount).equals(1)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+
+			callAsync(function() {
+				// not resolved yet
+				o(redraw.callCount).equals(1)
+
+				// reject
+				rejectCB("error")
+				callAsync(function() {
+					o(redraw.callCount).equals(2)
+					o(redraw.this).equals(undefined)
+					o(redraw.args.length).equals(0)
+
+					// called console.error
+					o(consoleSpy.callCount).equals(1)
+					done()
+				})
+			})
+		})
+		o("async function (await Promise, throw Error)", function(done) {
+			var consoleSpy = o.spy()
+			console.error = consoleSpy
+
+			var thenCB
+			var div = m("div", {onclick: async function () {
+				await new Promise(function(resolve){thenCB = resolve})
+				throw Error("error")
+			}})
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+
+			render(root, div)
+			div.dom.dispatchEvent(e)
+
+			o(redraw.callCount).equals(1)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+
+			callAsync(function() {
+				// not resolved yet
+				o(redraw.callCount).equals(1)
+
+				// resolve (and throw Error)
+				thenCB()
+				callAsync(function() {
+					o(redraw.callCount).equals(2)
+					o(redraw.this).equals(undefined)
+					o(redraw.args.length).equals(0)
+
+					// called console.error
+					o(consoleSpy.callCount).equals(1)
+					done()
+				})
+			})
+		})
+		o("async function (await thenable, throw Error)", function(done) {
+			var consoleSpy = o.spy()
+			console.error = consoleSpy
+
+			var thenCB
+			var div = m("div", {onclick: async function () {
+				await {then(resolve){thenCB = resolve}}
+				throw Error("error")
+			}})
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+
+			render(root, div)
+			div.dom.dispatchEvent(e)
+
+			o(redraw.callCount).equals(1)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+
+			callAsync(function() {
+				// not resolved yet
+				o(redraw.callCount).equals(1)
+
+				// resolve (and throw Error)
+				thenCB()
+				callAsync(function() {
+					o(redraw.callCount).equals(2)
+					o(redraw.this).equals(undefined)
+					o(redraw.args.length).equals(0)
+
+					// called console.error
+					o(consoleSpy.callCount).equals(1)
+					done()
+				})
+			})
+		})
+		o("return Promise (reject)", function(done) {
+			var consoleSpy = o.spy()
+			console.error = consoleSpy
+
+			var rejectCB
+			var div = m("div", {onclick: function () {
+				return new Promise(function(_, reject){rejectCB = reject})
+			}})
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+
+			render(root, div)
+			div.dom.dispatchEvent(e)
+
+			o(redraw.callCount).equals(1)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+
+			callAsync(function() {
+				// not resolved yet
+				o(redraw.callCount).equals(1)
+
+				// reject
+				rejectCB("error")
+				callAsync(function() {
+					o(redraw.callCount).equals(2)
+					o(redraw.this).equals(undefined)
+					o(redraw.args.length).equals(0)
+
+					// called console.error
+					o(consoleSpy.callCount).equals(1)
+					done()
+				})
+			})
+		})
+		o("return thenable (reject)", function(done) {
+			var consoleSpy = o.spy()
+			console.error = consoleSpy
+
+			var rejectCB
+			var div = m("div", {onclick: function () {
+				return {then(_, reject){rejectCB = reject}}
+			}})
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+
+			render(root, div)
+			div.dom.dispatchEvent(e)
+
+			o(redraw.callCount).equals(1)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+
+			callAsync(function() {
+				// not resolved yet
+				o(redraw.callCount).equals(1)
+
+				// resolve
+				rejectCB("error")
+				callAsync(function() {
+					o(redraw.callCount).equals(2)
+					o(redraw.this).equals(undefined)
+					o(redraw.args.length).equals(0)
+
+					// called console.error
+					o(consoleSpy.callCount).equals(1)
+					done()
+				})
+			})
+		})
+	})
+	o("async function (event.redraw = false)", function(done) {
+		var div = m("div", {onclick: async function (ev) {
+			// set event.redraw = false to prevent redraws
+			ev.redraw = false
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(0)
+
+		callAsync(function() {
+			o(redraw.callCount).equals(0)
+
+			done()
+		})
+	})
+	o("async function (event.redraw = false, await Promise)", function(done) {
+		var thenCB
+		var div = m("div", {onclick: async function (ev) {
+			// set event.redraw = false to prevent redraws
+			ev.redraw = false
+			await new Promise(function(resolve){thenCB = resolve})
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(0)
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(0)
+
+				done()
+			})
+		})
+	})
+	o("async function (await Promise, event.redraw = false)", function(done) {
+		var thenCB
+		var div = m("div", {onclick: async function (ev) {
+			await new Promise(function(resolve){thenCB = resolve})
+			// set event.redraw = false to prevent additional redraw
+			ev.redraw = false
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(1)
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(1)
+
+				done()
+			})
+		})
+	})
+	o("async function (multiple await)", function(done) {
+		var thenCB1, thenCB2
+		var div = m("div", {onclick: async function () {
+			await new Promise(function(resolve){thenCB1 = resolve})
+			await new Promise(function(resolve){thenCB2 = resolve})
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			o(redraw.callCount).equals(1)
+
+			// resolve 1
+			thenCB1()
+			callAsync(function() {
+				o(redraw.callCount).equals(1)
+
+				// resolve 2
+				thenCB2()
+				callAsync(function() {
+					o(redraw.callCount).equals(2)
+					o(redraw.this).equals(undefined)
+					o(redraw.args.length).equals(0)
+
+					done()
+				})
+			})
+		})
 	})
 })
