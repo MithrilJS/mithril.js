@@ -814,7 +814,7 @@ module.exports = function() {
 		if (eventRedraw && ev.redraw !== false) {
 			eventRedraw()
 			if (result != null && typeof result.then === "function") {
-				Promise.resolve(result).finally(function () {
+				Promise.resolve(result).then(function () {
 					if (ev.redraw !== false) eventRedraw()
 				})
 			}

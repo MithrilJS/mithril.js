@@ -525,7 +525,7 @@ o.spec("event", function() {
 			})
 		})
 	})
-	o.spec("reject", function() {
+	o.spec("do not asynchronous redraw when returned Promise is rejected", function() {
 		var error
 		o.beforeEach(function(){
 			error = console.error
@@ -544,14 +544,14 @@ o.spec("event", function() {
 			render(root, div)
 			div.dom.dispatchEvent(e)
 	
+			// sync redraw
 			o(redraw.callCount).equals(1)
 			o(redraw.this).equals(undefined)
 			o(redraw.args.length).equals(0)
 	
 			callAsync(function() {
-				o(redraw.callCount).equals(2)
-				o(redraw.this).equals(undefined)
-				o(redraw.args.length).equals(0)
+				// do not async redraw
+				o(redraw.callCount).equals(1)
 
 				// called console.error
 				o(consoleSpy.callCount).equals(1)
@@ -572,6 +572,7 @@ o.spec("event", function() {
 			render(root, div)
 			div.dom.dispatchEvent(e)
 
+			// sync redraw
 			o(redraw.callCount).equals(1)
 			o(redraw.this).equals(undefined)
 			o(redraw.args.length).equals(0)
@@ -583,9 +584,8 @@ o.spec("event", function() {
 				// reject
 				rejectCB("error")
 				callAsync(function() {
-					o(redraw.callCount).equals(2)
-					o(redraw.this).equals(undefined)
-					o(redraw.args.length).equals(0)
+					// do not async redraw
+					o(redraw.callCount).equals(1)
 
 					// called console.error
 					o(consoleSpy.callCount).equals(1)
@@ -607,6 +607,7 @@ o.spec("event", function() {
 			render(root, div)
 			div.dom.dispatchEvent(e)
 
+			// sync redraw
 			o(redraw.callCount).equals(1)
 			o(redraw.this).equals(undefined)
 			o(redraw.args.length).equals(0)
@@ -618,9 +619,8 @@ o.spec("event", function() {
 				// reject
 				rejectCB("error")
 				callAsync(function() {
-					o(redraw.callCount).equals(2)
-					o(redraw.this).equals(undefined)
-					o(redraw.args.length).equals(0)
+					// do not async redraw
+					o(redraw.callCount).equals(1)
 
 					// called console.error
 					o(consoleSpy.callCount).equals(1)
@@ -643,6 +643,7 @@ o.spec("event", function() {
 			render(root, div)
 			div.dom.dispatchEvent(e)
 
+			// sync redraw
 			o(redraw.callCount).equals(1)
 			o(redraw.this).equals(undefined)
 			o(redraw.args.length).equals(0)
@@ -654,9 +655,8 @@ o.spec("event", function() {
 				// resolve (and throw Error)
 				thenCB()
 				callAsync(function() {
-					o(redraw.callCount).equals(2)
-					o(redraw.this).equals(undefined)
-					o(redraw.args.length).equals(0)
+					// do not async redraw
+					o(redraw.callCount).equals(1)
 
 					// called console.error
 					o(consoleSpy.callCount).equals(1)
@@ -679,6 +679,7 @@ o.spec("event", function() {
 			render(root, div)
 			div.dom.dispatchEvent(e)
 
+			// sync redraw
 			o(redraw.callCount).equals(1)
 			o(redraw.this).equals(undefined)
 			o(redraw.args.length).equals(0)
@@ -690,9 +691,8 @@ o.spec("event", function() {
 				// resolve (and throw Error)
 				thenCB()
 				callAsync(function() {
-					o(redraw.callCount).equals(2)
-					o(redraw.this).equals(undefined)
-					o(redraw.args.length).equals(0)
+					// do not async redraw
+					o(redraw.callCount).equals(1)
 
 					// called console.error
 					o(consoleSpy.callCount).equals(1)
@@ -714,6 +714,7 @@ o.spec("event", function() {
 			render(root, div)
 			div.dom.dispatchEvent(e)
 
+			// sync redraw
 			o(redraw.callCount).equals(1)
 			o(redraw.this).equals(undefined)
 			o(redraw.args.length).equals(0)
@@ -725,9 +726,8 @@ o.spec("event", function() {
 				// reject
 				rejectCB("error")
 				callAsync(function() {
-					o(redraw.callCount).equals(2)
-					o(redraw.this).equals(undefined)
-					o(redraw.args.length).equals(0)
+					// do not async redraw
+					o(redraw.callCount).equals(1)
 
 					// called console.error
 					o(consoleSpy.callCount).equals(1)
@@ -749,6 +749,7 @@ o.spec("event", function() {
 			render(root, div)
 			div.dom.dispatchEvent(e)
 
+			// sync redraw
 			o(redraw.callCount).equals(1)
 			o(redraw.this).equals(undefined)
 			o(redraw.args.length).equals(0)
@@ -760,9 +761,8 @@ o.spec("event", function() {
 				// resolve
 				rejectCB("error")
 				callAsync(function() {
-					o(redraw.callCount).equals(2)
-					o(redraw.this).equals(undefined)
-					o(redraw.args.length).equals(0)
+					// do not async redraw
+					o(redraw.callCount).equals(1)
 
 					// called console.error
 					o(consoleSpy.callCount).equals(1)
