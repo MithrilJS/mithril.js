@@ -1,0 +1,14 @@
+name: Notify release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Send workflow dispatch to docs
+      run: gh --repo MithrilJS/docs workflow run package-update.yml -f package=mithril
+      env:
+        GH_TOKEN: ${{ secrets.DOCS_UPDATE_TOKEN }}
