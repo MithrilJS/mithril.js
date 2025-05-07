@@ -811,8 +811,8 @@ module.exports = function() {
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
 		var eventRedraw = this._
-		if (eventRedraw && ev.redraw !== false) {
-			eventRedraw()
+		if (eventRedraw) {
+			if (ev.redraw !== false) eventRedraw()
 			if (result != null && typeof result.then === "function") {
 				Promise.resolve(result).then(function () {
 					if (ev.redraw !== false) eventRedraw()
