@@ -848,6 +848,38 @@ o.spec("event", function() {
 			})
 		})
 	})
+	o("async function (event.redraw = false, await Promise, event.redraw = true)", function(done) {
+		var thenCB
+		var div = m("div", {onclick: async function (ev) {
+			// set event.redraw = false to prevent sync redraw
+			ev.redraw = false
+			await new Promise(function(resolve){thenCB = resolve})
+			// set event.redraw = true to enable async redraw
+			ev.redraw = true
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(0)
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(1)
+				o(redraw.this).equals(undefined)
+				o(redraw.args.length).equals(0)
+
+				done()
+			})
+		})
+	})
 	o("async function (multiple await)", function(done) {
 		var thenCB1, thenCB2
 		var div = m("div", {onclick: async function () {
