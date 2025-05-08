@@ -1,4 +1,4 @@
-name: Update release PR
+name: Publish prerelease and update PR
 
 on:
   workflow_call:
@@ -18,3 +18,10 @@ jobs:
     - run: npx pr-release pr --verbose --target release --source main --compact --verbose --minimize-semver-change
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    # The following will publish a prerelease to npm
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      name: Setup NPM Auth
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: npx pr-release infer-prerelease --preid=next --target release --source main --verbose --publish --minimize-semver-change
+      name: Publish
