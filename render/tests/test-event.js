@@ -916,4 +916,48 @@ o.spec("event", function() {
 			})
 		})
 	})
+	o("avoid sync redraw after removal", function() {
+		var div = m("div", {onclick: function () {}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		// remove div
+		render(root, [])
+
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(0)
+	})
+	o("avoid async redraw after removal", function(done) {
+		var thenCB
+		var div = m("div", {onclick: async function () {
+			await new Promise(function(resolve){thenCB = resolve})
+		}})
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, div)
+		div.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		callAsync(function() {
+			// not resolved yet
+			o(redraw.callCount).equals(1)
+
+			// remove div
+			render(root, [])
+
+			// resolve
+			thenCB()
+			callAsync(function() {
+				o(redraw.callCount).equals(1)
+
+				done()
+			})
+		})
+	})
 })

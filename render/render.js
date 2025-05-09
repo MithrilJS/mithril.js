@@ -626,6 +626,7 @@ module.exports = function() {
 		if (typeof vnode.tag !== "string") {
 			if (vnode.instance != null) onremove(vnode.instance)
 		} else {
+			if (vnode.events != null) vnode.events._ = null
 			var children = vnode.children
 			if (Array.isArray(children)) {
 				for (var i = 0; i < children.length; i++) {
@@ -810,12 +811,12 @@ module.exports = function() {
 		var result
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		var eventRedraw = this._
-		if (eventRedraw) {
-			if (ev.redraw !== false) eventRedraw()
+		var self = this
+		if (self._ != null) {
+			if (ev.redraw !== false) (0, self._)()
 			if (result != null && typeof result.then === "function") {
 				Promise.resolve(result).then(function () {
-					if (ev.redraw !== false) eventRedraw()
+					if (self._ != null && ev.redraw !== false) (0, self._)()
 				})
 			}
 		}
