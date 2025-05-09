@@ -772,19 +772,28 @@ o.spec("event", function() {
 		})
 	})
 	o("async function (event.redraw = false)", function(done) {
+		var spy = o.spy()
 		var div = m("div", {onclick: async function (ev) {
 			// set event.redraw = false to prevent redraws
 			ev.redraw = false
+			spy()
 		}})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
 		render(root, div)
+
+		// event listener has not yet been called
+		o(spy.callCount).equals(0)
+
 		div.dom.dispatchEvent(e)
 
+		// event listener called but not redraw
+		o(spy.callCount).equals(1)
 		o(redraw.callCount).equals(0)
 
 		callAsync(function() {
+			o(spy.callCount).equals(1)
 			o(redraw.callCount).equals(0)
 
 			done()
@@ -792,26 +801,37 @@ o.spec("event", function() {
 	})
 	o("async function (event.redraw = false, await Promise)", function(done) {
 		var thenCB
+		var spy = o.spy(function(resolve){thenCB = resolve})
 		var div = m("div", {onclick: async function (ev) {
 			// set event.redraw = false to prevent redraws
 			ev.redraw = false
-			await new Promise(function(resolve){thenCB = resolve})
+			await new Promise(spy)
 		}})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
 		render(root, div)
+
+		// event listener has not yet been called
+		o(spy.callCount).equals(0)
+		o(thenCB).equals(undefined)
+
 		div.dom.dispatchEvent(e)
 
+		// event listener called but not redraw
+		o(spy.callCount).equals(1)
+		o(thenCB).notEquals(undefined)
 		o(redraw.callCount).equals(0)
 
 		callAsync(function() {
 			// not resolved yet
+			o(spy.callCount).equals(1)
 			o(redraw.callCount).equals(0)
 
 			// resolve
 			thenCB()
 			callAsync(function() {
+				o(spy.callCount).equals(1)
 				o(redraw.callCount).equals(0)
 
 				done()
@@ -850,10 +870,11 @@ o.spec("event", function() {
 	})
 	o("async function (event.redraw = false, await Promise, event.redraw = true)", function(done) {
 		var thenCB
+		var spy = o.spy(function(resolve){thenCB = resolve})
 		var div = m("div", {onclick: async function (ev) {
 			// set event.redraw = false to prevent sync redraw
 			ev.redraw = false
-			await new Promise(function(resolve){thenCB = resolve})
+			await new Promise(spy)
 			// set event.redraw = true to enable async redraw
 			ev.redraw = true
 		}})
@@ -861,17 +882,26 @@ o.spec("event", function() {
 		e.initEvent("click", true, true)
 
 		render(root, div)
+
+		// event listener has not yet been called
+		o(spy.callCount).equals(0)
+		o(thenCB).equals(undefined)
+
 		div.dom.dispatchEvent(e)
 
+		// event listener called but not redraw
+		o(spy.callCount).equals(1)
+		o(thenCB).notEquals(undefined)
 		o(redraw.callCount).equals(0)
-
 		callAsync(function() {
 			// not resolved yet
+			o(spy.callCount).equals(1)
 			o(redraw.callCount).equals(0)
 
 			// resolve
 			thenCB()
 			callAsync(function() {
+				o(spy.callCount).equals(1)
 				o(redraw.callCount).equals(1)
 				o(redraw.this).equals(undefined)
 				o(redraw.args.length).equals(0)
@@ -917,7 +947,8 @@ o.spec("event", function() {
 		})
 	})
 	o("avoid sync redraw after removal", function() {
-		var div = m("div", {onclick: function () {}})
+		var spy = o.spy()
+		var div = m("div", {onclick: spy})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
@@ -925,20 +956,35 @@ o.spec("event", function() {
 		// remove div
 		render(root, [])
 
+		// event listener has not yet been called
+		o(spy.callCount).equals(0)
+
 		div.dom.dispatchEvent(e)
 
+		// event listener called but not redraw
+		o(spy.callCount).equals(1)
 		o(redraw.callCount).equals(0)
 	})
 	o("avoid async redraw after removal", function(done) {
 		var thenCB
+		var spy = o.spy(function(resolve){thenCB = resolve})
 		var div = m("div", {onclick: async function () {
-			await new Promise(function(resolve){thenCB = resolve})
+			await new Promise(spy)
 		}})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
 		render(root, div)
+
+		// event listener has not yet been called
+		o(spy.callCount).equals(0)
+		o(thenCB).equals(undefined)
+
 		div.dom.dispatchEvent(e)
+
+		// event listener called
+		o(spy.callCount).equals(1)
+		o(thenCB).notEquals(undefined)
 
 		o(redraw.callCount).equals(1)
 		o(redraw.this).equals(undefined)
@@ -946,6 +992,7 @@ o.spec("event", function() {
 
 		callAsync(function() {
 			// not resolved yet
+			o(spy.callCount).equals(1)
 			o(redraw.callCount).equals(1)
 
 			// remove div
@@ -954,6 +1001,7 @@ o.spec("event", function() {
 			// resolve
 			thenCB()
 			callAsync(function() {
+				o(spy.callCount).equals(1)
 				o(redraw.callCount).equals(1)
 
 				done()
