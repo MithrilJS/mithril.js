@@ -1,4 +1,24 @@
 
+# Release v2.3.0
+
+### Minor Changes
+
+#### [feat: Make redraws when Promises returned by event handlers are completed (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3020)
+
+This PR allows redraw on completion of the async event handler.  This PR makes redraws when Promises returned by event handlers are completed.
+   
+### Patch Changes
+
+#### [Allow additional async redraw even if the first redraw is skipped (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3021)
+
+This PR allows asynchronous redraw processing even if the first redraw is skipped by setting `event.redraw=false` before await in the async function.
+#### [Bump glob from 11.0.1 to 11.0.2 in the normal group (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/3019)
+
+Bumps the normal group with 1 update: [glob](https://github.com/isaacs/node-glob).  Updates `glob` from 11.0.1 to 11.0.2.  Commits.  fd61f24 11.0.2.
+#### [Fix badge for build status (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3015)
+
+The URL for the Shields.io badge for build status has been corrected.
+
 # Release v2.2.15
 
 ### Patch Changes

@@ -772,6 +772,7 @@ var _11 = function() {
 		if (typeof vnode3.tag !== "string") {
 			if (vnode3.instance != null) onremove(vnode3.instance)
 		} else {
+			if (vnode3.events != null) vnode3.events._ = null
 			var children2 = vnode3.children
 			if (Array.isArray(children2)) {
 				for (var i = 0; i < children2.length; i++) {
@@ -953,7 +954,15 @@ var _11 = function() {
 		var result
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (this._ && ev.redraw !== false) (0, this._)()
+		var self = this
+		if (self._ != null) {
+			if (ev.redraw !== false) (0, self._)()
+			if (result != null && typeof result.then === "function") {
+				Promise.resolve(result).then(function () {
+					if (self._ != null && ev.redraw !== false) (0, self._)()
+				})
+			}
+		}
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
