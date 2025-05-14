@@ -749,16 +749,16 @@ module.exports = function() {
 
 	//style
 	function updateStyle(element, old, style) {
-		if (old === style) {
-			// Styles are equivalent, do nothing.
-		} else if (style == null) {
+		// The case `old` and `style` are the same string has already skipped in setAttr().
+		if (style == null) {
 			// New style is missing, just clear it.
 			element.style = ""
 		} else if (typeof style !== "object") {
 			// New style is a string, let engine deal with patching.
 			element.style = style
-		} else if (old == null || typeof old !== "object") {
+		} else if (old == null || typeof old !== "object" || old === style) {
 			// `old` is missing or a string, `style` is an object.
+			// `old` and `style` are the same object (in this case, conciliation between objects does not work well.)
 			element.style = ""
 			// Add new style properties
 			for (var key in style) {

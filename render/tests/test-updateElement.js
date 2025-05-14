@@ -193,6 +193,19 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.style.color).equals("red")
 	})
+	o("re-render element styles for the same style object", function() {
+		var style = {color: "gold"}
+		var vnode = m("a", {style: style})
+
+		render(root, vnode)
+
+		// modify the same object
+		style.color = "red"
+		var updated = m("a", {style: style})
+		render(root, updated)
+
+		o(updated.dom.style.color).equals("red")
+	})
 	o("setting style to `null` removes all styles", function() {
 		var vnode = m("p", {style: "background-color: red"})
 		var updated = m("p", {style: null})
