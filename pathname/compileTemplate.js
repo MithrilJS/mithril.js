@@ -24,7 +24,7 @@ module.exports = function(template) {
 			if (extra === ".") return "([^/]+)\\."
 			return "([^/]+)" + (extra || "")
 		}
-	) + "$")
+	) + "\\/?$")
 	return function(data) {
 		// First, check the params. Usually, there isn't any, and it's just
 		// checking a static set.
