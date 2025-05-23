@@ -225,6 +225,30 @@ o.spec("route", function() {
 					)
 				})
 
+				o("remove trailing slash to match route if it is before rest operator match (...) ", function() {
+					$window.location.href = prefix + "/test/d/"
+					route(root, "/test/:a...", {
+						"/test/:a" : {
+							view: lock(function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							})
+						},
+						"/test/:a..." : {
+							view: lock(function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							})
+						},
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"d"} {"a":"d"} /test/d/'
+					)
+				})
+
 				o("handles route with search", function() {
 					$window.location.href = prefix + "/test?a=b&c=d"
 					route(root, "/test", {
