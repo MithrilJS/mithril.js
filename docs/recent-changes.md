@@ -1,4 +1,12 @@
 
+# Release v2.3.1
+
+### Patch Changes
+
+#### [set trailing slash optional in route matching (@touletan)](https://github.com/MithrilJS/mithril.js/pull/3025)
+
+Regexp has been updated to set trailing slash as optional in route matching.  link to issue 3024.  New test has been added.
+
 # Release v2.3.0
 
 ### Minor Changes

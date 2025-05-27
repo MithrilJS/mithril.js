@@ -1413,7 +1413,7 @@ var compileTemplate = function(template) {
 			if (extra === ".") return "([^/]+)\\."
 			return "([^/]+)" + (extra || "")
 		}
-	) + "$")
+	) + "\\/?$")
 	return function(data1) {
 		// First, check the params. Usually, there isn't any, and it's just
 		// checking a static set.
