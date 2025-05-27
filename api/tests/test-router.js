@@ -227,7 +227,7 @@ o.spec("route", function() {
 
 				o("remove trailing slash to match route if it is before rest operator match (...) ", function() {
 					$window.location.href = prefix + "/test/d/"
-					route(root, "/test/:a...", {
+					route(root, "/test/some/path", {
 						"/test/:a" : {
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
