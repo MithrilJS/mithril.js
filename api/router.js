@@ -44,7 +44,6 @@ module.exports = function($window, mountRedraw) {
 		},
 		onremove: function() {
 			$window.removeEventListener("popstate", fireAsync, false)
-			$window.removeEventListener("hashchange", resolveRoute, false)
 		},
 		view: function() {
 			if (!state || sentinel === currentResolver) return
@@ -81,7 +80,7 @@ module.exports = function($window, mountRedraw) {
 
 		function reject(e) {
 			console.error(e)
-			setPath(fallbackRoute, null, {replace: true})
+			route.set(fallbackRoute, null, {replace: true})
 		}
 
 		loop(0)
@@ -125,14 +124,10 @@ module.exports = function($window, mountRedraw) {
 			if (path === fallbackRoute) {
 				throw new Error("Could not resolve default route " + fallbackRoute + ".")
 			}
-			setPath(fallbackRoute, null, {replace: true})
+			route.set(fallbackRoute, null, {replace: true})
 		}
 	}
 
-	// Set it unconditionally so `m.route.set` and `m.route.Link` both work,
-	// even if neither `pushState` nor `hashchange` are supported. It's
-	// cleared if `hashchange` is used, since that makes it automatically
-	// async.
 	function fireAsync() {
 		if (!scheduled) {
 			scheduled = true
@@ -140,20 +135,6 @@ module.exports = function($window, mountRedraw) {
 			// dependency. Note that this will muck with tests a *lot*, so it's
 			// not as easy of a change as it sounds.
 			callAsync(resolveRoute)
-		}
-	}
-
-	function setPath(path, data, options) {
-		path = buildPathname(path, data)
-		if (ready) {
-			fireAsync()
-			var state = options ? options.state : null
-			var title = options ? options.title : null
-			if (options && options.replace) $window.history.replaceState(state, title, route.prefix + path)
-			else $window.history.pushState(state, title, route.prefix + path)
-		}
-		else {
-			$window.location.href = route.prefix + path
 		}
 	}
 
@@ -180,11 +161,7 @@ module.exports = function($window, mountRedraw) {
 			}
 		}
 
-		if (typeof $window.history.pushState === "function") {
-			$window.addEventListener("popstate", fireAsync, false)
-		} else if (route.prefix[0] === "#") {
-			$window.addEventListener("hashchange", resolveRoute, false)
-		}
+		$window.addEventListener("popstate", fireAsync, false)
 
 		ready = true
 		mountRedraw.mount(root, RouterRoot)
@@ -196,7 +173,18 @@ module.exports = function($window, mountRedraw) {
 			options.replace = true
 		}
 		lastUpdate = null
-		setPath(path, data, options)
+
+		path = buildPathname(path, data)
+		if (ready) {
+			fireAsync()
+			var state = options ? options.state : null
+			var title = options ? options.title : null
+			if (options && options.replace) $window.history.replaceState(state, title, route.prefix + path)
+			else $window.history.pushState(state, title, route.prefix + path)
+		}
+		else {
+			$window.location.href = route.prefix + path
+		}
 	}
 	route.get = function() {return currentPath}
 	route.prefix = "#!"
