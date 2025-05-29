@@ -139,6 +139,12 @@ module.exports = function($window, mountRedraw) {
 	}
 
 	function setPath(path, data, options) {
+		if (lastUpdate != null) {
+			options = options || {}
+			options.replace = true
+		}
+		lastUpdate = null
+
 		path = buildPathname(path, data)
 		if (ready) {
 			fireAsync()
@@ -181,14 +187,7 @@ module.exports = function($window, mountRedraw) {
 		mountRedraw.mount(root, RouterRoot)
 		resolveRoute()
 	}
-	route.set = function(path, data, options) {
-		if (lastUpdate != null) {
-			options = options || {}
-			options.replace = true
-		}
-		lastUpdate = null
-		setPath(path, data, options)
-	}
+	route.set = setPath
 	route.get = function() {return currentPath}
 	route.prefix = "#!"
 	route.Link = {
