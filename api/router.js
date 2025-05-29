@@ -44,7 +44,6 @@ module.exports = function($window, mountRedraw) {
 		},
 		onremove: function() {
 			$window.removeEventListener("popstate", fireAsync, false)
-			$window.removeEventListener("hashchange", resolveRoute, false)
 		},
 		view: function() {
 			if (!state || sentinel === currentResolver) return
@@ -129,10 +128,6 @@ module.exports = function($window, mountRedraw) {
 		}
 	}
 
-	// Set it unconditionally so `m.route.set` and `m.route.Link` both work,
-	// even if neither `pushState` nor `hashchange` are supported. It's
-	// cleared if `hashchange` is used, since that makes it automatically
-	// async.
 	function fireAsync() {
 		if (!scheduled) {
 			scheduled = true
@@ -180,11 +175,7 @@ module.exports = function($window, mountRedraw) {
 			}
 		}
 
-		if (typeof $window.history.pushState === "function") {
-			$window.addEventListener("popstate", fireAsync, false)
-		} else if (route.prefix[0] === "#") {
-			$window.addEventListener("hashchange", resolveRoute, false)
-		}
+		$window.addEventListener("popstate", fireAsync, false)
 
 		ready = true
 		mountRedraw.mount(root, RouterRoot)
