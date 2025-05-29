@@ -80,7 +80,7 @@ module.exports = function($window, mountRedraw) {
 
 		function reject(e) {
 			console.error(e)
-			setPath(fallbackRoute, null, {replace: true})
+			route.set(fallbackRoute, null, {replace: true})
 		}
 
 		loop(0)
@@ -124,7 +124,7 @@ module.exports = function($window, mountRedraw) {
 			if (path === fallbackRoute) {
 				throw new Error("Could not resolve default route " + fallbackRoute + ".")
 			}
-			setPath(fallbackRoute, null, {replace: true})
+			route.set(fallbackRoute, null, {replace: true})
 		}
 	}
 
@@ -135,26 +135,6 @@ module.exports = function($window, mountRedraw) {
 			// dependency. Note that this will muck with tests a *lot*, so it's
 			// not as easy of a change as it sounds.
 			callAsync(resolveRoute)
-		}
-	}
-
-	function setPath(path, data, options) {
-		if (lastUpdate != null) {
-			options = options || {}
-			options.replace = true
-		}
-		lastUpdate = null
-
-		path = buildPathname(path, data)
-		if (ready) {
-			fireAsync()
-			var state = options ? options.state : null
-			var title = options ? options.title : null
-			if (options && options.replace) $window.history.replaceState(state, title, route.prefix + path)
-			else $window.history.pushState(state, title, route.prefix + path)
-		}
-		else {
-			$window.location.href = route.prefix + path
 		}
 	}
 
@@ -187,7 +167,25 @@ module.exports = function($window, mountRedraw) {
 		mountRedraw.mount(root, RouterRoot)
 		resolveRoute()
 	}
-	route.set = setPath
+	route.set = function(path, data, options) {
+		if (lastUpdate != null) {
+			options = options || {}
+			options.replace = true
+		}
+		lastUpdate = null
+
+		path = buildPathname(path, data)
+		if (ready) {
+			fireAsync()
+			var state = options ? options.state : null
+			var title = options ? options.title : null
+			if (options && options.replace) $window.history.replaceState(state, title, route.prefix + path)
+			else $window.history.pushState(state, title, route.prefix + path)
+		}
+		else {
+			$window.location.href = route.prefix + path
+		}
+	}
 	route.get = function() {return currentPath}
 	route.prefix = "#!"
 	route.Link = {
