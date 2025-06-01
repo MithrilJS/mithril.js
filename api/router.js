@@ -33,9 +33,6 @@ module.exports = function($window, mountRedraw) {
 	var currentResolver, component, attrs, currentPath, lastUpdate
 
 	var RouterRoot = {
-		onbeforeupdate: function() {
-			return hasBeenResolved
-		},
 		onremove: function() {
 			$window.removeEventListener("popstate", fireAsync, false)
 		},
