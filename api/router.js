@@ -8,8 +8,6 @@ var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
 var censor = require("../util/censor")
 
-var sentinel = {}
-
 function decodeURIComponentSave(component) {
 	try {
 		return decodeURIComponent(component)
@@ -27,26 +25,22 @@ module.exports = function($window, mountRedraw) {
 
 	var scheduled = false
 
-	// state === 0: init
-	// state === 1: scheduled
-	// state === 2: done
 	var ready = false
-	var state = 0
+	var hasBeenResolved = false
 
 	var compiled, fallbackRoute
 
-	var currentResolver = sentinel, component, attrs, currentPath, lastUpdate
+	var currentResolver, component, attrs, currentPath, lastUpdate
 
 	var RouterRoot = {
 		onbeforeupdate: function() {
-			state = state ? 2 : 1
-			return !(!state || sentinel === currentResolver)
+			return hasBeenResolved
 		},
 		onremove: function() {
 			$window.removeEventListener("popstate", fireAsync, false)
 		},
 		view: function() {
-			if (!state || sentinel === currentResolver) return
+			if (!hasBeenResolved) return
 			// Wrap in a fragment to preserve existing key semantics
 			var vnode = [Vnode(component, attrs.key, attrs)]
 			if (currentResolver) vnode = currentResolver.render(vnode[0])
@@ -85,9 +79,6 @@ module.exports = function($window, mountRedraw) {
 
 		loop(0)
 		function loop(i) {
-			// state === 0: init
-			// state === 1: scheduled
-			// state === 2: done
 			for (; i < compiled.length; i++) {
 				if (compiled[i].check(data)) {
 					var payload = compiled[i].component
@@ -99,9 +90,9 @@ module.exports = function($window, mountRedraw) {
 						component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 						attrs = data.params, currentPath = path, lastUpdate = null
 						currentResolver = payload.render ? payload : null
-						if (state === 2) mountRedraw.redraw()
+						if (hasBeenResolved) mountRedraw.redraw()
 						else {
-							state = 2
+							hasBeenResolved = true
 							mountRedraw.redraw.sync()
 						}
 					}
