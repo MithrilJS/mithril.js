@@ -104,7 +104,7 @@ module.exports = function($window, mountRedraw) {
 							return payload.onmatch(data.params, path, matchedRoute)
 						}).then(update, path === fallbackRoute ? null : reject)
 					}
-					else update("div")
+					else update(/* "div" */)
 					return
 				}
 			}
