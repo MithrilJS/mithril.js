@@ -15,7 +15,7 @@
 
 ## What is Mithril.js?
 
-A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->9.00 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
+A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->8.92 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
 Mithril.js is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 

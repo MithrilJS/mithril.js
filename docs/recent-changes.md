@@ -1,4 +1,12 @@
 
+# Release v2.3.2
+
+### Patch Changes
+
+#### [Refactor router, fixes #2505 and #2778 (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3027)
+
+This PR refactors the router code to fix two issues (#2505 and #2778).
+
 # Release v2.3.1
 
 ### Patch Changes
