@@ -42,10 +42,10 @@ module.exports = function($window, mountRedraw) {
 			// Therefore, the following early return is not needed.
 			// if (!hasBeenResolved) return
 
+			var vnode = Vnode(component, attrs.key, attrs)
+			if (currentResolver) return currentResolver.render(vnode)
 			// Wrap in a fragment to preserve existing key semantics
-			var vnode = [Vnode(component, attrs.key, attrs)]
-			if (currentResolver) vnode = currentResolver.render(vnode[0])
-			return vnode
+			return [vnode]
 		},
 	}
 
