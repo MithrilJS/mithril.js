@@ -1931,6 +1931,85 @@ o.spec("route", function() {
 						o(route.param()).deepEquals({id:"1"})
 					})
 				})
+
+				o("route component is mounted after the route is initially resolved (synchronous)", function() {
+					var Component = {
+						view: lock(function() {
+							return m("span")
+						})
+					}
+
+					// render another vnode first
+					var render = coreRenderer($window)
+					render(root, m("a"))
+					o(root.firstChild.nodeName).equals("A")
+
+					// call route() (mount synchronously)
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : Component
+					})
+
+					// route component is mounted and the first rendered vnode is cleared
+					o(root.firstChild.nodeName).equals("SPAN")
+				})
+
+				o("route component is mounted after the route is initially resolved (onmatch, asynchronous)", function() {
+					var Component = {
+						view: lock(function() {
+							return m("span")
+						})
+					}
+
+					var resolver = {
+						onmatch: lock(function() {
+							return Component
+						})
+					}
+
+					// render another vnode first
+					var render = coreRenderer($window)
+					render(root, m("a"))
+					o(root.firstChild.nodeName).equals("A")
+
+					// call route() (mount asynchronously)
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : resolver
+					})
+
+					// the first rendered vnode is not yet cleared
+					o(root.firstChild.nodeName).equals("A")
+
+					return waitCycles(1).then(function() {
+						// route component is mounted and the first rendered vnode is cleared
+						o(root.firstChild.nodeName).equals("SPAN")
+					})
+				})
+
+				o("error in the route component is thrown and not caught in the initial rendering (#2621)", function() {
+					var Component = {
+						view: lock(function() {
+							throw Error("foo")
+						})
+					}
+
+					// Errors thrown during redrawing of mounted components are caught in m.mount()
+					// and console.error is called.
+					// Therefore, spy is used to confirm that console.error is not called
+					// when it is first mounted.
+					var spy = o.spy(console.error)
+					console.error = spy
+
+					$window.location.href = prefix + "/"
+					o(function(){
+						route(root, "/", {
+							"/" : Component
+						})
+					}).throws("foo")
+
+					o(spy.callCount).equals(0)
+				})
 			})
 		})
 	})
