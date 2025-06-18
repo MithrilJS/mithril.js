@@ -1939,10 +1939,20 @@ o.spec("route", function() {
 						})
 					}
 
+					// initial root node
+					root.textContent = "foo"
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("#text")
+					o(root.childNodes[0].nodeValue).equals("foo")
+
 					// render another vnode first
 					var render = coreRenderer($window)
-					render(root, m("a"))
-					o(root.firstChild.nodeName).equals("A")
+					var vnode = m("a", "loading...")
+					render(root, vnode)
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[0].firstChild.nodeName).equals("#text")
+					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
 
 					// call route() (mount synchronously)
 					$window.location.href = prefix + "/"
@@ -1951,7 +1961,10 @@ o.spec("route", function() {
 					})
 
 					// route component is mounted and the first rendered vnode is cleared
-					o(root.firstChild.nodeName).equals("SPAN")
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0]).notEquals(vnode.dom)
+					o(root.childNodes[0].nodeName).equals("SPAN")
+					o(root.childNodes[0].childNodes.length).equals(0)
 				})
 
 				o("route component is mounted after the route is initially resolved (onmatch, asynchronous)", function() {
@@ -1967,10 +1980,20 @@ o.spec("route", function() {
 						})
 					}
 
+					// initial root node
+					root.textContent = "foo"
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("#text")
+					o(root.childNodes[0].nodeValue).equals("foo")
+
 					// render another vnode first
 					var render = coreRenderer($window)
-					render(root, m("a"))
-					o(root.firstChild.nodeName).equals("A")
+					var vnode = m("a", "loading...")
+					render(root, vnode)
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[0].firstChild.nodeName).equals("#text")
+					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
 
 					// call route() (mount asynchronously)
 					$window.location.href = prefix + "/"
@@ -1979,11 +2002,18 @@ o.spec("route", function() {
 					})
 
 					// the first rendered vnode is not yet cleared
-					o(root.firstChild.nodeName).equals("A")
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0]).equals(vnode.dom)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[0].firstChild.nodeName).equals("#text")
+					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
 
 					return waitCycles(1).then(function() {
 						// route component is mounted and the first rendered vnode is cleared
-						o(root.firstChild.nodeName).equals("SPAN")
+						o(root.childNodes.length).equals(1)
+						o(root.childNodes[0]).notEquals(vnode.dom)
+						o(root.childNodes[0].nodeName).equals("SPAN")
+						o(root.childNodes[0].childNodes.length).equals(0)
 					})
 				})
 
