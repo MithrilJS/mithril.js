@@ -1935,6 +1935,8 @@ o.spec("route", function() {
 				o("route component is mounted after the route is initially resolved (synchronous)", function() {
 					var Component = {
 						view: lock(function() {
+							// the first rendered vnode is cleared
+							o(root.childNodes.length).equals(0)
 							return m("span")
 						})
 					}
@@ -1976,7 +1978,18 @@ o.spec("route", function() {
 
 					var resolver = {
 						onmatch: lock(function() {
+							// the first rendered vnode is not yet cleared
+							o(root.childNodes.length).equals(1)
+							o(root.childNodes[0]).equals(vnode.dom)
+							o(root.childNodes[0].nodeName).equals("A")
+							o(root.childNodes[0].firstChild.nodeName).equals("#text")
+							o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
 							return Component
+						}),
+						render: lock(function(vnode) {
+							// the first rendered vnode is cleared
+							o(root.childNodes.length).equals(0)
+							return vnode
 						})
 					}
 
