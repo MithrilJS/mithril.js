@@ -2013,8 +2013,14 @@ o.spec("route", function() {
 						})
 					}
 
+					// check for the order of calling onmatch and render
+					var count = 0
+
 					var resolver = {
 						onmatch: lock(function() {
+							count += 1
+							o(count).equals(1)
+
 							// the first rendered vnode is not yet cleared
 							o(root.childNodes.length).equals(1)
 							o(root.childNodes[0]).equals(vnode.dom)
@@ -2024,6 +2030,9 @@ o.spec("route", function() {
 							return Component
 						}),
 						render: lock(function(vnode) {
+							count += 1
+							o(count).equals(2)
+
 							// the first rendered vnode is cleared
 							o(root.childNodes.length).equals(0)
 							return vnode
@@ -2058,12 +2067,17 @@ o.spec("route", function() {
 					o(root.childNodes[0].firstChild.nodeName).equals("#text")
 					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
 
+					// The count of route resolver method calls is still 0
+					o(count).equals(0)
+
 					return waitCycles(1).then(function() {
 						// route component is mounted and the first rendered vnode is cleared
 						o(root.childNodes.length).equals(1)
 						o(root.childNodes[0]).notEquals(vnode.dom)
 						o(root.childNodes[0].nodeName).equals("SPAN")
 						o(root.childNodes[0].childNodes.length).equals(0)
+
+						o(count).equals(2)
 					})
 				})
 
