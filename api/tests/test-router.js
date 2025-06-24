@@ -1931,6 +1931,179 @@ o.spec("route", function() {
 						o(route.param()).deepEquals({id:"1"})
 					})
 				})
+
+				o("route component is mounted after the route is initially resolved (synchronous)", function() {
+					var Component = {
+						view: lock(function() {
+							// the first rendered vnode is cleared
+							o(root.childNodes.length).equals(0)
+							return m("span")
+						})
+					}
+
+					// initial root node
+					root.textContent = "foo"
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("#text")
+					o(root.childNodes[0].nodeValue).equals("foo")
+
+					// render another vnode first
+					var render = coreRenderer($window)
+					var vnode = m("a", "loading...")
+					render(root, vnode)
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[0].firstChild.nodeName).equals("#text")
+					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
+
+					// call route() (mount synchronously)
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : Component
+					})
+
+					// route component is mounted and the first rendered vnode is cleared
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0]).notEquals(vnode.dom)
+					o(root.childNodes[0].nodeName).equals("SPAN")
+					o(root.childNodes[0].childNodes.length).equals(0)
+				})
+
+				o("route component is mounted after the route is initially resolved (render, synchronous)", function() {
+					var Component = {
+						render: lock(function() {
+							// the first rendered vnode is cleared
+							o(root.childNodes.length).equals(0)
+							return m("span")
+						})
+					}
+
+					// initial root node
+					root.textContent = "foo"
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("#text")
+					o(root.childNodes[0].nodeValue).equals("foo")
+
+					// render another vnode first
+					var render = coreRenderer($window)
+					var vnode = m("a", "loading...")
+					render(root, vnode)
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[0].firstChild.nodeName).equals("#text")
+					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
+
+					// call route() (mount synchronously)
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : Component
+					})
+
+					// route component is mounted and the first rendered vnode is cleared
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0]).notEquals(vnode.dom)
+					o(root.childNodes[0].nodeName).equals("SPAN")
+					o(root.childNodes[0].childNodes.length).equals(0)
+				})
+
+				o("route component is mounted after the route is initially resolved (onmatch, asynchronous)", function() {
+					var Component = {
+						view: lock(function() {
+							return m("span")
+						})
+					}
+
+					// check for the order of calling onmatch and render
+					var count = 0
+
+					var resolver = {
+						onmatch: lock(function() {
+							count += 1
+							o(count).equals(1)
+
+							// the first rendered vnode is not yet cleared
+							o(root.childNodes.length).equals(1)
+							o(root.childNodes[0]).equals(vnode.dom)
+							o(root.childNodes[0].nodeName).equals("A")
+							o(root.childNodes[0].firstChild.nodeName).equals("#text")
+							o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
+							return Component
+						}),
+						render: lock(function(vnode) {
+							count += 1
+							o(count).equals(2)
+
+							// the first rendered vnode is cleared
+							o(root.childNodes.length).equals(0)
+							return vnode
+						})
+					}
+
+					// initial root node
+					root.textContent = "foo"
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("#text")
+					o(root.childNodes[0].nodeValue).equals("foo")
+
+					// render another vnode first
+					var render = coreRenderer($window)
+					var vnode = m("a", "loading...")
+					render(root, vnode)
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[0].firstChild.nodeName).equals("#text")
+					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
+
+					// call route() (mount asynchronously)
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : resolver
+					})
+
+					// the first rendered vnode is not yet cleared
+					o(root.childNodes.length).equals(1)
+					o(root.childNodes[0]).equals(vnode.dom)
+					o(root.childNodes[0].nodeName).equals("A")
+					o(root.childNodes[0].firstChild.nodeName).equals("#text")
+					o(root.childNodes[0].firstChild.nodeValue).equals("loading...")
+
+					// The count of route resolver method calls is still 0
+					o(count).equals(0)
+
+					return waitCycles(1).then(function() {
+						// route component is mounted and the first rendered vnode is cleared
+						o(root.childNodes.length).equals(1)
+						o(root.childNodes[0]).notEquals(vnode.dom)
+						o(root.childNodes[0].nodeName).equals("SPAN")
+						o(root.childNodes[0].childNodes.length).equals(0)
+
+						o(count).equals(2)
+					})
+				})
+
+				o("error in the route component is thrown and not caught in the initial rendering (#2621)", function() {
+					var Component = {
+						view: lock(function() {
+							throw Error("foo")
+						})
+					}
+
+					// Errors thrown during redrawing of mounted components are caught in m.mount()
+					// and console.error is called.
+					// Therefore, spy is used to confirm that console.error is not called
+					// when it is first mounted.
+					var spy = o.spy(console.error)
+					console.error = spy
+
+					$window.location.href = prefix + "/"
+					o(function(){
+						route(root, "/", {
+							"/" : Component
+						})
+					}).throws("foo")
+
+					o(spy.callCount).equals(0)
+				})
 			})
 		})
 	})
