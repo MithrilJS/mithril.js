@@ -28,20 +28,24 @@ module.exports = function($window, mountRedraw) {
 	var ready = false
 	var hasBeenResolved = false
 
-	var compiled, fallbackRoute
+	var dom, compiled, fallbackRoute
 
 	var currentResolver, component, attrs, currentPath, lastUpdate
 
 	var RouterRoot = {
 		onremove: function() {
+			ready = hasBeenResolved = false
 			$window.removeEventListener("popstate", fireAsync, false)
 		},
 		view: function() {
-			if (!hasBeenResolved) return
+			// The route has already been resolved.
+			// Therefore, the following early return is not needed.
+			// if (!hasBeenResolved) return
+
+			var vnode = Vnode(component, attrs.key, attrs)
+			if (currentResolver) return currentResolver.render(vnode)
 			// Wrap in a fragment to preserve existing key semantics
-			var vnode = [Vnode(component, attrs.key, attrs)]
-			if (currentResolver) vnode = currentResolver.render(vnode[0])
-			return vnode
+			return [vnode]
 		},
 	}
 
@@ -90,7 +94,7 @@ module.exports = function($window, mountRedraw) {
 						if (hasBeenResolved) mountRedraw.redraw()
 						else {
 							hasBeenResolved = true
-							mountRedraw.redraw.sync()
+							mountRedraw.mount(dom, RouterRoot)
 						}
 					}
 					// There's no understating how much I *wish* I could
@@ -148,11 +152,13 @@ module.exports = function($window, mountRedraw) {
 				throw new ReferenceError("Default route doesn't match any known routes.")
 			}
 		}
+		dom = root
 
 		$window.addEventListener("popstate", fireAsync, false)
 
 		ready = true
-		mountRedraw.mount(root, RouterRoot)
+
+		// The RouterRoot component is mounted when the route is first resolved.
 		resolveRoute()
 	}
 	route.set = function(path, data, options) {
