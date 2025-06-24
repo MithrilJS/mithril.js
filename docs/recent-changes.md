@@ -1,4 +1,15 @@
 
+# Release v2.3.3
+
+### Patch Changes
+
+#### [router: delay mounting RouterRoot until the first route is resolved (fixes #2621) (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3030)
+
+This PR delays the initial mounting of the router component until after the route has been resolved.
+#### [Bump glob from 11.0.2 to 11.0.3 in the normal group (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/3029)
+
+Bumps the normal group with 1 update: [glob](https://github.com/isaacs/node-glob).  Updates `glob` from 11.0.2 to 11.0.3.  Commits.  af2e7ce 11.0.3.
+
 # Release v2.3.2
 
 ### Patch Changes

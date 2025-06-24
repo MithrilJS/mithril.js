@@ -1391,9 +1391,9 @@ var parsePathname = function(url) {
 			: parseQueryString(url.slice(queryIndex0 + 1, queryEnd0)),
 	}
 }
-// Compiles a template into a function that takes a resolved0 path2 (without query0
+// Compiles a template into a function that takes a resolved1 path2 (without query0
 // strings) and returns an object containing the template parameters with their
-// parsed values. This expects the input of the compiled0 template to be the
+// parsed values. This expects the input of the compiled template to be the
 // output of `parsePathname`. Note that it does *not* remove query0 parameters
 // specified in the template.
 var compileTemplate = function(template) {
@@ -1487,18 +1487,21 @@ var _26 = function($window, mountRedraw00) {
 	var scheduled = false
 	var ready = false
 	var hasBeenResolved = false
-	var compiled, fallbackRoute
+	var dom0, compiled, fallbackRoute
 	var currentResolver, component, attrs3, currentPath, lastUpdate
 	var RouterRoot = {
 		onremove: function() {
+			ready = hasBeenResolved = false
 			$window.removeEventListener("popstate", fireAsync, false)
 		},
 		view: function() {
-			if (!hasBeenResolved) return
+			// The route has already been resolved0.
+			// Therefore, the following early return is2 not needed.
+			// if (!hasBeenResolved) return
+			var vnode6 = Vnode(component, attrs3.key, attrs3)
+			if (currentResolver) return currentResolver.render(vnode6)
 			// Wrap in a fragment0 to preserve existing key3 semantics
-			var vnode6 = [Vnode(component, attrs3.key, attrs3)]
-			if (currentResolver) vnode6 = currentResolver.render(vnode6[0])
-			return vnode6
+			return [vnode6]
 		},
 	}
 	var SKIP = route.SKIP = {}
@@ -1542,7 +1545,7 @@ var _26 = function($window, mountRedraw00) {
 						if (hasBeenResolved) mountRedraw00.redraw()
 						else {
 							hasBeenResolved = true
-							mountRedraw00.redraw.sync()
+							mountRedraw00.mount(dom0, RouterRoot)
 						}
 					}
 					// There's no understating how much I *wish* I could
@@ -1595,9 +1598,10 @@ var _26 = function($window, mountRedraw00) {
 				throw new ReferenceError("Default route doesn't match any known routes.")
 			}
 		}
+		dom0 = root
 		$window.addEventListener("popstate", fireAsync, false)
 		ready = true
-		mountRedraw00.mount(root, RouterRoot)
+		// The RouterRoot component is2 mounted when the route is2 first resolved0.
 		resolveRoute()
 	}
 	route.set = function(path0, data, options) {
