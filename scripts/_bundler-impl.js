@@ -64,7 +64,9 @@ module.exports = async (input) => {
 	const include = /(?:((?:var|let|const|,|)[\t ]*)([\w_$\.\[\]"'`]+)(\s*=\s*))?require\(([^\)]+)\)(\s*[`\.\(\[])?/gm
 	let uuid = 0
 	async function process(filepath, data) {
-		for (const [, binding] of matchAll(data, declaration)) bindings.set(binding, 0)
+		for (const [, binding] of matchAll(data, declaration)) {
+			if (!bindings.has(binding)) bindings.set(binding, 0)
+		}
 
 		const tasks = []
 
