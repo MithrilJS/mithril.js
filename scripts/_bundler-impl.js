@@ -164,6 +164,12 @@ module.exports = async (input) => {
 			return pre + b.replace(/\d+$/, "") + post
 		})
 
+		// fix comment‑only lines
+		const commentOnlyLines = /^(?:[ \t]*\/\/[^\r\n]*|[ \t]*\/\*[\s\S]*?\*\/[ \t]*)\r?$/gm
+		code = code.replace(commentOnlyLines, (comment) =>
+			comment.replace(variables, (match) => match.replace(/\d+$/, ""))
+		)
+
 		return code
 			.replace(/("|')use strict\1;?/gm, "") // remove extraneous "use strict"
 			.replace(/module\.exports\s*=\s*/gm, escapeReplace(rest ? `var _${uuid}` + eq : def + (rest ? "_" : "") + variable + eq)) // export
