@@ -293,4 +293,79 @@ o.spec("bundler", async () => {
 
 		o(await bundle(p("a.js"))).equals(";(function() {\nvar b0 = {b: 1}\nvar b = function() {return b0.b}\n}());")
 	})
+	o.spec("fix comments", () => {
+		o("fix /* */ comments", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = 2\n/* a */\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = 2\n/* a */\nvar c = a0\n}());")
+		})
+		o("fix // comments", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = 2\n// a\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = 2\n// a\nvar c = a0\n}());")
+		})
+		o("fix multi-line /* */ comments", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = 2\n/* \na */\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = 2\n/* \na */\nvar c = a0\n}());")
+		})
+		o("does not fix trailing /* */ comments", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = 2/* a */\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = 2/* a0 */\nvar c = a0\n}());")
+		})
+		o("does not fix trailing // comments", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = 2// a\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = 2// a0\nvar c = a0\n}());")
+		})
+		o("does not fix trailing multi-line /* */ comments", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = 2/* \na */\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = 2/* \na0 */\nvar c = a0\n}());")
+		})
+	})
+	o("prevents double suffixes (mountRedraw00)", async () => {
+		await setup({
+			// /index.js (request(b), mount-redraw(z), route(c))
+			"a.js": 'var b = require("./b")\nvar z = require("./z")\nvar c = require("./c")',
+			// /request.js
+			"b.js": 'var z = require("./z")\nmodule.exports = require("./p")(z)',
+			// /route.js
+			"c.js": 'var z = require("./z")\nmodule.exports = require("./q")(z)',
+			// /request/request.js
+			"p.js": "module.exports = function(z){}",
+			// /api/router.js
+			"q.js": "module.exports = function(z){}",
+			// /mount-redraw.js
+			"z.js": "module.exports = {}",
+		})
+
+		// check that the argument z2 is not z00
+		o(await bundle(p("a.js"))).equals(";(function() {\nvar z0 = {}\nvar _1 = function(z1){}\nvar b = _1(z0)\nvar z = z0\nvar _5 = function(z2){}\nvar c = _5(z)\n}());")
+	})
 })
