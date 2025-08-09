@@ -74,7 +74,7 @@ module.exports = function($window, mountRedraw) {
 		Object.assign(data.params, $window.history.state)
 
 		function reject(e) {
-			console.error(e)
+			reportError(e)
 			route.set(fallbackRoute, null, {replace: true})
 		}
 

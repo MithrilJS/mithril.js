@@ -10,11 +10,11 @@ var coreRenderer = require("../../render/render")
 var h = require("../../render/hyperscript")
 
 o.spec("mount/redraw", function() {
-	var root, m, throttleMock, consoleMock, $document, errors
-	var realError = console.error
+	var root, m, throttleMock, $document, errors
+	var realError = global.reportError
 	o.beforeEach(function() {
 		var $window = domMock()
-		console.error = consoleMock = o.spy()
+		global.reportError = o.spy()
 		throttleMock = throttleMocker()
 		root = $window.document.body
 		m = mountRedraw(coreRenderer($window), throttleMock.schedule)
@@ -23,11 +23,11 @@ o.spec("mount/redraw", function() {
 	})
 
 	o.afterEach(function() {
-		o(consoleMock.calls.map(function(c) {
+		o(global.reportError.calls.map(function(c) {
 			return c.args[0]
 		})).deepEquals(errors)
 		o(throttleMock.queueLength()).equals(0)
-		console.error = realError
+		global.reportError = realError
 	})
 
 	o("shouldn't error if there are no renderers", function() {

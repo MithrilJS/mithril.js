@@ -10,7 +10,7 @@ module.exports = function(render, schedule) {
 	function sync() {
 		for (offset = 0; offset < subscriptions.length; offset += 2) {
 			try { render(subscriptions[offset], Vnode(subscriptions[offset + 1]), redraw) }
-			catch (e) { console.error(e) }
+			catch (e) { reportError(e) }
 		}
 		offset = -1
 	}

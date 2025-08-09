@@ -69,6 +69,7 @@ o.spec("route", function() {
 
 				// In case it doesn't get reset
 				var realError = console.error
+				var realReportError = global.reportError
 
 				o.beforeEach(function() {
 					currentTest = nextID++
@@ -92,6 +93,7 @@ o.spec("route", function() {
 					o(throttleMock.queueLength()).equals(0)
 					currentTest = -1 // doesn't match any test
 					console.error = realError
+					global.reportError = realReportError
 				})
 
 				o("throws on invalid `root` DOM node", function() {
@@ -1175,7 +1177,7 @@ o.spec("route", function() {
 					var renderCount = 0
 					var spy = o.spy()
 					var error = new Error("error")
-					var errorSpy = console.error = o.spy()
+					var errorSpy = global.reportError = o.spy()
 
 					var resolver = {
 						onmatch: lock(function() {
@@ -2089,11 +2091,11 @@ o.spec("route", function() {
 					}
 
 					// Errors thrown during redrawing of mounted components are caught in m.mount()
-					// and console.error is called.
-					// Therefore, spy is used to confirm that console.error is not called
+					// and reportError is called.
+					// Therefore, spy is used to confirm that reportError is not called
 					// when it is first mounted.
-					var spy = o.spy(console.error)
-					console.error = spy
+					var spy = o.spy()
+					global.reportError = spy
 
 					$window.location.href = prefix + "/"
 					o(function(){
