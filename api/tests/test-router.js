@@ -79,7 +79,7 @@ o.spec("route", function() {
 
 					root = $window.document.body
 
-					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
+					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule)
 					route = apiRouter($window, mountRedraw)
 					route.prefix = prefix
 					console.error = function() {

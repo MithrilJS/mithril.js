@@ -2,7 +2,7 @@
 
 var Vnode = require("../render/vnode")
 
-module.exports = function(render, schedule, console) {
+module.exports = function(render, schedule) {
 	var subscriptions = []
 	var pending = false
 	var offset = -1
