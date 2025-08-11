@@ -64,8 +64,8 @@ o.spec("normalizeChildren", function() {
 	o("disallows mixed keys, starting with null", function() {
 		o(function() {
 			Vnode.normalizeChildren([
-				{data: 1},
 				null,
+				{key: 2},
 			])
 		}).throws(TypeError)
 	})
@@ -80,8 +80,8 @@ o.spec("normalizeChildren", function() {
 	o("disallows mixed keys, starting with undefined", function() {
 		o(function() {
 			Vnode.normalizeChildren([
-				{data: 1},
 				undefined,
+				{key: 2},
 			])
 		}).throws(TypeError)
 	})
@@ -96,8 +96,8 @@ o.spec("normalizeChildren", function() {
 	o("disallows mixed keys, starting with false", function() {
 		o(function() {
 			Vnode.normalizeChildren([
-				{data: 1},
 				false,
+				{key: 2},
 			])
 		}).throws(TypeError)
 	})
@@ -112,8 +112,8 @@ o.spec("normalizeChildren", function() {
 	o("disallows mixed keys, starting with true", function() {
 		o(function() {
 			Vnode.normalizeChildren([
-				{data: 1},
 				true,
+				{key: 2},
 			])
 		}).throws(TypeError)
 	})
