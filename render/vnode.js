@@ -19,7 +19,7 @@ Vnode.normalizeChildren = function(input) {
 		for (var i = 1; i < input.length; i++) {
 			if ((input[i] != null && input[i].key != null) !== isKeyed) {
 				throw new TypeError(
-					isKeyed && (input[i] != null || typeof input[i] === "boolean")
+					isKeyed && (input[i] != null && typeof input[i] !== "boolean")
 						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit keyed empty fragment, m.fragment({key: ...}), instead of a hole."
 						: "In fragments, vnodes must either all have keys or none have keys."
 				)
