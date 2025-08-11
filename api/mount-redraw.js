@@ -17,9 +17,6 @@ module.exports = function(render, schedule, console) {
 		component.postupdate = saveOldVdom;
 		component.postcreate = saveOldVdom;
 
-		// Initialize subscriber entry
-		microSubscribers.set(component, null);
-
 		return component;
 	}
 
