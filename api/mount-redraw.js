@@ -25,7 +25,6 @@ module.exports = function(render, schedule, console) {
 
 	function sync(component) {
 		if(component){
-			console.log("microSubscribers ",microSubscribers.get(component));
 			const oldComponent = microSubscribers.get(component);
 			if(oldComponent){
 				const dom = oldComponent.dom.parentElement;
