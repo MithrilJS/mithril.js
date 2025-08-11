@@ -1,4 +1,15 @@
 
+# Release v2.3.4
+
+### Patch Changes
+
+#### [Fix the error message selection condition (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/3037)
+
+The previous condition was basically "if this is non-nullish or a boolean".  That "or a boolean" is very obviously redundant.
+#### [bundler: fix mangled comments and double suffixes (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3032)
+
+This PR removes unnecessary suffixes from comments in the bundle file.  It also fixes the strange double suffix (`mountRedraw00`).
+
 # Release v2.3.3
 
 ### Patch Changes

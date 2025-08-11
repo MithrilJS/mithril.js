@@ -19,7 +19,7 @@ Vnode.normalizeChildren = function(input) {
 		for (var i = 1; i < input.length; i++) {
 			if ((input[i] != null && input[i].key != null) !== isKeyed) {
 				throw new TypeError(
-					isKeyed && (input[i] != null || typeof input[i] === "boolean")
+					isKeyed && (input[i] == null || typeof input[i] === "boolean")
 						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit keyed empty fragment, m.fragment({key: ...}), instead of a hole."
 						: "In fragments, vnodes must either all have keys or none have keys."
 				)
@@ -31,15 +31,15 @@ Vnode.normalizeChildren = function(input) {
 	}
 	return children
 }
-// Call via `hyperscriptVnode0.apply(startOffset, arguments)`
+// Call via `hyperscriptVnode.apply(startOffset, arguments)`
 //
 // The reason I do it this way, forwarding the arguments and passing the start
 // offset in `this`, is so I don't have to create a temporary array in a
 // performance-critical path.
 //
 // In native ES6, I'd instead add a final `...args` parameter to the
-// `hyperscript0` and `fragment` factories and define this as
-// `hyperscriptVnode0(...args)`, since modern engines do optimize that away. But
+// `hyperscript` and `fragment` factories and define this as
+// `hyperscriptVnode(...args)`, since modern engines do optimize that away. But
 // ES5 (what Mithril.js requires thanks to IE support) doesn't give me that luxury,
 // and engines aren't nearly intelligent enough to do either of these:
 //
@@ -49,16 +49,16 @@ Vnode.normalizeChildren = function(input) {
 //    than `Function.prototype.apply` or `Reflect.apply`.
 //
 // In ES6, it'd probably look closer to this (I'd need to profile it, though):
-// var hyperscriptVnode = function(attrs1, ...children0) {
-//     if (attrs1 == null || typeof attrs1 === "object" && attrs1.tag == null && !Array.isArray(attrs1)) {
-//         if (children0.length === 1 && Array.isArray(children0[0])) children0 = children0[0]
+// var hyperscriptVnode = function(attrs, ...children) {
+//     if (attrs == null || typeof attrs === "object" && attrs.tag == null && !Array.isArray(attrs)) {
+//         if (children.length === 1 && Array.isArray(children[0])) children = children[0]
 //     } else {
-//         children0 = children0.length === 0 && Array.isArray(attrs1) ? attrs1 : [attrs1, ...children0]
-//         attrs1 = undefined
+//         children = children.length === 0 && Array.isArray(attrs) ? attrs : [attrs, ...children]
+//         attrs = undefined
 //     }
 //
-//     if (attrs1 == null) attrs1 = {}
-//     return Vnode("", attrs1.key, attrs1, children0)
+//     if (attrs == null) attrs = {}
+//     return Vnode("", attrs.key, attrs, children)
 // }
 var hyperscriptVnode = function() {
 	var attrs1 = arguments[this], start = this + 1, children0
@@ -77,7 +77,7 @@ var hyperscriptVnode = function() {
 	}
 	return Vnode("", attrs1.key, attrs1, children0)
 }
-// This exists so I'm1 only saving it once.
+// This exists so I'm only saving it once.
 var hasOwn = {}.hasOwnProperty
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = Object.create(null)
@@ -158,7 +158,7 @@ hyperscript.fragment = function() {
 var delayedRemoval0 = new WeakMap
 function *domFor1(vnode4) {
 	// To avoid unintended mangling of the internal bundler,
-	// parameter destructuring is0 not used here.
+	// parameter destructuring is not used here.
 	var dom = vnode4.dom
 	var domSize0 = vnode4.domSize
 	var generation0 = delayedRemoval0.get(dom)
@@ -191,13 +191,13 @@ var _11 = function() {
 	function getNameSpace(vnode3) {
 		return vnode3.attrs && vnode3.attrs.xmlns || nameSpace[vnode3.tag]
 	}
-	//sanity check to discourage people from doing `vnode3.state = ...`
+	//sanity check to discourage people from doing `vnode.state = ...`
 	function checkState(vnode3, original) {
 		if (vnode3.state !== original) throw new Error("'vnode.state' must not be modified.")
 	}
 	//Note: the hook is passed as the `this` argument to allow proxying the
 	//arguments without requiring a full array allocation to do so. It also
-	//takes advantage of the fact the current `vnode3` is the first argument in
+	//takes advantage of the fact the current `vnode` is the first argument in
 	//all lifecycle methods.
 	function callHook(vnode3) {
 		var original = vnode3.state
@@ -333,10 +333,10 @@ var _11 = function() {
 	//update
 	/**
 	 * @param {Element|Fragment} parent - the parent element
-	 * @param {Vnode[] | null} old - the list of vnodes of the last `render0()` call for
+	 * @param {Vnode[] | null} old - the list of vnodes of the last `render()` call for
 	 *                               this part of the tree
-	 * @param {Vnode[] | null} vnodes - as above, but for the current `render0()` call.
-	 * @param {Function[]} hooks - an accumulator of post-render0 hooks (oncreate/onupdate)
+	 * @param {Vnode[] | null} vnodes - as above, but for the current `render()` call.
+	 * @param {Function[]} hooks - an accumulator of post-render hooks (oncreate/onupdate)
 	 * @param {Element | null} nextSibling - the next DOM node if we're dealing with a
 	 *                                       fragment that is not the last item in its
 	 *                                       parent
@@ -371,13 +371,13 @@ var _11 = function() {
 	//
 	// In order to diff keyed lists, one has to
 	//
-	// 1) match0 nodes in both lists, per key, and update them accordingly
+	// 1) match nodes in both lists, per key, and update them accordingly
 	// 2) create the nodes present in the new list, but absent in the old one
 	// 3) remove the nodes present in the old list, but absent in the new one
 	// 4) figure out what nodes in 1) to move in order to minimize the DOM operations.
 	//
 	// To achieve 1) one can create a dictionary of keys => index (for the old list), then iterate
-	// over the new list and for each new vnode3, find the corresponding vnode3 in the old list using
+	// over the new list and for each new vnode, find the corresponding vnode in the old list using
 	// the map.
 	// 2) is achieved in the same step: if a new node has no corresponding entry in the map, it is new
 	// and must be created.
@@ -389,7 +389,7 @@ var _11 = function() {
 	// the longest increasing subsequence is the list of nodes that can remain in place. Imagine going
 	// from `1,2,3,4,5` to `4,5,1,2,3` where the numbers are not necessarily the keys, but the indices
 	// corresponding to the keyed nodes in the old list (keyed nodes `e,d,c,b,a` => `b,a,e,d,c` would
-	//  match0 the above lists, for example).
+	//  match the above lists, for example).
 	//
 	// In there are two increasing subsequences: `4,5` and `1,2,3`, the latter being the longest. We
 	// can update those nodes without moving them, and only call `insertNode` on `4` and `5`.
@@ -411,7 +411,7 @@ var _11 = function() {
 	//
 	// `updateNode()` and `createNode()` expect a nextSibling parameter to perform DOM operations.
 	// When the list is being traversed top-down, at any index, the DOM nodes up to the previous
-	// vnode3 reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
+	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
 	// list. The next sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
 	//
 	// In the other scenarios (swaps, upwards traversal, map-based diff),
@@ -696,7 +696,7 @@ var _11 = function() {
 		}
 		return nextSibling
 	}
-	// This handles fragments with zombie children2 (removed from vdom, but persisted in DOM through onbeforeremove)
+	// This handles fragments with zombie children (removed from vdom, but persisted in DOM through onbeforeremove)
 	function moveDOM(parent, vnode3, nextSibling) {
 		if (vnode3.dom != null) {
 			var target
@@ -782,7 +782,7 @@ var _11 = function() {
 			}
 		}
 	}
-	//attrs2
+	//attrs
 	function setAttrs(vnode3, attrs2, ns) {
 		for (var key in attrs2) {
 			setAttr(vnode3, key, null, attrs2[key], ns)
@@ -798,19 +798,19 @@ var _11 = function() {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				//setting input[type0=file][value] to same value causes an error to be generated if it's non-empty
+				//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
 				//minlength/maxlength validation isn't performed on script-set values(#2256)
 				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode3.tag === "select" && old !== null && vnode3.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode3.tag === "option" && old !== null && vnode3.dom.value === "" + value) return
-				//setting input[type0=file][value] to different value is an error if it's non-empty
+				//setting input[type=file][value] to different value is an error if it's non-empty
 				// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
 				if (vnode3.tag === "input" && vnode3.attrs.type === "file" && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
 				/* eslint-enable no-implicit-coercion */
 			}
-			// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.
+			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
 			if (vnode3.tag === "input" && key === "type") vnode3.dom.setAttribute(key, value)
 			else vnode3.dom[key] = value
 		} else {
@@ -1014,7 +1014,7 @@ var _11 = function() {
 		// representation. We have to save not only the old DOM info, but also
 		// the attributes used to create it, as we diff *that*, not against the
 		// DOM directly (with a few exceptions in `setAttr`). And, of course, we
-		// need to save the children2 and text as they are conceptually not
+		// need to save the children and text as they are conceptually not
 		// unlike special "attributes" internally.
 		vnode3.attrs = old.attrs
 		vnode3.children = old.children
@@ -1051,13 +1051,13 @@ var _11 = function() {
 	}
 }
 var render = _11(typeof window !== "undefined" ? window : null)
-var _15 = function(render0, schedule, console) {
+var _15 = function(render2, schedule, console) {
 	var subscriptions = []
 	var pending = false
 	var offset = -1
 	function sync() {
 		for (offset = 0; offset < subscriptions.length; offset += 2) {
-			try { render0(subscriptions[offset], Vnode(subscriptions[offset + 1]), redraw) }
+			try { render2(subscriptions[offset], Vnode(subscriptions[offset + 1]), redraw) }
 			catch (e) { console.error(e) }
 		}
 		offset = -1
@@ -1080,11 +1080,11 @@ var _15 = function(render0, schedule, console) {
 		if (index >= 0) {
 			subscriptions.splice(index, 2)
 			if (index <= offset) offset -= 2
-			render0(root, [])
+			render2(root, [])
 		}
 		if (component != null) {
 			subscriptions.push(root, component)
-			render0(root, Vnode(component), redraw)
+			render2(root, Vnode(component), redraw)
 		}
 	}
 	return {mount: mount, redraw: redraw}
@@ -1184,8 +1184,8 @@ var _18 = function($window, oncompletion) {
 				if (ev.target.readyState === 4) {
 					try {
 						var success = (ev.target.status >= 200 && ev.target.status < 300) || ev.target.status === 304 || (/^file:\/\//i).test(url)
-						// When the response type1 isn't "" or "text",
-						// `xhr.responseText` is1 the wrong thing to use.
+						// When the response type isn't "" or "text",
+						// `xhr.responseText` is the wrong thing to use.
 						// Browsers do the right thing and throw here, and we
 						// should honor that and do the right thing by
 						// preferring `xhr.response` where possible/practical.
@@ -1194,13 +1194,13 @@ var _18 = function($window, oncompletion) {
 							// For IE and Edge, which don't implement
 							// `responseType: "json"`.
 							if (!ev.target.responseType && typeof args.extract !== "function") {
-								// Handle no-content0 which will not parse.
+								// Handle no-content which will not parse.
 								try { response = JSON.parse(ev.target.responseText) }
 								catch (e) { response = null }
 							}
 						} else if (!responseType || responseType === "text") {
 							// Only use this default if it's text. If a parsed
-							// document is1 needed on old IE and friends (all
+							// document is needed on old IE and friends (all
 							// unsupported), the user should use a custom
 							// `config` instead. They're already using this at
 							// their own risk.
@@ -1234,7 +1234,7 @@ var _18 = function($window, oncompletion) {
 							}
 							if (xhr.status === 0) {
 								// Use setTimeout to push this code block onto the event queue
-								// This allows `xhr.ontimeout` to run in the case that there is1 a timeout
+								// This allows `xhr.ontimeout` to run in the case that there is a timeout
 								// Without this setTimeout, `xhr.ontimeout` doesn't have a chance to reject
 								// as `xhr.onreadystatechange` will run before it
 								setTimeout(function() {
@@ -1272,8 +1272,8 @@ var _18 = function($window, oncompletion) {
 			else xhr.send(JSON.stringify(body))
 		})
 	}
-	// In case the global Promise is1 some userland library's where they rely on
-	// `foo instanceof this.constructor`, `this.constructor.resolve(value0)`, or
+	// In case the global Promise is some userland library's where they rely on
+	// `foo instanceof this.constructor`, `this.constructor.resolve(value)`, or
 	// similar. Let's *not* break them.
 	PromiseProxy.prototype = Promise.prototype
 	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
@@ -1297,11 +1297,11 @@ var _18 = function($window, oncompletion) {
 			function wrap(promise) {
 				var then = promise.then
 				// Set the constructor, so engines know to not await or resolve
-				// this as a native promise. At the time of writing, this is1
-				// only necessary for V8, but their behavior is1 the correct
+				// this as a native promise. At the time of writing, this is
+				// only necessary for V8, but their behavior is the correct
 				// behavior per spec. See this spec issue for more details:
 				// https://github.com/tc39/ecma262/issues/1577. Also, see the
-				// corresponding comment in `request0/tests/test-request0.js` for
+				// corresponding comment in `request/tests/test-request.js` for
 				// a bit more background on the issue at hand.
 				promise.constructor = PromiseProxy
 				promise.then = function() {
@@ -1373,7 +1373,7 @@ var parseQueryString = function(string) {
 	}
 	return data0
 }
-// Returns `{path1, params}` from `url`
+// Returns `{path, params}` from `url`
 var parsePathname = function(url) {
 	var queryIndex0 = url.indexOf("?")
 	var hashIndex0 = url.indexOf("#")
@@ -1391,10 +1391,10 @@ var parsePathname = function(url) {
 			: parseQueryString(url.slice(queryIndex0 + 1, queryEnd0)),
 	}
 }
-// Compiles a template into a function that takes a resolved1 path2 (without query0
+// Compiles a template into a function that takes a resolved path (without query
 // strings) and returns an object containing the template parameters with their
 // parsed values. This expects the input of the compiled template to be the
-// output of `parsePathname`. Note that it does *not* remove query0 parameters
+// output of `parsePathname`. Note that it does *not* remove query parameters
 // specified in the template.
 var compileTemplate = function(template) {
 	var templateData = parsePathname(template)
@@ -1402,7 +1402,7 @@ var compileTemplate = function(template) {
 	var keys = []
 	var regexp = new RegExp("^" + templateData.path.replace(
 		// I escape literal text so people can use things like `:file.:ext` or
-		// `:lang-:locale` in routes. This is3 all merged into one pass so I
+		// `:lang-:locale` in routes. This is all merged into one pass so I
 		// don't also accidentally escape `-` and make it harder to detect it to
 		// ban it from template parameters.
 		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
@@ -1430,7 +1430,7 @@ var compileTemplate = function(template) {
 		return true
 	}
 }
-// Note: this is4 mildly perf-sensitive.
+// Note: this is mildly perf-sensitive.
 //
 // It does *not* use `delete` - dynamic `delete`s usually cause objects to bail
 // out into dictionary mode and just generally cause a bunch of optimization
@@ -1445,11 +1445,11 @@ var compileTemplate = function(template) {
 //     "key", "oninit", "oncreate", "onbeforeupdate", "onupdate",
 //     "onbeforeremove", "onremove",
 // ]
-// var censor = (attrs4, extras) => {
-//     const result2 = Object.assign(Object.create(null), attrs4)
-//     for (const key6 of magic) delete result2[key6]
-//     if (extras != null) for (const key6 of extras) delete result2[key6]
-//     return result2
+// var censor = (attrs, extras) => {
+//     const result = Object.assign(Object.create(null), attrs)
+//     for (const key of magic) delete result[key]
+//     if (extras != null) for (const key of extras) delete result[key]
+//     return result
 // }
 // ```
 // Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
@@ -1478,7 +1478,7 @@ function decodeURIComponentSave(component) {
 		return component
 	}
 }
-var _26 = function($window, mountRedraw00) {
+var _26 = function($window, mountRedraw1) {
 	var callAsync = $window == null
 		// In case Mithril.js' loaded globally without the DOM, let's not break
 		? null
@@ -1495,12 +1495,12 @@ var _26 = function($window, mountRedraw00) {
 			$window.removeEventListener("popstate", fireAsync, false)
 		},
 		view: function() {
-			// The route has already been resolved0.
-			// Therefore, the following early return is2 not needed.
+			// The route has already been resolved.
+			// Therefore, the following early return is not needed.
 			// if (!hasBeenResolved) return
 			var vnode6 = Vnode(component, attrs3.key, attrs3)
 			if (currentResolver) return currentResolver.render(vnode6)
-			// Wrap in a fragment0 to preserve existing key3 semantics
+			// Wrap in a fragment to preserve existing key semantics
 			return [vnode6]
 		},
 	}
@@ -1518,7 +1518,7 @@ var _26 = function($window, mountRedraw00) {
 			}
 		}
 		// This seemingly useless `.concat()` speeds up the tests quite a bit,
-		// since the representation is2 consistently a relatively poorly
+		// since the representation is consistently a relatively poorly
 		// optimized cons string.
 		var path0 = prefix.concat()
 			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSave)
@@ -1542,10 +1542,10 @@ var _26 = function($window, mountRedraw00) {
 						component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 						attrs3 = data.params, currentPath = path0, lastUpdate = null
 						currentResolver = payload.render ? payload : null
-						if (hasBeenResolved) mountRedraw00.redraw()
+						if (hasBeenResolved) mountRedraw1.redraw()
 						else {
 							hasBeenResolved = true
-							mountRedraw00.mount(dom0, RouterRoot)
+							mountRedraw1.mount(dom0, RouterRoot)
 						}
 					}
 					// There's no understating how much I *wish* I could
@@ -1572,7 +1572,7 @@ var _26 = function($window, mountRedraw00) {
 	function fireAsync() {
 		if (!scheduled) {
 			scheduled = true
-			// TODO: just do `mountRedraw00.redraw1()` here and elide the timer
+			// TODO: just do `mountRedraw.redraw()` here and elide the timer
 			// dependency. Note that this will muck with tests a *lot*, so it's
 			// not as easy of a change as it sounds.
 			callAsync(resolveRoute)
@@ -1601,7 +1601,7 @@ var _26 = function($window, mountRedraw00) {
 		dom0 = root
 		$window.addEventListener("popstate", fireAsync, false)
 		ready = true
-		// The RouterRoot component is2 mounted when the route is2 first resolved0.
+		// The RouterRoot component is mounted when the route is first resolved.
 		resolveRoute()
 	}
 	route.set = function(path0, data, options) {
@@ -1626,7 +1626,7 @@ var _26 = function($window, mountRedraw00) {
 	route.prefix = "#!"
 	route.Link = {
 		view: function(vnode6) {
-			// Omit the used parameters from the rendered element0 - they are
+			// Omit the used parameters from the rendered element - they are
 			// internal. Also, censor the various lifecycle methods.
 			//
 			// We don't strip the other parameters because for convenience we
@@ -1640,7 +1640,7 @@ var _26 = function($window, mountRedraw00) {
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
 			//
-			// The attribute is2 coerced so users don't get surprised over
+			// The attribute is coerced so users don't get surprised over
 			// `disabled: 0` resulting in a button that's somehow routable
 			// despite being visibly disabled.
 			if (child0.attrs.disabled = Boolean(child0.attrs.disabled)) {
@@ -1664,20 +1664,20 @@ var _26 = function($window, mountRedraw00) {
 						onclick.handleEvent(e)
 					}
 					// Adapted from React Router's implementation:
-					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom0/modules/Link.js
+					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom/modules/Link.js
 					//
 					// Try to be flexible and intuitive in how we handle links.
 					// Fun fact: links aren't as obvious to get right as you
 					// would expect. There's a lot more valid ways to click a
 					// link than this, and one might want to not simply click a
 					// link, but right click or command-click it to copy the
-					// link target1, etc. Nope, this isn't just for blind people.
+					// link target, etc. Nope, this isn't just for blind people.
 					if (
 						// Skip if `onclick` prevented default
 						result1 !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
-						// Let the browser handle `target1=_blank`, etc.
+						// Let the browser handle `target=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
