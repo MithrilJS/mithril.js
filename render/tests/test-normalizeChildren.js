@@ -53,4 +53,68 @@ o.spec("normalizeChildren", function() {
 			])
 		}).throws(TypeError)
 	})
+	o("disallows mixed keys, ending with null", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{key: 1},
+				null,
+			])
+		}).throws(TypeError)
+	})
+	o("disallows mixed keys, starting with null", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{data: 1},
+				null,
+			])
+		}).throws(TypeError)
+	})
+	o("disallows mixed keys, ending with undefined", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{key: 1},
+				undefined,
+			])
+		}).throws(TypeError)
+	})
+	o("disallows mixed keys, starting with undefined", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{data: 1},
+				undefined,
+			])
+		}).throws(TypeError)
+	})
+	o("disallows mixed keys, ending with false", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{key: 1},
+				false,
+			])
+		}).throws(TypeError)
+	})
+	o("disallows mixed keys, starting with false", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{data: 1},
+				false,
+			])
+		}).throws(TypeError)
+	})
+	o("disallows mixed keys, ending with true", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{key: 1},
+				true,
+			])
+		}).throws(TypeError)
+	})
+	o("disallows mixed keys, starting with true", function() {
+		o(function() {
+			Vnode.normalizeChildren([
+				{data: 1},
+				true,
+			])
+		}).throws(TypeError)
+	})
 })
