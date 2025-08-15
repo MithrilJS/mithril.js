@@ -13,6 +13,7 @@ m.Fragment = "["
 m.mount = mountRedraw.mount
 m.route = require("./route")
 m.render = require("./render")
+m.reactive = mountRedraw.reactive
 m.redraw = mountRedraw.redraw
 m.request = request.request
 m.parseQueryString = require("./querystring/parse")
