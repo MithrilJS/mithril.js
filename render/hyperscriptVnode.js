@@ -10,6 +10,5 @@ module.exports = function(attrs, children) {
 		attrs = undefined
 	}
 
-	if (attrs == null) attrs = {}
-	return Vnode("", attrs.key, attrs, children)
+	return Vnode("", attrs && attrs.key, attrs, children)
 }

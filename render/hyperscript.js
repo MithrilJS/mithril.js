@@ -32,11 +32,19 @@ function compileSelector(selector) {
 }
 
 function execSelector(state, vnode) {
+	vnode.tag = state.tag
+
 	var attrs = vnode.attrs
+	if (attrs == null) {
+		if (state.attrs != null) {
+			vnode.attrs = Object.assign({}, state.attrs)
+			vnode.is = state.attrs.is
+		}
+		return vnode
+	}
+
 	var hasClass = hasOwn.call(attrs, "class")
 	var className = hasClass ? attrs.class : attrs.className
-
-	vnode.tag = state.tag
 
 	if (state.attrs != null) {
 		attrs = Object.assign({}, state.attrs, attrs)

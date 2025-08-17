@@ -551,20 +551,20 @@ o.spec("hyperscript", function() {
 		o("handles children without attr", function() {
 			var vnode = m("div", [m("i"), m("s")])
 
-			o(vnode.attrs).deepEquals({})
+			o(vnode.attrs).equals(undefined)
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
 		o("handles child without attr unwrapped", function() {
 			var vnode = m("div", m("i"))
 
-			o(vnode.attrs).deepEquals({})
+			o(vnode.attrs).equals(undefined)
 			o(vnode.children[0].tag).equals("i")
 		})
 		o("handles children without attr unwrapped", function() {
 			var vnode = m("div", m("i"), m("s"))
 
-			o(vnode.attrs).deepEquals({})
+			o(vnode.attrs).equals(undefined)
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
