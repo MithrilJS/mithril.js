@@ -61,9 +61,7 @@ function execSelector(state, vnode) {
 				? state.attrs.className != null
 					? String(state.attrs.className) + " " + String(className)
 					: className
-				: state.attrs.className != null
-					? state.attrs.className
-					: null
+				: state.attrs.className
 	} else {
 		if (className != null) attrs.className = className
 	}
