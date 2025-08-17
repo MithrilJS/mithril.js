@@ -70,12 +70,12 @@ function execSelector(state, vnode) {
 	return vnode
 }
 
-function hyperscript(selector) {
+function hyperscript(selector, attrs, ...children) {
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
 
-	var vnode = hyperscriptVnode.apply(1, arguments)
+	var vnode = hyperscriptVnode(attrs, children)
 
 	if (typeof selector === "string") {
 		vnode.children = Vnode.normalizeChildren(vnode.children)
