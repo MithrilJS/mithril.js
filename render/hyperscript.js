@@ -3,6 +3,7 @@
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
 var hasOwn = require("../util/hasOwn")
+var cachedAttrsIsStaticMap = require("./cachedAttrsIsStaticMap")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = Object.create(null)
@@ -12,8 +13,12 @@ function isEmpty(object) {
 	return true
 }
 
+function isFormAttributeKey(key) {
+	return key === "value" || key === "checked" || key === "selectedIndex" || key === "selected"
+}
+
 function compileSelector(selector) {
-	var match, tag = "div", classes = [], attrs = {}
+	var match, tag = "div", classes = [], attrs = {}, isStatic = true
 	while (match = selectorParser.exec(selector)) {
 		var type = match[1], value = match[2]
 		if (type === "" && value !== "") tag = value
@@ -23,12 +28,16 @@ function compileSelector(selector) {
 			var attrValue = match[6]
 			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
 			if (match[4] === "class") classes.push(attrValue)
-			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
+			else {
+				attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
+				if (isFormAttributeKey(match[4])) isStatic = false
+			}
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
-	if (isEmpty(attrs)) attrs = null
-	return selectorCache[selector] = {tag: tag, attrs: attrs}
+	if (isEmpty(attrs)) attrs = undefined
+	else cachedAttrsIsStaticMap.set(attrs, isStatic)
+	return selectorCache[selector] = {tag: tag, attrs: attrs, is: attrs && attrs.is}
 }
 
 function execSelector(state, vnode) {
@@ -36,10 +45,8 @@ function execSelector(state, vnode) {
 
 	var attrs = vnode.attrs
 	if (attrs == null) {
-		if (state.attrs != null) {
-			vnode.attrs = Object.assign({}, state.attrs)
-			vnode.is = state.attrs.is
-		}
+		vnode.attrs = state.attrs
+		vnode.is = state.is
 		return vnode
 	}
 
