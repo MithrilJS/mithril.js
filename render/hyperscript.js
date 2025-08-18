@@ -45,7 +45,9 @@ function execSelector(state, vnode) {
 
 	var attrs = vnode.attrs
 	if (attrs == null) {
-		vnode.attrs = state.attrs
+		// "|| {}" is used to preserve existing behavior.
+		// Note: removing this "|| {}" allows attrs to be undefined, which may improve performance.
+		vnode.attrs = state.attrs || {}
 		vnode.is = state.is
 		return vnode
 	}
