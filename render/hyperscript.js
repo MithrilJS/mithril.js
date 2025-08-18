@@ -7,6 +7,8 @@ var cachedAttrsIsStaticMap = require("./cachedAttrsIsStaticMap")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = Object.create(null)
+var emptyAttrs = {}
+cachedAttrsIsStaticMap.set(emptyAttrs, true)
 
 function isEmpty(object) {
 	for (var key in object) if (hasOwn.call(object, key)) return false
@@ -35,9 +37,9 @@ function compileSelector(selector) {
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
-	if (isEmpty(attrs)) attrs = undefined
+	if (isEmpty(attrs)) attrs = emptyAttrs
 	else cachedAttrsIsStaticMap.set(attrs, isStatic)
-	return selectorCache[selector] = {tag: tag, attrs: attrs, is: attrs && attrs.is}
+	return selectorCache[selector] = {tag: tag, attrs: attrs, is: attrs.is}
 }
 
 function execSelector(state, vnode) {
@@ -45,9 +47,7 @@ function execSelector(state, vnode) {
 
 	var attrs = vnode.attrs
 	if (attrs == null) {
-		// "|| {}" is used to preserve existing behavior.
-		// Note: removing this "|| {}" allows attrs to be undefined, which may improve performance.
-		vnode.attrs = state.attrs || {}
+		vnode.attrs = state.attrs
 		vnode.is = state.is
 		return vnode
 	}
@@ -55,7 +55,7 @@ function execSelector(state, vnode) {
 	var hasClass = hasOwn.call(attrs, "class")
 	var className = hasClass ? attrs.class : attrs.className
 
-	if (state.attrs != null) {
+	if (state.attrs !== emptyAttrs) {
 		attrs = Object.assign({}, state.attrs, attrs)
 
 		if (className != null || state.attrs.className != null) attrs.className =
