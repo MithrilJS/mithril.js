@@ -3,12 +3,11 @@
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
 var hasOwn = require("../util/hasOwn")
+var emptyAttrs = require("./emptyAttrs")
 var cachedAttrsIsStaticMap = require("./cachedAttrsIsStaticMap")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = Object.create(null)
-var emptyAttrs = {}
-cachedAttrsIsStaticMap.set(emptyAttrs, true)
 
 function isEmpty(object) {
 	for (var key in object) if (hasOwn.call(object, key)) return false
