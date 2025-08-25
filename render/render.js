@@ -4,6 +4,7 @@ var Vnode = require("../render/vnode")
 var df = require("../render/domFor")
 var delayedRemoval = df.delayedRemoval
 var domFor = df.domFor
+var cachedAttrsIsStaticMap = require("./cachedAttrsIsStaticMap")
 
 module.exports = function() {
 	var nameSpace = {
@@ -453,7 +454,9 @@ module.exports = function() {
 		var element = vnode.dom = old.dom
 		ns = getNameSpace(vnode) || ns
 
-		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
+		if (old.attrs != vnode.attrs || (vnode.attrs != null && !cachedAttrsIsStaticMap.get(vnode.attrs))) {
+			updateAttrs(vnode, old.attrs, vnode.attrs, ns)
+		}
 		if (!maybeSetContentEditable(vnode)) {
 			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
@@ -715,7 +718,7 @@ module.exports = function() {
 		// so removal should be done first to prevent accidental removal for newly setting values.
 		var val
 		if (old != null) {
-			if (old === attrs) {
+			if (old === attrs && !cachedAttrsIsStaticMap.has(attrs)) {
 				console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
 			}
 			for (var key in old) {

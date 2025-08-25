@@ -19,7 +19,7 @@ A modern client-side JavaScript framework for building Single Page Applications.
 
 Mithril.js is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
-Mithril.js supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
+Mithril.js supports Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
 
 ## Installation
 

@@ -368,4 +368,87 @@ o.spec("bundler", async () => {
 		// check that the argument z2 is not z00
 		o(await bundle(p("a.js"))).equals(";(function() {\nvar z0 = {}\nvar _1 = function(z1){}\nvar b = _1(z0)\nvar z = z0\nvar _5 = function(z2){}\nvar c = _5(z)\n}());")
 	})
+	o.spec("spread syntax and destructuring (...)", () => {
+		o("rest parameter", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "function f(d, ...a){}\nmodule.exports = f",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nfunction f(d, ...a0){}\nvar c = f\n}());")
+		})
+		o("function call", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = [1, 2, 3]\nvar d = f(...a)\nmodule.exports = d",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = [1, 2, 3]\nvar d = f(...a0)\nvar c = d\n}());")
+		})
+		o("new", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = [1, 2, 3]\nvar d = new f(...a)\nmodule.exports = d",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = [1, 2, 3]\nvar d = new f(...a0)\nvar c = d\n}());")
+		})
+		o("array spread", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = [1, 2, 3]\nvar arr = [...a]\nmodule.exports = arr",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = [1, 2, 3]\nvar arr = [...a0]\nvar c = arr\n}());")
+		})
+		o("array spread (merge)", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = [1, 2, 3]\nvar arr = [0, ...a, 4]\nmodule.exports = arr",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = [1, 2, 3]\nvar arr = [0, ...a0, 4]\nvar c = arr\n}());")
+		})
+		o("array destructuring", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = [1, 2, 3]\nvar d\n[d, ...a] = a\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = [1, 2, 3]\nvar d\n[d, ...a0] = a0\nvar c = a0\n}());")
+		})
+		o("object spread", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = { p: 1, q: 2, r: 3 }\nvar d = {...a}\nmodule.exports = d",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = { p: 1, q: 2, r: 3 }\nvar d = {...a0}\nvar c = d\n}());")
+		})
+		o("object spread (merge)", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var a = { p: 1, q: 2, r: 3 }\nvar d = {o:0,...a}\nmodule.exports = d",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar a0 = { p: 1, q: 2, r: 3 }\nvar d = {o:0,...a0}\nvar c = d\n}());")
+		})
+		o("object destructuring", async () => {
+			await setup({
+				"a.js": 'var b = require("./b")\nvar c = require("./c")',
+				"b.js": "var a = 1\nmodule.exports = a",
+				"c.js": "var obj = { p: 1, q: 2, r: 3 }\nvar p,a\n({p,...a}=obj)\nmodule.exports = a",
+			})
+
+			o(await bundle(p("a.js"))).equals(";(function() {\nvar a = 1\nvar b = a\nvar obj = { p: 1, q: 2, r: 3 }\nvar p,a0\n({p,...a0}=obj)\nvar c = a0\n}());")
+		})
+	})
 })
