@@ -1,4 +1,15 @@
 
+# Release v2.3.5
+
+### Patch Changes
+
+#### [Assorted Performance Improvements (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3041)
+
+This PR improves performance through the following changes: Adoption of the spread syntax, which can be optimized in modern browsers.
+#### [Bump actions/checkout from 4 to 5 in the normal group (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/3039)
+
+Bumps the normal group with 1 update: [actions/checkout](https://github.com/actions/checkout).  Updates `actions/checkout` from 4 to 5.  Release notes.
+
 # Release v2.3.4
 
 ### Patch Changes
