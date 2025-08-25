@@ -158,10 +158,12 @@ module.exports = async (input) => {
 		})
 
 		//fix props
-		const props = new RegExp(`((?:[^:]\\/\\/.*)?\\.\\s*)(${candidates})|([\\{,]\\s*)(${candidates})(\\s*:)`, "gm")
-		code = code.replace(props, (match, dot, a, pre, b, post) => {
+		const props = new RegExp(`(\\.\\.)?((?:[^:]\\/\\/.*)?\\.\\s*)(${candidates})|([\\{,]\\s*)(${candidates})(\\s*:)`, "gm")
+		code = code.replace(props, (match, dotdot, dot, a, pre, b, post) => {
 			// Don't do anything because dot was matched in a comment
 			if (dot && dot.indexOf("//") === 1) return match
+			// Don't do anything because dot is a part of spread syntax or destructuring
+			if (dotdot) return match
 			if (dot) return dot + a.replace(/\d+$/, "")
 			return pre + b.replace(/\d+$/, "") + post
 		})

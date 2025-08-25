@@ -3,6 +3,8 @@
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
 var hasOwn = require("../util/hasOwn")
+var emptyAttrs = require("./emptyAttrs")
+var cachedAttrsIsStaticMap = require("./cachedAttrsIsStaticMap")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = Object.create(null)
@@ -12,8 +14,12 @@ function isEmpty(object) {
 	return true
 }
 
+function isFormAttributeKey(key) {
+	return key === "value" || key === "checked" || key === "selectedIndex" || key === "selected"
+}
+
 function compileSelector(selector) {
-	var match, tag = "div", classes = [], attrs = {}
+	var match, tag = "div", classes = [], attrs = {}, isStatic = true
 	while (match = selectorParser.exec(selector)) {
 		var type = match[1], value = match[2]
 		if (type === "" && value !== "") tag = value
@@ -23,22 +29,32 @@ function compileSelector(selector) {
 			var attrValue = match[6]
 			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
 			if (match[4] === "class") classes.push(attrValue)
-			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
+			else {
+				attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
+				if (isFormAttributeKey(match[4])) isStatic = false
+			}
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
-	if (isEmpty(attrs)) attrs = null
-	return selectorCache[selector] = {tag: tag, attrs: attrs}
+	if (isEmpty(attrs)) attrs = emptyAttrs
+	else cachedAttrsIsStaticMap.set(attrs, isStatic)
+	return selectorCache[selector] = {tag: tag, attrs: attrs, is: attrs.is}
 }
 
 function execSelector(state, vnode) {
+	vnode.tag = state.tag
+
 	var attrs = vnode.attrs
+	if (attrs == null) {
+		vnode.attrs = state.attrs
+		vnode.is = state.is
+		return vnode
+	}
+
 	var hasClass = hasOwn.call(attrs, "class")
 	var className = hasClass ? attrs.class : attrs.className
 
-	vnode.tag = state.tag
-
-	if (state.attrs != null) {
+	if (state.attrs !== emptyAttrs) {
 		attrs = Object.assign({}, state.attrs, attrs)
 
 		if (className != null || state.attrs.className != null) attrs.className =
@@ -46,9 +62,7 @@ function execSelector(state, vnode) {
 				? state.attrs.className != null
 					? String(state.attrs.className) + " " + String(className)
 					: className
-				: state.attrs.className != null
-					? state.attrs.className
-					: null
+				: state.attrs.className
 	} else {
 		if (className != null) attrs.className = className
 	}
@@ -70,12 +84,12 @@ function execSelector(state, vnode) {
 	return vnode
 }
 
-function hyperscript(selector) {
+function hyperscript(selector, attrs, ...children) {
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
 
-	var vnode = hyperscriptVnode.apply(1, arguments)
+	var vnode = hyperscriptVnode(attrs, children)
 
 	if (typeof selector === "string") {
 		vnode.children = Vnode.normalizeChildren(vnode.children)
