@@ -568,6 +568,26 @@ o.spec("hyperscript", function() {
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
+		o("handles children without attr (fragment)", function() {
+			var vnode = m("[", [m("i"), m("s")])
+
+			o(vnode.attrs).deepEquals({})
+			o(vnode.children[0].tag).equals("i")
+			o(vnode.children[1].tag).equals("s")
+		})
+		o("handles child without attr unwrapped (fragment)", function() {
+			var vnode = m("[", m("i"))
+
+			o(vnode.attrs).deepEquals({})
+			o(vnode.children[0].tag).equals("i")
+		})
+		o("handles children without attr unwrapped (fragment)", function() {
+			var vnode = m("[", m("i"), m("s"))
+
+			o(vnode.attrs).deepEquals({})
+			o(vnode.children[0].tag).equals("i")
+			o(vnode.children[1].tag).equals("s")
+		})
 		o("handles shared attrs", function() {
 			var attrs = {a: "b"}
 
@@ -661,6 +681,42 @@ o.spec("hyperscript", function() {
 
 			o(vnode.tag).equals(component)
 			o(vnode.attrs.id).equals("a")
+			o(vnode.children.length).equals(1)
+			o(vnode.children[0]).equals("b")
+		})
+		o("works with POJOs (without attrs)", function() {
+			var component = {
+				view: function() {}
+			}
+			var vnode = m(component, "b")
+
+			o(vnode.tag).equals(component)
+			o(vnode.attrs).deepEquals({})
+			o(vnode.children.length).equals(1)
+			o(vnode.children[0]).equals("b")
+		})
+		o("works with constructibles (without attrs)", function() {
+			var component = o.spy()
+			component.prototype.view = function() {}
+
+			var vnode = m(component, "b")
+
+			o(component.callCount).equals(0)
+
+			o(vnode.tag).equals(component)
+			o(vnode.attrs).deepEquals({})
+			o(vnode.children.length).equals(1)
+			o(vnode.children[0]).equals("b")
+		})
+		o("works with closures (without attrs)", function () {
+			var component = o.spy()
+
+			var vnode = m(component, "b")
+
+			o(component.callCount).equals(0)
+
+			o(vnode.tag).equals(component)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.children.length).equals(1)
 			o(vnode.children[0]).equals("b")
 		})
