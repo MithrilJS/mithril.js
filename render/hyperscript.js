@@ -96,6 +96,7 @@ function hyperscript(selector, attrs, ...children) {
 		if (selector !== "[") return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
 	}
 
+	if (vnode.attrs == null) vnode.attrs = {}
 	vnode.tag = selector
 	return vnode
 }
