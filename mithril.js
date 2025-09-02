@@ -134,6 +134,7 @@ function hyperscript(selector, attrs, ...children) {
 		vnode.children = Vnode.normalizeChildren(vnode.children)
 		if (selector !== "[") return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
 	}
+	if (vnode.attrs == null) vnode.attrs = {}
 	vnode.tag = selector
 	return vnode
 }
@@ -143,6 +144,7 @@ hyperscript.trust = function(html) {
 }
 hyperscript.fragment = function(attrs4, ...children1) {
 	var vnode2 = hyperscriptVnode(attrs4, children1)
+	if (vnode2.attrs == null) vnode2.attrs = {}
 	vnode2.tag = "["
 	vnode2.children = Vnode.normalizeChildren(vnode2.children)
 	return vnode2
