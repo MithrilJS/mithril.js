@@ -1,4 +1,12 @@
 
+# Release v2.3.7
+
+### Patch Changes
+
+#### [Make the attrs of non-element vnodes always non-null. (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3042)
+
+In #3041, it seemed that the case of non-element vnodes was not fully considered in terms of not breaking existing behavior.
+
 # Release v2.3.6
 
 ### Patch Changes
