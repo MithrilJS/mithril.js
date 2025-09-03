@@ -3,7 +3,7 @@
 [![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
 [![License](https://img.shields.io/npm/l/mithril.svg)](https://github.com/MithrilJS/mithril.js/blob/main/LICENSE) &nbsp;
 [![npm Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
-[![Build Status](https://img.shields.io/github/actions/workflow/status/MithrilJS/mithril.js/.github%2Fworkflows%2Ftest.yml?branch=main&event=push)](https://www.npmjs.com/package/mithril) &nbsp;
+[![Build Status](https://img.shields.io/github/actions/workflow/status/MithrilJS/mithril.js/.github%2Fworkflows%2Ftest.yml?branch=main&event=push)](https://github.com/MithrilJS/mithril.js/actions) &nbsp;
 [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs) &nbsp;
 [![Zulip, join chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://mithril.zulipchat.com/)
 
