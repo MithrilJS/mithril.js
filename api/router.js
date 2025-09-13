@@ -1,14 +1,13 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
-var m = require("../render/hyperscript")
+var hyperscript = require("../render/hyperscript")
 
+var decodeURIComponentSave = require("../util/decodeURIComponentSave")
 var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
 var censor = require("../util/censor")
-
-var decodeURIComponentSave = require("../util/decodeURIComponentSave")
 
 module.exports = function($window, mountRedraw) {
 	var p = Promise.resolve()
@@ -179,7 +178,7 @@ module.exports = function($window, mountRedraw) {
 			//
 			// We don't strip the other parameters because for convenience we
 			// let them be specified in the selector as well.
-			var child = m(
+			var child = hyperscript(
 				vnode.attrs.selector || "a",
 				censor(vnode.attrs, ["options", "params", "selector", "onclick"]),
 				vnode.children
