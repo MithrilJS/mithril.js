@@ -8,13 +8,7 @@ var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
 var censor = require("../util/censor")
 
-function decodeURIComponentSave(component) {
-	try {
-		return decodeURIComponent(component)
-	} catch(e) {
-		return component
-	}
-}
+var decodeURIComponentSave = require("../util/decodeURIComponentSave")
 
 module.exports = function($window, mountRedraw) {
 	var p = Promise.resolve()

@@ -1,12 +1,6 @@
 "use strict"
 
-function decodeURIComponentSave(str) {
-	try {
-		return decodeURIComponent(str)
-	} catch(err) {
-		return str
-	}
-}
+var decodeURIComponentSave = require("../util/decodeURIComponentSave")
 
 module.exports = function(string) {
 	if (string === "" || string == null) return {}
