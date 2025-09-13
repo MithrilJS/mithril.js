@@ -1,26 +1,15 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
-var m = require("../render/hyperscript")
+var hyperscript = require("../render/hyperscript")
 
+var decodeURIComponentSave = require("../util/decodeURIComponentSave")
 var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
 var censor = require("../util/censor")
 
-function decodeURIComponentSave(component) {
-	try {
-		return decodeURIComponent(component)
-	} catch(e) {
-		return component
-	}
-}
-
 module.exports = function($window, mountRedraw) {
-	var callAsync = $window == null
-		// In case Mithril.js' loaded globally without the DOM, let's not break
-		? null
-		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
 	var p = Promise.resolve()
 
 	var scheduled = false
@@ -126,7 +115,7 @@ module.exports = function($window, mountRedraw) {
 			// TODO: just do `mountRedraw.redraw()` here and elide the timer
 			// dependency. Note that this will muck with tests a *lot*, so it's
 			// not as easy of a change as it sounds.
-			callAsync(resolveRoute)
+			setTimeout(resolveRoute)
 		}
 	}
 
@@ -189,7 +178,7 @@ module.exports = function($window, mountRedraw) {
 			//
 			// We don't strip the other parameters because for convenience we
 			// let them be specified in the selector as well.
-			var child = m(
+			var child = hyperscript(
 				vnode.attrs.selector || "a",
 				censor(vnode.attrs, ["options", "params", "selector", "onclick"]),
 				vnode.children
