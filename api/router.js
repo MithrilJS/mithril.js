@@ -17,10 +17,6 @@ function decodeURIComponentSave(component) {
 }
 
 module.exports = function($window, mountRedraw) {
-	var callAsync = $window == null
-		// In case Mithril.js' loaded globally without the DOM, let's not break
-		? null
-		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
 	var p = Promise.resolve()
 
 	var scheduled = false
@@ -126,7 +122,7 @@ module.exports = function($window, mountRedraw) {
 			// TODO: just do `mountRedraw.redraw()` here and elide the timer
 			// dependency. Note that this will muck with tests a *lot*, so it's
 			// not as easy of a change as it sounds.
-			callAsync(resolveRoute)
+			setTimeout(resolveRoute)
 		}
 	}
 
