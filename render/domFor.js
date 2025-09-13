@@ -1,8 +1,8 @@
 "use strict"
 
-var delayedRemoval = new WeakMap
+var delayedRemoval = require("../render/delayedRemoval")
 
-function *domFor(vnode) {
+module.exports = function *(vnode) {
 	// To avoid unintended mangling of the internal bundler,
 	// parameter destructuring is not used here.
 	var dom = vnode.dom
@@ -19,9 +19,4 @@ function *domFor(vnode) {
 		dom = nextSibling
 	}
 	while (domSize)
-}
-
-module.exports = {
-	delayedRemoval: delayedRemoval,
-	domFor: domFor,
 }
