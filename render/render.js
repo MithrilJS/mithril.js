@@ -1,9 +1,9 @@
 "use strict"
 
-var Vnode = require("../render/vnode")
-var delayedRemoval = require("../render/delayedRemoval")
-var domFor = require("../render/domFor")
-var cachedAttrsIsStaticMap = require("../render/cachedAttrsIsStaticMap")
+var Vnode = require("./vnode")
+var delayedRemoval = require("./delayedRemoval")
+var domFor = require("./domFor")
+var cachedAttrsIsStaticMap = require("./cachedAttrsIsStaticMap")
 
 module.exports = function() {
 	var nameSpace = {
