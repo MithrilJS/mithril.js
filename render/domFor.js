@@ -1,6 +1,6 @@
 "use strict"
 
-var delayedRemoval = require("../render/delayedRemoval")
+var delayedRemoval = require("./delayedRemoval")
 
 function *domFor(vnode) {
 	// To avoid unintended mangling of the internal bundler,
