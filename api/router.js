@@ -52,12 +52,7 @@ module.exports = function($window, mountRedraw) {
 				if (prefix[0] !== "/") prefix = "/" + prefix
 			}
 		}
-		// This seemingly useless `.concat()` speeds up the tests quite a bit,
-		// since the representation is consistently a relatively poorly
-		// optimized cons string.
-		var path = prefix.concat()
-			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSafe)
-			.slice(route.prefix.length)
+		var path = decodeURIComponentSafe(prefix).slice(route.prefix.length)
 		var data = parsePathname(path)
 
 		Object.assign(data.params, $window.history.state)

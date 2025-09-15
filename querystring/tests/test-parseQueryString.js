@@ -22,7 +22,8 @@ o.spec("parseQueryString", function() {
 	})
 	o("handles wrongly escaped values", function() {
 		var data = parseQueryString("?test=%c5%a1%e8ZM%80%82H")
-		o(data).deepEquals({test: "%c5%a1%e8ZM%80%82H"})
+		// decodes "%c5%a1" only
+		o(data).deepEquals({test: "š%e8ZM%80%82H"})
 	})
 	o("handles escaped slashes followed by a number", function () {
 		var data = parseQueryString("?hello=%2Fen%2F1")
