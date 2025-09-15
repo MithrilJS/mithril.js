@@ -3,7 +3,7 @@
 var Vnode = require("../render/vnode")
 var hyperscript = require("../render/hyperscript")
 
-var decodeURIComponentSave = require("../util/decodeURIComponentSave")
+var decodeURIComponentSafe = require("../util/decodeURIComponentSafe")
 var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
@@ -56,7 +56,7 @@ module.exports = function($window, mountRedraw) {
 		// since the representation is consistently a relatively poorly
 		// optimized cons string.
 		var path = prefix.concat()
-			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSave)
+			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSafe)
 			.slice(route.prefix.length)
 		var data = parsePathname(path)
 
