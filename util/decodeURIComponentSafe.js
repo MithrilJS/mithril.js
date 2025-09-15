@@ -31,5 +31,5 @@ The regexp just tries to match this as compactly as possible.
 var validUtf8Encodings = /%(?:[0-7]|(?!c0|c1|e0%[89]|ed%[ab]|f0%8|f4%[9ab])(?:c|d|(?:e|f[0-4]%[89ab])[\da-f]%[89ab])[\da-f]%[89ab])[\da-f]/gi
 
 module.exports = function(str) {
-	return str.replace(validUtf8Encodings, decodeURIComponent)
+	return String(str).replace(validUtf8Encodings, decodeURIComponent)
 }
