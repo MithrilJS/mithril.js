@@ -157,6 +157,14 @@ module.exports = async (input) => {
 			return open + fixed + close
 		})
 
+		// fix regexp literals
+		// Note: This regexp, while it doesn't technically capture all cases a regexp could appear, should hopefully work for now.
+		const regexpLiteral = /([=({[](?:[\s\u2028\u2029]|\/\/.*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/)*\/)((?:[^\\\/[\r\n\u2028\u2029]|\\[^\r\n\u2028\u2029]|\[(?:[^\]\\\r\n\u2028\u2029]|\\[^\r\n\u2028\u2029])*\])+)(\/[$\p{ID_Continue}]*)/ug
+		code = code.replace(regexpLiteral, (match, open, data, close) => {
+			const fixed = data.replace(variables, (match) => match.replace(/\d+$/, ""))
+			return open + fixed + close
+		})
+
 		//fix props
 		const props = new RegExp(`(\\.\\.)?((?:[^:]\\/\\/.*)?\\.\\s*)(${candidates})|([\\{,]\\s*)(${candidates})(\\s*:)`, "gm")
 		code = code.replace(props, (match, dotdot, dot, a, pre, b, post) => {

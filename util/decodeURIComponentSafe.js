@@ -28,8 +28,7 @@ So in reality, only the following sequences can encode are valid characters:
 
 The regexp just tries to match this as compactly as possible.
 */
-// Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
-var validUtf8Encodings = new RegExp("%(?:[0-7]|(?!c[01]|e0%[89]|ed%[ab]|f0%8|f4%[9ab])(?:c|d|(?:e|f[0-4]%[89ab])[0-9a-f]%[89ab])[0-9a-f]%[89ab])[0-9a-f]", "gi")
+var validUtf8Encodings = /%(?:[0-7]|(?!c[01]|e0%[89]|ed%[ab]|f0%8|f4%[9ab])(?:c|d|(?:e|f[0-4]%[89ab])[\da-f]%[89ab])[\da-f]%[89ab])[\da-f]/gi
 
 module.exports = function(str) {
 	return String(str).replace(validUtf8Encodings, decodeURIComponent)
