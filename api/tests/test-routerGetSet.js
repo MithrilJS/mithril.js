@@ -220,7 +220,7 @@ o.spec("route.get/route.set", function() {
 					route.set("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
 					setTimeout(function() {
 						// Yep, before even the throttle mechanism takes hold.
-						o(route.get()).equals("/other/x/y%2Fz?c=d&e=f")
+						o(route.get()).equals("/other/x/y/z?c=d&e=f")
 						throttleMock.fire()
 						done()
 					})

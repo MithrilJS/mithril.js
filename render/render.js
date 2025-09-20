@@ -1,9 +1,8 @@
 "use strict"
 
-var Vnode = require("../render/vnode")
-var df = require("../render/domFor")
-var delayedRemoval = df.delayedRemoval
-var domFor = df.domFor
+var Vnode = require("./vnode")
+var delayedRemoval = require("./delayedRemoval")
+var domFor = require("./domFor")
 var cachedAttrsIsStaticMap = require("./cachedAttrsIsStaticMap")
 
 module.exports = function() {

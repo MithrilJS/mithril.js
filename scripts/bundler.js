@@ -42,8 +42,8 @@ async function build() {
 		return
 	}
 	console.log("minifying...")
-	// Terser's "reduce_funcs" option seems to degrade performance. So, disable it.
-	const minified = await Terser.minify(original, {compress: {reduce_funcs: false}, mangle: true})
+	// Terser's "conditionals" and "reduce_funcs" options seem to degrade performance. So, disable them.
+	const minified = await Terser.minify(original, {compress: {conditionals: false, reduce_funcs: false}, mangle: true})
 	if (minified.error) throw new Error(minified.error)
 	await writeFile(params.output, minified.code, "utf-8")
 	const originalSize = Buffer.byteLength(original, "utf-8")
