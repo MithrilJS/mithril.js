@@ -288,11 +288,11 @@ o.spec("bundler", async () => {
 	o("does not mess up regexp literals", async () => {
 		await setup({
 			"a.js": 'var b = require("./b")\nvar c = require("./c")',
-			"b.js": "var b = /b/\nmodule.exports = function() {return b}",
+			"b.js": "var b = /b/\nvar g = 0\nmodule.exports = function() {return b}",
 			"c.js": "var b =\n\t/ b \\/ \\/ [a-b]/g\nvar d = b/b\nmodule.exports = function() {return b}",
 		})
 
-		o(await bundle(p("a.js"))).equals(";(function() {\nvar b0 = /b/\nvar b = function() {return b0}\nvar b1 =\n\t/ b \\/ \\/ [a-b]/g\nvar d = b1/b1\nvar c = function() {return b1}\n}());")
+		o(await bundle(p("a.js"))).equals(";(function() {\nvar b0 = /b/\nvar g = 0\nvar b = function() {return b0}\nvar b1 =\n\t/ b \\/ \\/ [a-b]/g\nvar d = b1/b1\nvar c = function() {return b1}\n}());")
 	})
 	o("does not mess up properties", async () => {
 		await setup({
