@@ -1,5 +1,7 @@
 "use strict"
 
+var isNormalizationDeferred = require("./isNormalizationDeferred")
+
 function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, is: undefined, domSize: undefined, state: undefined, events: undefined, instance: undefined}
 }
@@ -10,7 +12,9 @@ Vnode.normalize = function(node) {
 	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
 Vnode.normalizeChildren = function(input) {
-	var children = []
+	// Normalize children in place for performance
+	// if vnodes are NOT component vnodes.
+	var children = input[isNormalizationDeferred] ? [] : input
 	if (input.length) {
 		var isKeyed = input[0] != null && input[0].key != null
 		// Note: this is a *very* perf-sensitive check.

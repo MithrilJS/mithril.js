@@ -1,5 +1,6 @@
 "use strict"
 
+var isNormalizationDeferred = require("./isNormalizationDeferred")
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
 var hasOwn = require("../util/hasOwn")
@@ -94,6 +95,8 @@ function hyperscript(selector, attrs, ...children) {
 	if (typeof selector === "string") {
 		vnode.children = Vnode.normalizeChildren(vnode.children)
 		if (selector !== "[") return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
+	} else {
+		vnode.children[isNormalizationDeferred] = true
 	}
 
 	if (vnode.attrs == null) vnode.attrs = {}
