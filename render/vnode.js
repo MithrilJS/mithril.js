@@ -10,24 +10,23 @@ Vnode.normalize = function(node) {
 	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
 Vnode.normalizeChildren = function(input) {
-	var children = []
-	if (input.length) {
-		var isKeyed = input[0] != null && input[0].key != null
-		// Note: this is a *very* perf-sensitive check.
-		// Fun fact: merging the loop like this is somehow faster than splitting
-		// it, noticeably so.
-		for (var i = 1; i < input.length; i++) {
-			if ((input[i] != null && input[i].key != null) !== isKeyed) {
-				throw new TypeError(
-					isKeyed && (input[i] == null || typeof input[i] === "boolean")
-						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit keyed empty fragment, m.fragment({key: ...}), instead of a hole."
-						: "In fragments, vnodes must either all have keys or none have keys."
-				)
-			}
-		}
-		for (var i = 0; i < input.length; i++) {
-			children[i] = Vnode.normalize(input[i])
-		}
+	// Preallocate the array length (initially holey) and fill every index immediately in order.
+	// Benchmarking shows better performance on V8.
+	var children = new Array(input.length)
+	// Count the number of keyed normalized vnodes for consistency check.
+	// Note: this is a perf-sensitive check.
+	// Fun fact: merging the loop like this is somehow faster than splitting
+	// the check within updateNodes(), noticeably so.
+	var numKeyed = 0
+	for (var i = 0; i < input.length; i++) {
+		children[i] = Vnode.normalize(input[i])
+		if (children[i] !== null && children[i].key != null) numKeyed++
+	}
+	if (numKeyed !== 0 && numKeyed !== input.length) {
+		throw new TypeError(children.includes(null)
+			? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit keyed empty fragment, m.fragment({key: ...}), instead of a hole."
+			: "In fragments, vnodes must either all have keys or none have keys."
+		)
 	}
 	return children
 }
