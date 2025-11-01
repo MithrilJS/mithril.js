@@ -93,7 +93,6 @@ module.exports = function() {
 		}
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
-		// Capture nodes to remove, so we don't confuse them.
 		var fragment = getDocument(parent).createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
