@@ -870,6 +870,242 @@ o.spec("component", function() {
 					}
 				})
 			})
+			o.spec("vnode.domSize (vnode.instance == null)", function() {
+				o("create and update", function() {
+					var component = createComponent({
+						view: function() {return null}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.domSize).equals(0)
+					o(v1.instance).equals(null)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.domSize).equals(0)
+					o(v2.instance).equals(null)
+				})
+				o("remove instance", function() {
+					var v
+					var component = createComponent({
+						view: function() {return v}
+					})
+					// create (return element vnode)
+					v = m("a")
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("a")
+					o(v1.domSize).equals(undefined)
+					o(v1.instance.domSize).equals(undefined)
+					// remove instance (return null)
+					v = null
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.domSize).equals(0)
+					o(v2.instance).equals(null)
+				})
+				o("nested component", function() {
+					var childComponent = createComponent({
+						view: function() {return null}
+					})
+					var parentComponent = createComponent({
+						view: function() {return m(childComponent)}
+					})
+					// create
+					var v1 = m(parentComponent)
+					render(root, v1)
+					o(v1.domSize).equals(0)
+					o(v1.instance.domSize).equals(0)
+					o(v1.instance.instance).equals(null)
+					// update
+					var v2 = m(parentComponent)
+					render(root, v2)
+					o(v2.domSize).equals(0)
+					o(v2.instance.domSize).equals(0)
+					o(v2.instance.instance).equals(null)
+				})
+			})
+			o.spec("vnode.domSize equals vnode.instance.domSize (vnode.instance != null)", function() {
+				o("text", function() {
+					var component = createComponent({
+						view: function() {return "text"}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("#")
+					o(v1.domSize).equals(undefined)
+					o(v1.instance.domSize).equals(undefined)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("#")
+					o(v2.domSize).equals(undefined)
+					o(v2.instance.domSize).equals(undefined)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("element", function() {
+					var component = createComponent({
+						view: function() {return m("a")}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("a")
+					o(v1.domSize).equals(undefined)
+					o(v1.instance.domSize).equals(undefined)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("a")
+					o(v2.domSize).equals(undefined)
+					o(v2.instance.domSize).equals(undefined)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("trust(0)", function() {
+					var component = createComponent({
+						view: function() {return m.trust("")}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("<")
+					o(v1.domSize).equals(0)
+					o(v1.instance.domSize).equals(0)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("<")
+					o(v2.domSize).equals(0)
+					o(v2.instance.domSize).equals(0)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("trust(1)", function() {
+					var component = createComponent({
+						view: function() {return m.trust("<a></a>")}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("<")
+					o(v1.domSize).equals(1)
+					o(v1.instance.domSize).equals(1)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("<")
+					o(v2.domSize).equals(1)
+					o(v2.instance.domSize).equals(1)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("trust(2)", function() {
+					var component = createComponent({
+						view: function() {return m.trust("<a></a><b></b>")}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("<")
+					o(v1.domSize).equals(2)
+					o(v1.instance.domSize).equals(2)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("<")
+					o(v2.domSize).equals(2)
+					o(v2.instance.domSize).equals(2)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("fragment(0)", function() {
+					var component = createComponent({
+						view: function() {return []}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("[")
+					o(v1.domSize).equals(0)
+					o(v1.instance.domSize).equals(0)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("[")
+					o(v2.domSize).equals(0)
+					o(v2.instance.domSize).equals(0)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("fragment(1)", function() {
+					var component = createComponent({
+						view: function() {return [m("a")]}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("[")
+					o(v1.domSize).equals(1)
+					o(v1.instance.domSize).equals(1)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("[")
+					o(v2.domSize).equals(1)
+					o(v2.instance.domSize).equals(1)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("fragment(2)", function() {
+					var component = createComponent({
+						view: function() {return [m("a"), m("b")]}
+					})
+					// create
+					var v1 = m(component)
+					render(root, v1)
+					o(v1.instance.tag).equals("[")
+					o(v1.domSize).equals(2)
+					o(v1.instance.domSize).equals(2)
+					o(v1.dom).equals(v1.instance.dom)
+					// update
+					var v2 = m(component)
+					render(root, v2)
+					o(v2.instance.tag).equals("[")
+					o(v2.domSize).equals(2)
+					o(v2.instance.domSize).equals(2)
+					o(v2.dom).equals(v2.instance.dom)
+				})
+				o("nested component", function() {
+					var childComponent = createComponent({
+						view: function() {return [m("a"), m("b")]}
+					})
+					var parentComponent = createComponent({
+						view: function() {return m(childComponent)}
+					})
+					// create
+					var v1 = m(parentComponent)
+					render(root, v1)
+					o(v1.instance.instance.tag).equals("[")
+					o(v1.domSize).equals(2)
+					o(v1.instance.domSize).equals(2)
+					o(v1.instance.instance.domSize).equals(2)
+					o(v1.dom).equals(v1.instance.dom)
+					o(v1.instance.dom).equals(v1.instance.instance.dom)
+					// update
+					var v2 = m(parentComponent)
+					render(root, v2)
+					o(v2.instance.instance.tag).equals("[")
+					o(v2.domSize).equals(2)
+					o(v2.instance.domSize).equals(2)
+					o(v2.instance.instance.domSize).equals(2)
+					o(v2.dom).equals(v2.instance.dom)
+					o(v2.instance.dom).equals(v2.instance.instance.dom)
+				})
+			})
 		})
 	})
 	o.spec("Tests specific to certain component kinds", function() {

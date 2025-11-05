@@ -19,12 +19,14 @@ o.spec("createHTML", function() {
 		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("A")
+		o(vnode.domSize).equals(1)
 	})
 	o("creates text HTML", function() {
 		var vnode = trust("a")
 		render(root, vnode)
 
 		o(vnode.dom.nodeValue).equals("a")
+		o(vnode.domSize).equals(1)
 	})
 	o("handles empty HTML", function() {
 		var vnode = trust("")
@@ -59,12 +61,14 @@ o.spec("createHTML", function() {
 
 		o(vnode.dom.nodeName).equals("g")
 		o(vnode.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(vnode.domSize).equals(1)
 	})
 	o("creates text SVG", function() {
 		var vnode = trust("a")
 		render(root, m("svg", vnode))
 
 		o(vnode.dom.nodeValue).equals("a")
+		o(vnode.domSize).equals(1)
 	})
 	o("handles empty SVG", function() {
 		var vnode = trust("")

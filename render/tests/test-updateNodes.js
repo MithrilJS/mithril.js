@@ -97,6 +97,7 @@ o.spec("updateNodes", function() {
 		o(root.childNodes.length).equals(1)
 		o(updated.dom.nodeName).equals("A")
 		o(updated.dom).equals(root.childNodes[0])
+		o(updated.domSize).equals(1)
 	})
 	o("handles fragment noop w/ text child", function() {
 		var vnodes = fragment("a")
@@ -108,6 +109,7 @@ o.spec("updateNodes", function() {
 		o(root.childNodes.length).equals(1)
 		o(updated.dom.nodeValue).equals("a")
 		o(updated.dom).equals(root.childNodes[0])
+		o(updated.domSize).equals(1)
 	})
 	o("handles undefined to null noop", function() {
 		var vnodes = [null, m("div")]
@@ -293,6 +295,7 @@ o.spec("updateNodes", function() {
 		o(root.childNodes.length).equals(2)
 		o(updated[0].children[0].dom.nodeName).equals("A")
 		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(updated[0].domSize).equals(1)
 		o(updated[1].dom.nodeName).equals("B")
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
@@ -308,6 +311,7 @@ o.spec("updateNodes", function() {
 		o(updated[0].children[0].dom).equals(root.childNodes[0])
 		o(updated[0].children[1].dom.nodeName).equals("A")
 		o(updated[0].children[1].dom).equals(root.childNodes[1])
+		o(updated[0].domSize).equals(2)
 		o(updated[1].dom.nodeName).equals("I")
 		o(updated[1].dom).equals(root.childNodes[2])
 	})
