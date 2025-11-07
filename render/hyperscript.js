@@ -51,23 +51,20 @@ function execSelector(state, vnode) {
 		return vnode
 	}
 
-	var hasClass = hasOwn.call(attrs, "class")
-	var className = hasClass ? attrs.class : attrs.className
-
-	if (state.attrs !== emptyAttrs) {
-		attrs = Object.assign({}, state.attrs, attrs)
-
-		if (className != null || state.attrs.className != null) attrs.className =
-			className != null
-				? state.attrs.className != null
-					? String(state.attrs.className) + " " + String(className)
-					: className
-				: state.attrs.className
-	} else {
-		if (className != null) attrs.className = className
+	if (hasOwn.call(attrs, "class")) {
+		if (attrs.class != null) attrs.className = attrs.class
+		attrs.class = null
 	}
 
-	if (hasClass) attrs.class = null
+	if (state.attrs !== emptyAttrs) {
+		var className = attrs.className
+		attrs = Object.assign({}, state.attrs, attrs)
+
+		if (state.attrs.className != null) attrs.className =
+			className != null
+				? String(state.attrs.className) + " " + String(className)
+				: state.attrs.className
+	}
 
 	// workaround for #2622 (reorder keys in attrs to set "type" first)
 	// The DOM does things to inputs based on the "type", so it needs set first.
