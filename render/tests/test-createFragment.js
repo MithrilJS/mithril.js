@@ -19,6 +19,7 @@ o.spec("createFragment", function() {
 		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("A")
+		o(vnode.domSize).equals(1)
 	})
 	o("handles empty fragment", function() {
 		var vnode = fragment()
@@ -48,5 +49,6 @@ o.spec("createFragment", function() {
 
 		o(vnode.dom).notEquals(null)
 		o(vnode.dom.nodeName).equals("TD")
+		o(vnode.domSize).equals(1)
 	})
 })

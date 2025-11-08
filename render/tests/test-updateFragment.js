@@ -23,6 +23,7 @@ o.spec("updateFragment", function() {
 
 		o(updated.dom).equals(root.firstChild)
 		o(updated.dom.nodeName).equals("B")
+		o(updated.domSize).equals(1)
 	})
 	o("adds els", function() {
 		var vnode = fragment()
@@ -57,6 +58,7 @@ o.spec("updateFragment", function() {
 
 		o(updated.dom).equals(root.firstChild)
 		o(updated.dom.nodeName).equals("A")
+		o(updated.domSize).equals(1)
 	})
 	o("updates to childless fragment", function() {
 		var vnode = fragment(m("a"))
@@ -66,6 +68,7 @@ o.spec("updateFragment", function() {
 		render(root, updated)
 
 		o(updated.dom).equals(null)
+		o(updated.domSize).equals(0)
 		o(root.childNodes.length).equals(0)
 	})
 })

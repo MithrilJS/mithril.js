@@ -93,7 +93,6 @@ module.exports = function() {
 		}
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
-		// Capture nodes to remove, so we don't confuse them.
 		var fragment = getDocument(parent).createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
@@ -162,7 +161,7 @@ module.exports = function() {
 		if (vnode.instance != null) {
 			createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+			vnode.domSize = vnode.instance.domSize
 		}
 		else {
 			vnode.domSize = 0
@@ -446,8 +445,8 @@ module.exports = function() {
 					domSize += child.domSize || 1
 				}
 			}
-			if (domSize !== 1) vnode.domSize = domSize
 		}
+		vnode.domSize = domSize
 	}
 	function updateElement(old, vnode, hooks, ns) {
 		var element = vnode.dom = old.dom
@@ -471,14 +470,9 @@ module.exports = function() {
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 		}
-		else if (old.instance != null) {
-			removeNode(parent, old.instance)
-			vnode.dom = undefined
-			vnode.domSize = 0
-		}
 		else {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
+			if (old.instance != null) removeNode(parent, old.instance)
+			vnode.domSize = 0
 		}
 	}
 	function getKeyMap(vnodes, start, end) {
@@ -550,7 +544,7 @@ module.exports = function() {
 	function moveDOM(parent, vnode, nextSibling) {
 		if (vnode.dom != null) {
 			var target
-			if (vnode.domSize == null) {
+			if (vnode.domSize == null || vnode.domSize === 1) {
 				// don't allocate for the common case
 				target = vnode.dom
 			} else {
@@ -615,7 +609,7 @@ module.exports = function() {
 	}
 	function removeDOM(parent, vnode) {
 		if (vnode.dom == null) return
-		if (vnode.domSize == null) {
+		if (vnode.domSize == null || vnode.domSize === 1) {
 			parent.removeChild(vnode.dom)
 		} else {
 			for (var dom of domFor(vnode)) parent.removeChild(dom)
