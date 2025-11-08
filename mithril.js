@@ -10,24 +10,23 @@ Vnode.normalize = function(node) {
 	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
 Vnode.normalizeChildren = function(input) {
-	var children = []
-	if (input.length) {
-		var isKeyed = input[0] != null && input[0].key != null
-		// Note: this is a *very* perf-sensitive check.
-		// Fun fact: merging the loop like this is somehow faster than splitting
-		// it, noticeably so.
-		for (var i = 1; i < input.length; i++) {
-			if ((input[i] != null && input[i].key != null) !== isKeyed) {
-				throw new TypeError(
-					isKeyed && (input[i] == null || typeof input[i] === "boolean")
-						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit keyed empty fragment, m.fragment({key: ...}), instead of a hole."
-						: "In fragments, vnodes must either all have keys or none have keys."
-				)
-			}
-		}
-		for (var i = 0; i < input.length; i++) {
-			children[i] = Vnode.normalize(input[i])
-		}
+	// Preallocate the array length (initially holey) and fill every index immediately in order.
+	// Benchmarking shows better performance on V8.
+	var children = new Array(input.length)
+	// Count the number of keyed normalized vnodes for consistency check.
+	// Note: this is a perf-sensitive check.
+	// Fun fact: merging the loop like this is somehow faster than splitting
+	// the check within updateNodes(), noticeably so.
+	var numKeyed = 0
+	for (var i = 0; i < input.length; i++) {
+		children[i] = Vnode.normalize(input[i])
+		if (children[i] !== null && children[i].key != null) numKeyed++
+	}
+	if (numKeyed !== 0 && numKeyed !== input.length) {
+		throw new TypeError(children.includes(null)
+			? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit keyed empty fragment, m.fragment({key: ...}), instead of a hole."
+			: "In fragments, vnodes must either all have keys or none have keys."
+		)
 	}
 	return children
 }
@@ -100,20 +99,18 @@ function execSelector(state, vnode) {
 		vnode.is = state.is
 		return vnode
 	}
-	var hasClass = hasOwn.call(attrs, "class")
-	var className = hasClass ? attrs.class : attrs.className
-	if (state.attrs !== emptyAttrs) {
-		attrs = Object.assign({}, state.attrs, attrs)
-		if (className != null || state.attrs.className != null) attrs.className =
-			className != null
-				? state.attrs.className != null
-					? String(state.attrs.className) + " " + String(className)
-					: className
-				: state.attrs.className
-	} else {
-		if (className != null) attrs.className = className
+	if (hasOwn.call(attrs, "class")) {
+		if (attrs.class != null) attrs.className = attrs.class
+		attrs.class = null
 	}
-	if (hasClass) attrs.class = null
+	if (state.attrs !== emptyAttrs) {
+		var className = attrs.className
+		attrs = Object.assign({}, state.attrs, attrs)
+		if (state.attrs.className != null) attrs.className =
+			className != null
+				? String(state.attrs.className) + " " + String(className)
+				: state.attrs.className
+	}
 	// workaround for #2622 (reorder keys in attrs to set "type" first)
 	// The DOM does things to inputs based on the "type", so it needs set first.
 	// See: https://github.com/MithrilJS/mithril.js/issues/2622
@@ -149,16 +146,16 @@ hyperscript.fragment = function(attrs4, ...children1) {
 	vnode2.children = Vnode.normalizeChildren(vnode2.children)
 	return vnode2
 }
-var delayedRemoval0 = new WeakMap
-function *domFor1(vnode4) {
+var delayedRemoval = new WeakMap
+function *domFor(vnode4) {
 	// To avoid unintended mangling of the internal bundler,
 	// parameter destructuring is not used here.
 	var dom = vnode4.dom
 	var domSize0 = vnode4.domSize
-	var generation0 = delayedRemoval0.get(dom)
+	var generation0 = delayedRemoval.get(dom)
 	if (dom != null) do {
 		var nextSibling = dom.nextSibling
-		if (delayedRemoval0.get(dom) === generation0) {
+		if (delayedRemoval.get(dom) === generation0) {
 			yield dom
 			domSize0--
 		}
@@ -166,12 +163,6 @@ function *domFor1(vnode4) {
 	}
 	while (domSize0)
 }
-var df = {
-	delayedRemoval: delayedRemoval0,
-	domFor: domFor1,
-}
-var delayedRemoval = df.delayedRemoval
-var domFor0 = df.domFor
 var _14 = function() {
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
@@ -254,7 +245,6 @@ var _14 = function() {
 		}
 		vnode3.dom = temp.firstChild
 		vnode3.domSize = temp.childNodes.length
-		// Capture nodes to remove, so we don't confuse them.
 		var fragment = getDocument(parent).createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
@@ -318,7 +308,7 @@ var _14 = function() {
 		if (vnode3.instance != null) {
 			createNode(parent, vnode3.instance, hooks, ns, nextSibling)
 			vnode3.dom = vnode3.instance.dom
-			vnode3.domSize = vnode3.dom != null ? vnode3.instance.domSize : 0
+			vnode3.domSize = vnode3.instance.domSize
 		}
 		else {
 			vnode3.domSize = 0
@@ -424,14 +414,14 @@ var _14 = function() {
 		else if (vnodes == null || vnodes.length === 0) removeNodes(parent, old, 0, old.length)
 		else {
 			var isOldKeyed = old[0] != null && old[0].key != null
-			var isKeyed0 = vnodes[0] != null && vnodes[0].key != null
+			var isKeyed = vnodes[0] != null && vnodes[0].key != null
 			var start = 0, oldStart = 0
 			if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
-			if (!isKeyed0) while (start < vnodes.length && vnodes[start] == null) start++
-			if (isOldKeyed !== isKeyed0) {
+			if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
+			if (isOldKeyed !== isKeyed) {
 				removeNodes(parent, old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
-			} else if (!isKeyed0) {
+			} else if (!isKeyed) {
 				// Don't index past the end of either list (causes deopts).
 				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
 				// Rewind if necessary to the first non-null index on either side.
@@ -595,8 +585,8 @@ var _14 = function() {
 					domSize += child.domSize || 1
 				}
 			}
-			if (domSize !== 1) vnode3.domSize = domSize
 		}
+		vnode3.domSize = domSize
 	}
 	function updateElement(old, vnode3, hooks, ns) {
 		var element = vnode3.dom = old.dom
@@ -619,14 +609,9 @@ var _14 = function() {
 			vnode3.dom = vnode3.instance.dom
 			vnode3.domSize = vnode3.instance.domSize
 		}
-		else if (old.instance != null) {
-			removeNode(parent, old.instance)
-			vnode3.dom = undefined
-			vnode3.domSize = 0
-		}
 		else {
-			vnode3.dom = old.dom
-			vnode3.domSize = old.domSize
+			if (old.instance != null) removeNode(parent, old.instance)
+			vnode3.domSize = 0
 		}
 	}
 	function getKeyMap(vnodes, start, end) {
@@ -696,12 +681,12 @@ var _14 = function() {
 	function moveDOM(parent, vnode3, nextSibling) {
 		if (vnode3.dom != null) {
 			var target
-			if (vnode3.domSize == null) {
+			if (vnode3.domSize == null || vnode3.domSize === 1) {
 				// don't allocate for the common case
 				target = vnode3.dom
 			} else {
 				target = getDocument(parent).createDocumentFragment()
-				for (var dom of domFor0(vnode3)) target.appendChild(dom)
+				for (var dom of domFor(vnode3)) target.appendChild(dom)
 			}
 			insertDOM(parent, target, nextSibling)
 		}
@@ -735,7 +720,7 @@ var _14 = function() {
 		var result = callHook.call(source.onbeforeremove, vnode3)
 		if (result == null) return
 		var generation = currentRender
-		for (var dom of domFor0(vnode3)) delayedRemoval.set(dom, generation)
+		for (var dom of domFor(vnode3)) delayedRemoval.set(dom, generation)
 		counter.v++
 		Promise.resolve(result).finally(function () {
 			checkState(vnode3, original)
@@ -756,10 +741,10 @@ var _14 = function() {
 	}
 	function removeDOM(parent, vnode3) {
 		if (vnode3.dom == null) return
-		if (vnode3.domSize == null) {
+		if (vnode3.domSize == null || vnode3.domSize === 1) {
 			parent.removeChild(vnode3.dom)
 		} else {
-			for (var dom of domFor0(vnode3)) parent.removeChild(dom)
+			for (var dom of domFor(vnode3)) parent.removeChild(dom)
 		}
 	}
 	function onremove(vnode3) {
@@ -1046,8 +1031,8 @@ var _14 = function() {
 		}
 	}
 }
-var render = _14(typeof window !== "undefined" ? window : null)
-var _19 = function(render2, schedule, console) {
+var render = _14()
+var _21 = function(render2, schedule, console) {
 	var subscriptions = []
 	var pending = false
 	var offset = -1
@@ -1085,7 +1070,7 @@ var _19 = function(render2, schedule, console) {
 	}
 	return {mount: mount, redraw: redraw}
 }
-var mountRedraw0 = _19(render, typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : null, typeof console !== "undefined" ? console : null)
+var mountRedraw = _21(render, typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : null, typeof console !== "undefined" ? console : null)
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
@@ -1141,7 +1126,7 @@ var buildPathname = function(template, params) {
 	if (newHashIndex >= 0) result0 += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)
 	return result0
 }
-var _22 = function($window, oncompletion) {
+var _25 = function($window, oncompletion) {
 	function PromiseProxy(executor) {
 		return new Promise(executor)
 	}
@@ -1314,22 +1299,37 @@ var _22 = function($window, oncompletion) {
 		}
 	}
 }
-var request = _22(typeof window !== "undefined" ? window : null, mountRedraw0.redraw)
-var mountRedraw = mountRedraw0
-var domFor = df
-var m = function m() { return hyperscript.apply(this, arguments) }
-m.m = hyperscript
-m.trust = hyperscript.trust
-m.fragment = hyperscript.fragment
-m.Fragment = "["
-m.mount = mountRedraw.mount
-var m4 = hyperscript
-function decodeURIComponentSave0(str) {
-	try {
-		return decodeURIComponent(str)
-	} catch(err) {
-		return str
-	}
+var request = _25(typeof window !== "undefined" ? window : null, mountRedraw.redraw)
+/*
+Percent encodings encode UTF-8 bytes, so this regexp needs to match that.
+Here's how UTF-8 encodes stuff:
+- `00-7F`: 1-byte, for U+0000-U+007F
+- `C2-DF 80-BF`: 2-byte, for U+0080-U+07FF
+- `E0-EF 80-BF 80-BF`: 3-byte, encodes U+0800-U+FFFF
+- `F0-F4 80-BF 80-BF 80-BF`: 4-byte, encodes U+10000-U+10FFFF
+In this, there's a number of invalid byte sequences:
+- `80-BF`: Continuation byte, invalid as start
+- `C0-C1 80-BF`: Overlong encoding for U+0000-U+007F
+- `E0 80-9F 80-BF`: Overlong encoding for U+0080-U+07FF
+- `ED A0-BF 80-BF`: Encoding for UTF-16 surrogate U+D800-U+DFFF
+- `F0 80-8F 80-BF 80-BF`: Overlong encoding for U+0800-U+FFFF
+- `F4 90-BF`: RFC 3629 restricted UTF-8 to only code points UTF-16 could encode.
+- `F5-FF`: RFC 3629 restricted UTF-8 to only code points UTF-16 could encode.
+So in reality, only the following sequences can encode are valid characters:
+- 00-7F
+- C2-DF 80-BF
+- E0    A0-BF 80-BF
+- E1-EC 80-BF 80-BF
+- ED    80-9F 80-BF
+- EE-EF 80-BF 80-BF
+- F0    90-BF 80-BF 80-BF
+- F1-F3 80-BF 80-BF 80-BF
+- F4    80-8F 80-BF 80-BF
+The regexp just tries to match this as compactly as possible.
+*/
+var validUtf8Encodings = /%(?:[0-7]|(?!c[01]|e0%[89]|ed%[ab]|f0%8|f4%[9ab])(?:c|d|(?:e|f[0-4]%[89ab])[\da-f]%[89ab])[\da-f]%[89ab])[\da-f]/gi
+var decodeURIComponentSafe = function(str) {
+	return String(str).replace(validUtf8Encodings, decodeURIComponent)
 }
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
@@ -1337,8 +1337,8 @@ var parseQueryString = function(string) {
 	var entries = string.split("&"), counters = {}, data0 = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key4 = decodeURIComponentSave0(entry[0])
-		var value2 = entry.length === 2 ? decodeURIComponentSave0(entry[1]) : ""
+		var key4 = decodeURIComponentSafe(entry[0])
+		var value2 = entry.length === 2 ? decodeURIComponentSafe(entry[1]) : ""
 		if (value2 === "true") value2 = true
 		else if (value2 === "false") value2 = false
 		var levels = key4.split(/\]\[?|\[/)
@@ -1402,8 +1402,8 @@ var compileTemplate = function(template) {
 		// don't also accidentally escape `-` and make it harder to detect it to
 		// ban it from template parameters.
 		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
-		function(m5, key5, extra) {
-			if (key5 == null) return "\\" + m5
+		function(m4, key5, extra) {
+			if (key5 == null) return "\\" + m4
 			keys.push({k: key5, r: extra === "..."})
 			if (extra === "...") return "(.*)"
 			if (extra === ".") return "([^/]+)\\."
@@ -1448,8 +1448,7 @@ var compileTemplate = function(template) {
 //     return result
 // }
 // ```
-// Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
-var magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$")
+var magic = /^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$/
 var censor = function(attrs7, extras) {
 	var result2 = {}
 	if (extras != null) {
@@ -1467,18 +1466,7 @@ var censor = function(attrs7, extras) {
 	}
 	return result2
 }
-function decodeURIComponentSave(component) {
-	try {
-		return decodeURIComponent(component)
-	} catch(e) {
-		return component
-	}
-}
-var _30 = function($window, mountRedraw1) {
-	var callAsync = $window == null
-		// In case Mithril.js' loaded globally without the DOM, let's not break
-		? null
-		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
+var _31 = function($window, mountRedraw0) {
 	var p = Promise.resolve()
 	var scheduled = false
 	var ready = false
@@ -1513,12 +1501,7 @@ var _30 = function($window, mountRedraw1) {
 				if (prefix[0] !== "/") prefix = "/" + prefix
 			}
 		}
-		// This seemingly useless `.concat()` speeds up the tests quite a bit,
-		// since the representation is consistently a relatively poorly
-		// optimized cons string.
-		var path0 = prefix.concat()
-			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSave)
-			.slice(route.prefix.length)
+		var path0 = decodeURIComponentSafe(prefix).slice(route.prefix.length)
 		var data = parsePathname(path0)
 		Object.assign(data.params, $window.history.state)
 		function reject(e) {
@@ -1538,10 +1521,10 @@ var _30 = function($window, mountRedraw1) {
 						component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 						attrs6 = data.params, currentPath = path0, lastUpdate = null
 						currentResolver = payload.render ? payload : null
-						if (hasBeenResolved) mountRedraw1.redraw()
+						if (hasBeenResolved) mountRedraw0.redraw()
 						else {
 							hasBeenResolved = true
-							mountRedraw1.mount(dom0, RouterRoot)
+							mountRedraw0.mount(dom0, RouterRoot)
 						}
 					}
 					// There's no understating how much I *wish* I could
@@ -1571,7 +1554,7 @@ var _30 = function($window, mountRedraw1) {
 			// TODO: just do `mountRedraw.redraw()` here and elide the timer
 			// dependency. Note that this will muck with tests a *lot*, so it's
 			// not as easy of a change as it sounds.
-			callAsync(resolveRoute)
+			setTimeout(resolveRoute)
 		}
 	}
 	function route(root, defaultRoute, routes) {
@@ -1627,7 +1610,7 @@ var _30 = function($window, mountRedraw1) {
 			//
 			// We don't strip the other parameters because for convenience we
 			// let them be specified in the selector as well.
-			var child0 = m4(
+			var child0 = hyperscript(
 				vnode6.attrs.selector || "a",
 				censor(vnode6.attrs, ["options", "params", "selector", "onclick"]),
 				vnode6.children
@@ -1692,7 +1675,14 @@ var _30 = function($window, mountRedraw1) {
 	}
 	return route
 }
-m.route = _30(typeof window !== "undefined" ? window : null, mountRedraw)
+var router = _31(typeof window !== "undefined" ? window : null, mountRedraw)
+var m = function m() { return hyperscript.apply(this, arguments) }
+m.m = hyperscript
+m.trust = hyperscript.trust
+m.fragment = hyperscript.fragment
+m.Fragment = "["
+m.mount = mountRedraw.mount
+m.route = router
 m.render = render
 m.redraw = mountRedraw.redraw
 m.request = request.request
@@ -1702,7 +1692,7 @@ m.parsePathname = parsePathname
 m.buildPathname = buildPathname
 m.vnode = Vnode
 m.censor = censor
-m.domFor = domFor.domFor
+m.domFor = domFor
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }());

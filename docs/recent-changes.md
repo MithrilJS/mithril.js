@@ -1,4 +1,31 @@
 
+# Release v2.3.8
+
+### Patch Changes
+
+#### [refactor execSelector (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3056)
+
+
+#### [Make `vnode.domSize` assignment consistent between create and update. (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3055)
+
+This PR makes the code and behavior of create and update processes more consistent.
+#### [Bump rimraf from 6.0.1 to 6.1.0 in the normal group (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/3054)
+
+Bumps the normal group with 1 update: [rimraf](https://github.com/isaacs/rimraf).  Updates `rimraf` from 6.0.1 to 6.1.0.  Changelog.  Sourced from rimraf's changelog.
+#### [Fix URI decoder bug and reduce bundle size through module tailoring and cleanup (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3050)
+
+This fixes the URI decoder used in the Router to decode more strictly.
+#### [refactor `Vnode.normalizeChildren` (@kfule)](https://github.com/MithrilJS/mithril.js/pull/3052)
+
+`Vnode.normalizeChildren` now preallocates the array length and performs key-consistency checks after normalization.
+#### [Bump actions/setup-node from 5 to 6 in the normal group (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/3053)
+
+Bumps the normal group with 1 update: [actions/setup-node](https://github.com/actions/setup-node).  Updates `actions/setup-node` from 5 to 6.  Release notes.
+#### [Bump actions/setup-node from 4 to 5 in the normal group (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/3047)
+
+Bumps the normal group with 1 update: [actions/setup-node](https://github.com/actions/setup-node).  Updates `actions/setup-node` from 4 to 5.  Release notes.
+#### [docs: edited the link to the build badge (@Olexandr88)](https://github.com/MithrilJS/mithril.js/pull/3045)
+
 # Release v2.3.7
 
 ### Patch Changes
