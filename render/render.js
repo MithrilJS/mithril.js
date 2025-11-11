@@ -166,6 +166,8 @@ module.exports = function() {
 		else {
 			vnode.domSize = 0
 		}
+		// postcreate is called after the component is created
+		if(vnode.tag.postcreate) vnode.tag.postcreate.apply(vnode);
 	}
 
 	//update
@@ -474,6 +476,8 @@ module.exports = function() {
 			if (old.instance != null) removeNode(parent, old.instance)
 			vnode.domSize = 0
 		}
+		// postupdate is called after the component is updated
+		if(vnode.tag.postupdate) vnode.tag.postupdate.apply(vnode);
 	}
 	function getKeyMap(vnodes, start, end) {
 		var map = Object.create(null)
@@ -879,7 +883,7 @@ module.exports = function() {
 
 	var currentDOM
 
-	return function(dom, vnodes, redraw) {
+	return function(dom, vnodes, redraw, nextSibling = null) {
 		if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 		if (currentDOM != null && dom.contains(currentDOM)) {
 			throw new TypeError("Node is currently being rendered to and thus is locked.")
@@ -897,7 +901,7 @@ module.exports = function() {
 			// First time rendering into a node clears it out
 			if (dom.vnodes == null) dom.textContent = ""
 			vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
-			updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+			updateNodes(dom, dom.vnodes, vnodes, hooks, nextSibling, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 			dom.vnodes = vnodes
 			// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 			if (active != null && activeElement(dom) !== active && typeof active.focus === "function") active.focus()
