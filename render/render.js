@@ -349,8 +349,9 @@ module.exports = function() {
 					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
 					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, oldIndices = new Array(vnodesLength), li=0, i=0, pos = 2147483647, matched = 0, map, lisIndices
 					for (i = 0; i < vnodesLength; i++) oldIndices[i] = -1
+					var map = Object.create(null)
+					for (var i = start; i <= end; i++) map[vnodes[i].key] = i
 					for (i = oldEnd; i >= oldStart; i--) {
-						if (map == null) map = getKeyMap(vnodes, start, end + 1)
 						oe = old[i]
 						var newIndex = map[oe.key]
 						if (newIndex != null) {
@@ -474,17 +475,6 @@ module.exports = function() {
 			if (old.instance != null) removeNode(parent, old.instance)
 			vnode.domSize = 0
 		}
-	}
-	function getKeyMap(vnodes, start, end) {
-		var map = Object.create(null)
-		for (; start < end; start++) {
-			var vnode = vnodes[start]
-			if (vnode != null) {
-				var key = vnode.key
-				if (key != null) map[key] = start
-			}
-		}
-		return map
 	}
 	// Lifted from ivi https://github.com/ivijs/ivi/
 	// takes a list of unique numbers (-1 is special and can
