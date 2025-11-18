@@ -291,9 +291,9 @@ module.exports = function() {
 					o = old[start]
 					v = vnodes[start]
 					if (o === v || o == null && v == null) continue
-					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
+					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, old.length, nextSibling))
 					else if (v == null) removeNode(parent, o)
-					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
+					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, old.length, nextSibling), ns)
 				}
 				if (old.length > commonLength) removeNodes(parent, old, start, old.length)
 				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
@@ -316,13 +316,13 @@ module.exports = function() {
 					v = vnodes[start]
 					if (o.key !== v.key) break
 					oldStart++, start++
-					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
+					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, oldEnd + 1, nextSibling), ns)
 				}
 				// swaps and list reversals
 				while (oldEnd >= oldStart && end >= start) {
 					if (start === end) break
 					if (o.key !== ve.key || oe.key !== v.key) break
-					topSibling = getNextSibling(old, oldStart, nextSibling)
+					topSibling = getNextSibling(old, oldStart, oldEnd, nextSibling)
 					moveDOM(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
 					if (++start <= --end) moveDOM(parent, o, nextSibling)
@@ -533,8 +533,8 @@ module.exports = function() {
 		return result
 	}
 
-	function getNextSibling(vnodes, i, nextSibling) {
-		for (; i < vnodes.length; i++) {
+	function getNextSibling(vnodes, i, end, nextSibling) {
+		for (; i < end; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling
