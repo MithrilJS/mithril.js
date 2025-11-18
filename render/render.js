@@ -349,15 +349,15 @@ module.exports = function() {
 					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
 					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, oldIndices = new Array(vnodesLength), li=0, i=0, pos = 2147483647, matched = 0, map, lisIndices
 					for (i = 0; i < vnodesLength; i++) oldIndices[i] = -1
-					for (i = end; i >= start; i--) {
-						if (map == null) map = getKeyMap(old, oldStart, oldEnd + 1)
-						ve = vnodes[i]
-						var oldIndex = map[ve.key]
-						if (oldIndex != null) {
-							pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
-							oldIndices[i-start] = oldIndex
-							oe = old[oldIndex]
-							old[oldIndex] = null
+					for (i = oldEnd; i >= oldStart; i--) {
+						if (map == null) map = getKeyMap(vnodes, start, end + 1)
+						oe = old[i]
+						var newIndex = map[oe.key]
+						if (newIndex != null) {
+							pos = (newIndex < pos) ? newIndex : -1 // becomes -1 if nodes were re-ordered
+							oldIndices[newIndex-start] = i
+							ve = vnodes[newIndex]
+							old[i] = null
 							if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
 							if (ve.dom != null) nextSibling = ve.dom
 							matched++
