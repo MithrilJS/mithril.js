@@ -26,7 +26,8 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 
 		while (tests--) {
 			const test = fuzzTest(c.delMax, c.movMax, c.insMax)
-			o(i++ + ": " + test.list.join() + " -> " + test.updated.join(), function() {
+			const id = i++
+			o(id + ": " + test.list.join() + " -> " + test.updated.join(), function() {
 				render(root, test.list.map(function(x){return m(x, {key: x})}))
 				addSpies(root)
 				render(root, test.updated.map(function(x){return m(x, {key: x})}))
@@ -38,6 +39,29 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 				// o(root.appendChild.callCount + root.insertBefore.callCount).equals(test.expected.creations + test.expected.moves)("moves")
 				o(root.removeChild.callCount).equals(test.expected.deletions)("deletions")
 				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(test.updated)
+			})
+			o(id + ": including tag changes", function() {
+				// change some tags before and after the update
+				var list = test.list.map(function(x){return m(x + (Math.random() > 0.5 ? "_" : ""), {key: x})})
+				var updated = test.updated.map(function(x){return m(x, {key: x})})
+				var str = list.map(function(v) {return v.tag}).join() + " -> " + updated.map(function(v) {return v.tag}).join()
+
+				render(root, list)
+				render(root, updated)
+
+				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(test.updated)(str)
+			})
+			o(id + ": including empty fragments (without dom)", function() {
+				// change some vnodes to empty fragments without DOM before and after the update
+				var list = test.list.map(function(x){return m(Math.random() > 0.5 ? x : "[", {key: x})})
+				var updated = test.updated.map(function(x){return m(Math.random() > 0.5 ? x : "[", {key: x})})
+				var expected = updated.map(function(v){return v.tag}).filter(function(x){return x !== "["})
+				var str = list.map(function(v) {return v.tag + "." + v.key}).join() + " -> " + updated.map(function(v) {return v.tag + "." + v.key}).join()
+
+				render(root, list)
+				render(root, updated)
+
+				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(expected)(str)
 			})
 		}
 	})
