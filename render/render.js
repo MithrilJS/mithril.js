@@ -275,17 +275,17 @@ module.exports = function() {
 			var isOldKeyed = old[0] != null && old[0].key != null
 			var isKeyed = vnodes[0] != null && vnodes[0].key != null
 			var start = 0, oldStart = 0
-			if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
-			if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
 			if (isOldKeyed !== isKeyed) {
-				removeNodes(parent, old, oldStart, old.length)
-				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+				removeNodes(parent, old, 0, old.length)
+				createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 			} else if (!isKeyed) {
 				// Don't index past the end of either list (causes deopts).
 				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
 				// Rewind if necessary to the first non-null index on either side.
 				// We could alternatively either explicitly create or remove nodes when `start !== oldStart`
 				// but that would be optimizing for sparse lists which are more rare than dense ones.
+				while (oldStart < old.length && old[oldStart] == null) oldStart++
+				while (start < vnodes.length && vnodes[start] == null) start++
 				start = start < oldStart ? start : oldStart
 				for (; start < commonLength; start++) {
 					o = old[start]
