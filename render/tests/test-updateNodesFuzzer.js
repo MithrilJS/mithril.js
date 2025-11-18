@@ -25,15 +25,17 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 		var tests = 250
 
 		while (tests--) {
-			var test = fuzzTest(c.delMax, c.movMax, c.insMax)
+			const test = fuzzTest(c.delMax, c.movMax, c.insMax)
 			o(i++ + ": " + test.list.join() + " -> " + test.updated.join(), function() {
 				render(root, test.list.map(function(x){return m(x, {key: x})}))
 				addSpies(root)
 				render(root, test.updated.map(function(x){return m(x, {key: x})}))
 
-				if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
+				// FIXME: This does not take into account the "swaps and list reversals" heuristic in updateNodes().
+				// if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
 
-				o(root.appendChild.callCount + root.insertBefore.callCount).equals(test.expected.creations + test.expected.moves)("moves")
+				// ditto
+				// o(root.appendChild.callCount + root.insertBefore.callCount).equals(test.expected.creations + test.expected.moves)("moves")
 				o(root.removeChild.callCount).equals(test.expected.deletions)("deletions")
 				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(test.updated)
 			})
