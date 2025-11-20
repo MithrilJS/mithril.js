@@ -1169,6 +1169,51 @@ o.spec("updateNodes", function() {
 		o(root.appendChild.callCount + root.insertBefore.callCount).equals(5)
 		o(tagNames).deepEquals(expectedTagNames)
 	})
+	o("update keyed element vnodes with another tag (#3059)", function() {
+		var e = function(k) {return m(k, {key: k})} // element vnode
+		var p = function(k) {return m(k + "p", {key: k})} // element vnode (another tag)
+
+		const o1 = [e("k1"),e("k2"),e("k3"),e("k4")]
+		const v1 = [p("k2"),e("k4"),e("k3")]
+
+		// create
+		render(root, v1)
+		o(Array.from(root.childNodes).map(function(n) {return n.nodeName})).deepEquals(["K2P", "K4", "K3"])
+
+		// update
+		render(root, [])
+		render(root, o1)
+		render(root, v1)
+		o(Array.from(root.childNodes).map(function(n) {return n.nodeName})).deepEquals(["K2P", "K4", "K3"])
+	})
+	o("update keyed element vnodes with dom and keyed fragment vnodes without dom (1) (#3059)", function() {
+		o(function() {
+			var e = function(k) {return m(k, {key: k})} // element vnode (with dom)
+			var f = function(k) {return m("[", {key: k})} // fragment vnode (without dom)
+
+			var o1 = [f("k1"),e("k2")]
+			var v1 = [e("k1"),e("a"),f("k2")]
+
+			render(root, o1)
+			render(root, v1)
+
+			o(Array.from(root.childNodes).map(function(n) {return n.nodeName})).deepEquals(["K1", "A"])
+		}).notThrows(Error)
+	})
+	o("update keyed element vnodes with dom and keyed fragment vnodes without dom (2) (#3059)", function() {
+		o(function() {
+			var e = function(k) {return m(k, {key: k})} // element vnode (with dom)
+			var f = function(k) {return m("[", {key: k})} // fragment vnode (without dom)
+
+			var o1 = [f("k1"),f("k2"),e("k3")]
+			var v1 = [e("k1"),f("k3"),e("k2")]
+
+			render(root, o1)
+			render(root, v1)
+
+			o(Array.from(root.childNodes).map(function(n) {return n.nodeName})).deepEquals(["K1", "K2"])
+		}).notThrows(Error)
+	})
 
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
