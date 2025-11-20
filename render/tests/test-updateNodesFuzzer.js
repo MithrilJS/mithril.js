@@ -33,9 +33,12 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 				render(root, test.updated.map(function(x){return m(x, {key: x})}))
 
 				// FIXME: This does not take into account the "swaps and list reversals" heuristic in updateNodes().
+				// Here, we’re checking whether the number of node moves matches the theoretical value derived from the LIS.
+				// However, in updateNodes(), when patterns such as swaps or reversed lists are detected,
+				// nodes are moved before the LIS-based reordering is applied.
+				// Once these heuristic moves occur, the actual number of moves no longer matches the LIS-based theoretical value.
 				// if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
-
-				// ditto
+				//
 				// o(root.appendChild.callCount + root.insertBefore.callCount).equals(test.expected.creations + test.expected.moves)("moves")
 				o(root.removeChild.callCount).equals(test.expected.deletions)("deletions")
 				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(test.updated)
