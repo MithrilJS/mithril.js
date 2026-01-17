@@ -863,7 +863,6 @@ module.exports = function() {
 		// unlike special "attributes" internally.
 		vnode.attrs = old.attrs
 		vnode.children = old.children
-		vnode.text = old.text
 		return true
 	}
 
