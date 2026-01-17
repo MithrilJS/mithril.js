@@ -419,7 +419,7 @@ module.exports = function() {
 		}
 	}
 	function updateText(old, vnode) {
-		if (old.children.toString() !== vnode.children.toString()) {
+		if (old.children !== vnode.children) {
 			old.dom.nodeValue = vnode.children
 		}
 		vnode.dom = old.dom
