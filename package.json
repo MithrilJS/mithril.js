@@ -4,6 +4,7 @@
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
+  "main": "mithril.js",
   "unpkg": "mithril.min.js",
   "jsdelivr": "mithril.min.js",
   "repository": "github:MithrilJS/mithril.js",
@@ -31,5 +32,10 @@
     "ospec": "4.2.1",
     "rimraf": "^6.0.1",
     "terser": "^5.7.2"
-  }
+  },
+  "files": [
+    "mithril.*",
+    "stream.js",
+    "stream/*.js"
+  ]
 }
