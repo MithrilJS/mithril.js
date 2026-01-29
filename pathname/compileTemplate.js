@@ -1,6 +1,7 @@
 "use strict"
 
 var parsePathname = require("./parse")
+var decodeURIComponentSafe = require("../util/decodeURIComponentSafe")
 
 // Compiles a template into a function that takes a resolved path (without query
 // strings) and returns an object containing the template parameters with their
@@ -36,7 +37,7 @@ module.exports = function(template) {
 		var values = regexp.exec(data.path)
 		if (values == null) return false
 		for (var i = 0; i < keys.length; i++) {
-			data.params[keys[i].k] = keys[i].r ? values[i + 1] : decodeURIComponent(values[i + 1])
+			data.params[keys[i].k] = keys[i].r ? values[i + 1] : decodeURIComponentSafe(values[i + 1])
 		}
 		return true
 	}
