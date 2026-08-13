@@ -620,7 +620,7 @@ o.spec("request", function() {
 			})
 			request({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
-				o(e.message).equals("[object Object]")
+				o(e.message).equals(JSON.stringify({error: "error"}))
 				o(e.response).deepEquals({error: "error"})
 				o(e.code).equals(500)
 			}).then(done)

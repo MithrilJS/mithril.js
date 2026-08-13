@@ -96,6 +96,12 @@ module.exports = function($window, oncompletion) {
 							var completeErrorResponse = function() {
 								try { message = ev.target.responseText }
 								catch (e) { message = response }
+								// Error() stringifies non-strings poorly (e.g. [object Object]);
+								// responseText is also unavailable for responseType json/arraybuffer/etc.
+								if (typeof message !== "string") {
+									try { message = JSON.stringify(message) }
+									catch (stringifyError) { message = String(message) }
+								}
 								var error = new Error(message)
 								error.code = ev.target.status
 								error.response = response

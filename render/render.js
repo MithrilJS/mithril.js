@@ -274,32 +274,32 @@ module.exports = function() {
 		else {
 			var isOldKeyed = old[0] != null && old[0].key != null
 			var isKeyed = vnodes[0] != null && vnodes[0].key != null
-			var start = 0, oldStart = 0
-			if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
-			if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
+			var start = 0, oldStart = 0, o, v
 			if (isOldKeyed !== isKeyed) {
-				removeNodes(parent, old, oldStart, old.length)
-				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+				removeNodes(parent, old, 0, old.length)
+				createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 			} else if (!isKeyed) {
 				// Don't index past the end of either list (causes deopts).
 				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
 				// Rewind if necessary to the first non-null index on either side.
 				// We could alternatively either explicitly create or remove nodes when `start !== oldStart`
 				// but that would be optimizing for sparse lists which are more rare than dense ones.
+				while (oldStart < old.length && old[oldStart] == null) oldStart++
+				while (start < vnodes.length && vnodes[start] == null) start++
 				start = start < oldStart ? start : oldStart
 				for (; start < commonLength; start++) {
 					o = old[start]
 					v = vnodes[start]
 					if (o === v || o == null && v == null) continue
-					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
+					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, old.length, nextSibling))
 					else if (v == null) removeNode(parent, o)
-					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
+					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, old.length, nextSibling), ns)
 				}
 				if (old.length > commonLength) removeNodes(parent, old, start, old.length)
 				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else {
 				// keyed diff
-				var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oe, ve, topSibling
+				var oldEnd = old.length - 1, end = vnodes.length - 1, oe, ve, topSibling
 
 				// bottom-up
 				while (oldEnd >= oldStart && end >= start) {
@@ -316,13 +316,13 @@ module.exports = function() {
 					v = vnodes[start]
 					if (o.key !== v.key) break
 					oldStart++, start++
-					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
+					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, oldEnd + 1, nextSibling), ns)
 				}
 				// swaps and list reversals
 				while (oldEnd >= oldStart && end >= start) {
 					if (start === end) break
 					if (o.key !== ve.key || oe.key !== v.key) break
-					topSibling = getNextSibling(old, oldStart, nextSibling)
+					topSibling = getNextSibling(old, oldStart, oldEnd, nextSibling)
 					moveDOM(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
 					if (++start <= --end) moveDOM(parent, o, nextSibling)
@@ -347,17 +347,18 @@ module.exports = function() {
 				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
 					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
-					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, oldIndices = new Array(vnodesLength), li=0, i=0, pos = 2147483647, matched = 0, map, lisIndices
-					for (i = 0; i < vnodesLength; i++) oldIndices[i] = -1
-					for (i = end; i >= start; i--) {
-						if (map == null) map = getKeyMap(old, oldStart, oldEnd + 1)
-						ve = vnodes[i]
-						var oldIndex = map[ve.key]
-						if (oldIndex != null) {
-							pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
-							oldIndices[i-start] = oldIndex
-							oe = old[oldIndex]
-							old[oldIndex] = null
+					var originalNextSibling = nextSibling, pos = 2147483647, matched = 0
+					var oldIndices = new Array(end - start + 1).fill(-1)
+					var map = Object.create(null)
+					for (var i = start; i <= end; i++) map[vnodes[i].key] = i
+					for (var i = oldEnd; i >= oldStart; i--) {
+						oe = old[i]
+						var newIndex = map[oe.key]
+						if (newIndex != null) {
+							pos = (newIndex < pos) ? newIndex : -1 // becomes -1 if nodes were re-ordered
+							oldIndices[newIndex-start] = i
+							ve = vnodes[newIndex]
+							old[i] = null
 							if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
 							if (ve.dom != null) nextSibling = ve.dom
 							matched++
@@ -370,22 +371,22 @@ module.exports = function() {
 						if (pos === -1) {
 							// the indices of the indices of the items that are part of the
 							// longest increasing subsequence in the oldIndices list
-							lisIndices = makeLisIndices(oldIndices)
-							li = lisIndices.length - 1
-							for (i = end; i >= start; i--) {
-								v = vnodes[i]
-								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
+							var lisIndices = makeLisIndices(oldIndices)
+							var li = lisIndices.length - 1
+							for (var i = end; i >= start; i--) {
+								ve = vnodes[i]
+								if (oldIndices[i-start] === -1) createNode(parent, ve, hooks, ns, nextSibling)
 								else {
 									if (lisIndices[li] === i - start) li--
-									else moveDOM(parent, v, nextSibling)
+									else moveDOM(parent, ve, nextSibling)
 								}
-								if (v.dom != null) nextSibling = vnodes[i].dom
+								if (ve.dom != null) nextSibling = ve.dom
 							}
 						} else {
-							for (i = end; i >= start; i--) {
-								v = vnodes[i]
-								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
-								if (v.dom != null) nextSibling = vnodes[i].dom
+							for (var i = end; i >= start; i--) {
+								ve = vnodes[i]
+								if (oldIndices[i-start] === -1) createNode(parent, ve, hooks, ns, nextSibling)
+								if (ve.dom != null) nextSibling = ve.dom
 							}
 						}
 					}
@@ -475,17 +476,6 @@ module.exports = function() {
 			vnode.domSize = 0
 		}
 	}
-	function getKeyMap(vnodes, start, end) {
-		var map = Object.create(null)
-		for (; start < end; start++) {
-			var vnode = vnodes[start]
-			if (vnode != null) {
-				var key = vnode.key
-				if (key != null) map[key] = start
-			}
-		}
-		return map
-	}
 	// Lifted from ivi https://github.com/ivijs/ivi/
 	// takes a list of unique numbers (-1 is special and can
 	// occur multiple times) and returns an array with the indices
@@ -533,8 +523,8 @@ module.exports = function() {
 		return result
 	}
 
-	function getNextSibling(vnodes, i, nextSibling) {
-		for (; i < vnodes.length; i++) {
+	function getNextSibling(vnodes, i, end, nextSibling) {
+		for (; i < end; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling

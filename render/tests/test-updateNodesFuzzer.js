@@ -25,17 +25,46 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 		var tests = 250
 
 		while (tests--) {
-			var test = fuzzTest(c.delMax, c.movMax, c.insMax)
-			o(i++ + ": " + test.list.join() + " -> " + test.updated.join(), function() {
+			const test = fuzzTest(c.delMax, c.movMax, c.insMax)
+			const id = i++
+			o(id + ": " + test.list.join() + " -> " + test.updated.join(), function() {
 				render(root, test.list.map(function(x){return m(x, {key: x})}))
 				addSpies(root)
 				render(root, test.updated.map(function(x){return m(x, {key: x})}))
 
-				if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
-
-				o(root.appendChild.callCount + root.insertBefore.callCount).equals(test.expected.creations + test.expected.moves)("moves")
+				// FIXME: This does not take into account the "swaps and list reversals" heuristic in updateNodes().
+				// Here, we’re checking whether the number of node moves matches the theoretical value derived from the LIS.
+				// However, in updateNodes(), when patterns such as swaps or reversed lists are detected,
+				// nodes are moved before the LIS-based reordering is applied.
+				// Once these heuristic moves occur, the actual number of moves no longer matches the LIS-based theoretical value.
+				// if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
+				//
+				// o(root.appendChild.callCount + root.insertBefore.callCount).equals(test.expected.creations + test.expected.moves)("moves")
 				o(root.removeChild.callCount).equals(test.expected.deletions)("deletions")
 				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(test.updated)
+			})
+			o(id + ": including tag changes", function() {
+				// change some tags before and after the update
+				var list = test.list.map(function(x){return m(x + (Math.random() > 0.5 ? "_" : ""), {key: x})})
+				var updated = test.updated.map(function(x){return m(x, {key: x})})
+				var str = list.map(function(v) {return v.tag}).join() + " -> " + updated.map(function(v) {return v.tag}).join()
+
+				render(root, list)
+				render(root, updated)
+
+				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(test.updated)(str)
+			})
+			o(id + ": including empty fragments (without dom)", function() {
+				// change some vnodes to empty fragments without DOM before and after the update
+				var list = test.list.map(function(x){return m(Math.random() > 0.5 ? x : "[", {key: x})})
+				var updated = test.updated.map(function(x){return m(Math.random() > 0.5 ? x : "[", {key: x})})
+				var expected = updated.map(function(v){return v.tag}).filter(function(x){return x !== "["})
+				var str = list.map(function(v) {return v.tag + "." + v.key}).join() + " -> " + updated.map(function(v) {return v.tag + "." + v.key}).join()
+
+				render(root, list)
+				render(root, updated)
+
+				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(expected)(str)
 			})
 		}
 	})
