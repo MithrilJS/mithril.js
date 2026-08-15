@@ -419,7 +419,7 @@ module.exports = function() {
 		}
 	}
 	function updateText(old, vnode) {
-		if (old.children.toString() !== vnode.children.toString()) {
+		if (old.children !== vnode.children) {
 			old.dom.nodeValue = vnode.children
 		}
 		vnode.dom = old.dom
@@ -863,7 +863,6 @@ module.exports = function() {
 		// unlike special "attributes" internally.
 		vnode.attrs = old.attrs
 		vnode.children = old.children
-		vnode.text = old.text
 		return true
 	}
 
