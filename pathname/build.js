@@ -10,6 +10,7 @@ module.exports = function(template, params) {
 	if (params == null) return template
 	var queryIndex = template.indexOf("?")
 	var hashIndex = template.indexOf("#")
+	if (hashIndex >= 0 && queryIndex > hashIndex) queryIndex = -1
 	var queryEnd = hashIndex < 0 ? template.length : hashIndex
 	var pathEnd = queryIndex < 0 ? queryEnd : queryIndex
 	var path = template.slice(0, pathEnd)
@@ -28,6 +29,7 @@ module.exports = function(template, params) {
 	// In case the template substitution adds new query/hash parameters.
 	var newQueryIndex = resolved.indexOf("?")
 	var newHashIndex = resolved.indexOf("#")
+	if (newHashIndex >= 0 && newQueryIndex > newHashIndex) newQueryIndex = -1
 	var newQueryEnd = newHashIndex < 0 ? resolved.length : newHashIndex
 	var newPathEnd = newQueryIndex < 0 ? newQueryEnd : newQueryIndex
 	var result = resolved.slice(0, newPathEnd)

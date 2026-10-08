@@ -101,6 +101,18 @@ o.spec("buildPathname", function() {
 
 			o(string).equals(prefix + "/image.png/view")
 		})
+		o("preserves question marks inside template fragments", function() {
+			o(buildPathname(prefix + "/item#section?tab=details", {page: 2})).equals(prefix + "/item?page=2#section?tab=details")
+			o(buildPathname(prefix + "/item#section?tab=details", {})).equals(prefix + "/item#section?tab=details")
+		})
+		o("preserves question marks inside variadic fragments", function() {
+			o(buildPathname(prefix + "/:path...", {path: "item#section?tab=details", page: 2})).equals(prefix + "/item?page=2#section?tab=details")
+			o(buildPathname(prefix + "/:path...?sort=asc", {path: "item#section?tab=details", page: 2})).equals(prefix + "/item?sort=asc&page=2#section?tab=details")
+		})
+		o("keeps queries before fragments and encoded question marks unchanged", function() {
+			o(buildPathname(prefix + "/item?sort=asc#section?tab=details", {page: 2})).equals(prefix + "/item?sort=asc&page=2#section?tab=details")
+			o(buildPathname(prefix + "/item#section%3Ftab=details", {page: 2})).equals(prefix + "/item?page=2#section%3Ftab=details")
+		})
 		o("merges query strings", function() {
 			var string = buildPathname(prefix + "/item?a=1&b=2", {c: 3})
 
