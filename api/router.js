@@ -95,7 +95,11 @@ module.exports = function($window, mountRedraw) {
 					else if (payload.onmatch) {
 						p.then(function () {
 							return payload.onmatch(data.params, path, matchedRoute)
-						}).then(update, path === fallbackRoute ? null : reject)
+						}).then(update, path === fallbackRoute ? null : function(e) {
+							// An obsolete resolver must not redirect a newer navigation.
+							if (update === lastUpdate) reject(e)
+							else console.error(e)
+						})
 					}
 					else update(/* "div" */)
 					return
